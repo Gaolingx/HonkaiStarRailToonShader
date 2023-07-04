@@ -1,6 +1,6 @@
 # HonkaiStarRailToonShader
   
-![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/Final.png)
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/Final.PNG)
 ## What's This?
 这是一个基于Unity引擎URP管线的仿制星穹铁道风格的卡通渲染项目。
 
