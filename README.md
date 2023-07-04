@@ -1,6 +1,6 @@
 # HonkaiStarRailToonShader
   
-![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Final.png)
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/Final.png)
 ## What's This?
 这是一个基于Unity引擎URP管线的仿制星穹铁道风格的卡通渲染项目。
 
@@ -8,7 +8,7 @@
 只需将/Shaders/GenshinCelShaderURP/路径下解压对应版本的文件夹到你的Assets即可在材质球中看到添加的shader。
 在开始之前，你至少需要准备如下的贴图，如果不知道如何获取他们，可以参考B站 @小二今天吃啥啊 的这个教程，[链接](https://www.bilibili.com/video/BV1t34y1H7jt/)
   
-![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/PicturesMapUsed.png)  
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/MapUsed.PNG)  
 ![图片](https://github.com/Gaolingx/GenshinCelShaderURP/raw/main/Pictures/v2-940ac11643928df7ad332a6f89369873_r.jpg)  
 > (1)RGBA通道的身体BaseColor Map (2)RGBA通道的身体ILM Mask Map (3)身体ShadowCoolRamp  (4)身体ShadowWarmRamp (5)面部BaseColor Map (6)面部阴影SDF阈值图+ILM Mask Map(7)头发BaseColor Map (8)RGBA通道的头发ILM Mask Map (9)头发ShadowCoolRamp (10)头发ShadowWarmRamp
 
