@@ -136,100 +136,8 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _DRAW_OVERLAY_ON
         #pragma shader_feature_local _EMISSION_ON
+
         ENDHLSL
-
-        Pass
-        {
-            Name "ShadowCaster"
-            Tags{"LightMode" = "ShadowCaster"}
-
-            ZWrite [_ZWrite]
-            ZTest LEqual
-            ColorMask 0
-            Cull[_Cull]
-
-            HLSLPROGRAM
-            #pragma exclude_renderers gles gles3 glcore
-            #pragma target 4.5
-
-            // Material keywords
-            #pragma shader_feature_local_fragment _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-
-            // GPU Instancing
-            #pragma multi_compile_instancing
-            #pragma multi_compile _ DOTS_INSTANCING_ON
-
-            // This is used during shadow map generation to differentiate between directional and punctual light shadows, as they use different formulas to apply Normal Bias
-            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
-            
-            #pragma vertex ShadowPassVertex // 和後面的include 有關係
-            #pragma fragment ShadowPassFragment
-
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "DepthOnly"
-            Tags{"LightMode" = "DepthOnly"}
-
-            ZWrite [_ZWrite]
-            ColorMask 0
-            Cull[_Cull]
-
-            HLSLPROGRAM
-            #pragma exclude_renderers gles gles3 glcore
-            #pragma target 4.5
-
-            #pragma vertex DepthOnlyVertex // 和後面的include 有關係
-            #pragma fragment DepthOnlyFragment
-
-            // Material keywords
-            #pragma shader_feature_local_fragment _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-
-            // GPU Instancing
-            #pragma multi_compile_instancing
-            #pragma multi_compile _ DOTS_INSTANCING_ON
-
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/DepthOnlyPass.hlsl"
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "DepthNormals"
-            Tags{"LightMode" = "DepthNormals"}
-
-            ZWrite [_ZWrite]
-            Cull[_Cull]
-
-            HLSLPROGRAM
-            #pragma exclude_renderers gles gles3 glcore
-            #pragma target 4.5
-
-            #pragma vertex DepthNormalsVertex // 和後面的include 有關係
-            #pragma fragment DepthNormalsFragment
-
-            // Material keywords
-            #pragma shader_feature_local _NORMALMAP 
-            #pragma shader_feature_local _PARALLAXMAP
-            #pragma shader_feature_local _ _DETAIL_MULX2 _DETAIL_SCALED
-            #pragma shader_feature_local_fragment _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
-
-            // GPU Instancing
-            #pragma multi_compile_instancing
-            #pragma multi_compile _ DOTS_INSTANCING_ON
-
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
-            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitDepthNormalsPass.hlsl"
-            ENDHLSL
-        }
 
         Pass
         {
@@ -369,6 +277,40 @@ Shader "Custom/SRUniversal"
 
             ENDHLSL
         }
+
+        Pass
+        {
+            Name "ShadowCaster"
+            Tags{"LightMode" = "ShadowCaster"}
+
+            ZWrite [_ZWrite]
+            ZTest LEqual
+            ColorMask 0
+            Cull[_Cull]
+
+            HLSLPROGRAM
+            #pragma exclude_renderers gles gles3 glcore
+            #pragma target 4.5
+
+            // Material keywords
+            #pragma shader_feature_local_fragment _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+
+            // GPU Instancing
+            #pragma multi_compile_instancing
+            #pragma multi_compile _ DOTS_INSTANCING_ON
+
+            // This is used during shadow map generation to differentiate between directional and punctual light shadows, as they use different formulas to apply Normal Bias
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            
+            #pragma vertex ShadowPassVertex // 和後面的include 有關係
+            #pragma fragment ShadowPassFragment
+
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/LitInput.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/Shaders/ShadowCasterPass.hlsl"
+            ENDHLSL
+        }
+        
         Pass
         {
             Name "DepthOnly"
