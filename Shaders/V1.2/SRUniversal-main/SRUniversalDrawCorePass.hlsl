@@ -183,9 +183,9 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
         float3 headForward = normalize(_HeadForward).xyz;
         float3 headRight = normalize(_HeadRight).xyz;
         float3 headUp = normalize(cross(headForward, headRight));
-        float3 lightDir = normalize(lightDirectionWS - dot(lightDirectionWS,headUp) * headUp);
+        float3 lightDir = normalize(lightDirectionWS - dot(lightDirectionWS, headUp) * headUp);
         //光照在左脸的时候。左脸的uv采样左脸，右脸的uv采样右脸，而光照在右脸的时候，左脸的uv采样右脸，右脸的uv采样左脸，因为SDF贴图明暗变化在右脸
-        float isRight = step(0,dot(lightDir, headRight));
+        float isRight = step(0, dot(lightDir, headRight));
         //相当于float sdfUVx=isRight?1-input.uv.x:input.uv.x;
         //即打在右脸的时候，反转uv的u坐标
         float sdfUVx = lerp(input.uv.x, 1 - input.uv.x, isRight);
