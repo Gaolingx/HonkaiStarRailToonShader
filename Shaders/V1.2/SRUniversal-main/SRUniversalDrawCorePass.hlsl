@@ -259,7 +259,7 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
                     specularColor *= _SpecularColor;
                 #else
                     //高光颜色与主光源的颜色同步
-                    specularColor *= LightColor;
+                    specularColor *= LightColor.rgb;
                 #endif
                 //强度系数
                 specularColor *= _SpecularBrightness;
