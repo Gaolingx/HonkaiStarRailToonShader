@@ -347,7 +347,7 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
             float2 outlineUV = float2(0, 0.0625);
             coolRamp = tex2D(_BodyCoolRamp, outlineUV).rgb;
             warmRamp = tex2D(_BodyWarmRamp, outlineUV).rgb;
-            float3 OutlineRamp = lerp(coolRamp, warmRamp, 0.5);
+            float3 OutlineRamp = abs(lerp(coolRamp, warmRamp, 0.5));
             fakeOutlineColor = pow(OutlineRamp, _OutlineGamma);
         }
     #endif
