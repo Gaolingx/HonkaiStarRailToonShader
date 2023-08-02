@@ -86,6 +86,8 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
     Light mainLight = GetMainLight(shadowCoord);
+    //获取主光源颜色
+    float4 LightColor = float4(mainLight.color.rgb, 1);
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
@@ -145,7 +147,7 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
     indirectLightColor *= lerp(1, baseColor, _IndirectLightMixBaseColor);
     
     //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
-    float3 mainLightColor = lerp(Luminance(mainLight.color.rgb), mainLight.color.rgb, _MainLightColorUsage);
+    float3 mainLightColor = lerp(Luminance(LightColor.rgb), LightColor.rgb, _MainLightColorUsage);
 
     float mainLightShadow = 1;
     int rampRowIndex = 0;
@@ -257,7 +259,7 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
                     specularColor *= _SpecularColor;
                 #else
                     //高光颜色与主光源的颜色同步
-                    specularColor *= mainLight.color;
+                    specularColor *= LightColor;
                 #endif
                 //强度系数
                 specularColor *= _SpecularBrightness;
@@ -318,7 +320,7 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
         float offsetLinearEyeDepth = LinearEyeDepth(offsetSceneDepth, _ZBufferParams);
         //深度差超过阈值，表示是边界
         float rimLight = saturate(offsetLinearEyeDepth - (linearEyeDepth + _RimLightThreshold)) / _RimLightFadeout;
-        rimLightColor = rimLight * mainLight.color.rgb;
+        rimLightColor = rimLight * LightColor.rgb;
         rimLightColor *= _RimLightTintColor;
         rimLightColor *= _RimLightBrightness;
     #else
