@@ -69,10 +69,15 @@ Varyings vert(Attributes input)
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS,input.tangentOS);
 
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+    // 世界空间
     output.positionWSAndFogFactor = float4(vertexInput.positionWS, ComputeFogFactor(vertexInput.positionCS.z));
+    // 世界空间法线
     output.normalWS = vertexNormalInput.normalWS;
+    // 世界空间相机向量
     output.viewDirectionWS = unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexInput.positionWS : GetWorldToViewMatrix()[2].xyz;
+    // 间接光 with 球谐函数
     output.SH = SampleSH(lerp(vertexNormalInput.normalWS, float3(0,0,0), _IndirectLightFlattenNormal));
+
     output.positionCS = vertexInput.positionCS;
 
     return output;
@@ -140,7 +145,7 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
     float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
         
-        indirectLightColor *= lerp(1, lightMap.r, _IndirectLightOcclusionUsage);
+        indirectLightColor *= lerp(1, lightMap.r, _IndirectLightOcclusionUsage); // 加个 Ambient Occlusion
     #elif _AREA_FACE
         indirectLightColor *= lerp(1, lerp(faceMap.g, 1, step(faceMap.r, 0.5)), _IndirectLightOcclusionUsage);
     #endif
@@ -201,7 +206,9 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
         float sdf = smoothstep(sdfThreshold - _FaceShadowTransitionSoftness, sdfThreshold + _FaceShadowTransitionSoftness, sdfValue);
         //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
         mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
+
         rampRowIndex = 1;
+        //rampRowIndex = 0;
         rampRowNum = 8;
     #endif
 
@@ -297,8 +304,8 @@ float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
                 float fac = NoV;
                 fac = pow(saturate(fac), _StockingsTransitionPower);
                 fac = saturate((fac - _StockingsTransitionHardness/2)/(1 - _StockingsTransitionHardness));
-                fac = fac * (stockingsMapB * _StockingsTextureUsage + (1 - _StockingsTextureUsage));
-                fac = lerp(fac, 1, stockingsMapRG.g);
+                fac = fac * (stockingsMapB * _StockingsTextureUsage + (1 - _StockingsTextureUsage)); // 细节纹理
+                fac = lerp(fac, 1, stockingsMapRG.g); // 厚度插值亮区
                 Gradient curve = GradientConstruct();
                 curve.colorsLength = 3;
                 curve.colors[0] = float4(_StockingsDarkColor, 0);
