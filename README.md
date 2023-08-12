@@ -14,13 +14,13 @@
   
 ## Texture Import Setting
 为什么我要特此说明这个问题？根据反馈，有的人在使用shader时候发现一些不正确的效果，这通常容易被认为是错误的代码导致的，真相是他们并没有使用正确的纹理导入设置，如下图，ramp阴影的交界处出现了我们不希望看到的锯齿而且看上去很奇怪。  
-![图片](https://github.com/Gaolingx/GenshinCelShaderURP/raw/main/Pictures/20230812_01.PNG)  
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/20230812_01.PNG)  
 1、除了表达颜色的贴图如Base Texture和Ramp Texture等颜色贴图以外，其他用于数值计算的贴图在Texture Import Settings中需要取消勾选sRGB，保证贴图在线性空间中。  
-![图片](https://github.com/Gaolingx/GenshinCelShaderURP/raw/main/Pictures/20230812_03.PNG)  
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/20230812_03.PNG)  
 2、鉴于Ramp贴图的特殊性，需要在导入设置中关闭“生成MipMap”，并将压缩改为“高质量”以获得更高精度。
-![图片](https://github.com/Gaolingx/GenshinCelShaderURP/raw/main/Pictures/20230812_04.PNG)  
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/20230812_04.PNG)  
 完成上述设置后，效果终于正确了！Done Well!
-![图片](https://github.com/Gaolingx/GenshinCelShaderURP/raw/main/Pictures/20230812_02.PNG)  
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/20230812_02.PNG)  
 
 
 
