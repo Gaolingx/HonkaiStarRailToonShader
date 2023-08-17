@@ -62,7 +62,7 @@ float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z)
     return cameraMulFix * 0.00005; // mul a const to make return result = default normal expand amount WS
 }
 
-Varyings vert(Attributes input)
+Varyings SRUniversalVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
 
@@ -88,7 +88,7 @@ Varyings vert(Attributes input)
     return output;
 }
 
-float4 frag(Varyings input) : SV_TARGET
+float4 SRUniversalFragment(Varyings input) : SV_TARGET
 {
     float3 coolRamp = 0;
     float3 warmRamp = 0;
