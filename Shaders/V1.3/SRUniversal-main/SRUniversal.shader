@@ -173,8 +173,8 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _SHADOWS_SOFT
 
-            #pragma vertex vert
-            #pragma fragment frag
+            #pragma vertex SRUniversalVertex
+            #pragma fragment SRUniversalFragment
 
             #pragma multi_compile_fog
 
@@ -206,8 +206,8 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _SHADOWS_SOFT
 
-            #pragma vertex vert
-            #pragma fragment frag
+            #pragma vertex SRUniversalVertex
+            #pragma fragment SRUniversalFragment
 
             #pragma multi_compile_fog
 
@@ -220,11 +220,11 @@ Shader "Custom/SRUniversal"
                 {
                     float4 positionCS : SV_POSITION;
                 };
-                Varyings vert(Attributes input)
+                Varyings SRUniversalVertex(Attributes input)
                 {
                     return (Varyings)0;
                 }
-                float4 frag(Varyings input) : SV_TARGET
+                float4 SRUniversalFragment(Varyings input) : SV_TARGET
                 {
                     return 0;
                 }
@@ -260,8 +260,8 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile_fog
             // ---------------------------------------------------------------------------------------------
 
-            #pragma vertex vert
-            #pragma fragment frag
+            #pragma vertex SRUniversalVertex
+            #pragma fragment SRUniversalFragment
 
             #if _OUTLINE_ON
 
@@ -274,11 +274,11 @@ Shader "Custom/SRUniversal"
                 {
                     float4 positionCS : SV_POSITION;
                 };
-                Varyings vert(Attributes input)
+                Varyings SRUniversalVertex(Attributes input)
                 {
                     return (Varyings)0;
                 }
-                float4 frag(Varyings input) : SV_TARGET
+                float4 SRUniversalFragment(Varyings input) : SV_TARGET
                 {
                     return 0;
                 }

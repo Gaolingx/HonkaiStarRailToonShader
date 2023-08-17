@@ -61,7 +61,7 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-Varyings vert(Attributes input)
+Varyings SRUniversalVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
 
@@ -83,7 +83,7 @@ Varyings vert(Attributes input)
     return output;
 }
 
-float4 frag(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
+float4 SRUniversalFragment(Varyings input, bool isFrontFace : SV_IsFrontFace): SV_TARGET
 {
     //片元世界空间位置
     float3 positionWS = input.positionWSAndFogFactor.xyz;
