@@ -242,7 +242,7 @@ Shader "Custom/SRUniversal"
             {
                 "RenderPipeline" = "UniversalPipeline"
                 "RenderType" = "Opaque"
-                "LightMode" = "UniversalForwardOnly"
+                "LightMode" = "HSROutline"
 
             }
 

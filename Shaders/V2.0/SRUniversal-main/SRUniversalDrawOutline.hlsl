@@ -88,7 +88,7 @@ Varyings SRUniversalVertex(Attributes input)
     return output;
 }
 
-float4 SRUniversalFragment(Varyings input) : SV_TARGET
+float4 colorFragmentTarget(inout Varyings input)
 {
     float3 coolRamp = 0;
     float3 warmRamp = 0;
@@ -132,4 +132,15 @@ float4 SRUniversalFragment(Varyings input) : SV_TARGET
     color.rgb = MixFog(color.rgb, input.fogFactor);
 
     return color;
+}
+
+void SRUniversalFragment(
+    Varyings input,
+    out float4 colorTarget      : SV_Target0,
+    out float4 bloomTarget      : SV_Target1)
+{
+    float4 outputColor = colorFragmentTarget(input);
+
+    colorTarget = float4(outputColor.rgb, 1);
+    bloomTarget = 0;
 }
