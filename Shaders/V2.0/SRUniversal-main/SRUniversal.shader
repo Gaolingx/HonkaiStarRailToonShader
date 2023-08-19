@@ -192,7 +192,7 @@ Shader "Custom/SRUniversal"
             {
                 "RenderPipeline" = "UniversalPipeline"
                 "RenderType" = "Opaque"
-                "LightMode" = "UniversalForward"
+                "LightMode" = "HSRForward3"
             }
             Cull[_Cull]
             Stencil{
