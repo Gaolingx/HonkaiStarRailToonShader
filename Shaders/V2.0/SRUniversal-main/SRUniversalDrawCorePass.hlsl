@@ -200,6 +200,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         float2 sdfUV = float2(sdfUVx, input.uv.y);
         //使用uv采样面部贴图的a通道
         float sdfValue = tex2D(_FaceMap, sdfUV).a;
+        sdfValue += _FaceShadowOffset;
         //dot(lightDir,headForward)的范围是[1,-1]映射到[0,1]
         float sdfThreshold = 1 - (dot(lightDir, headForward) * 0.5 + 0.5);
         //采样结果大于点乘结果，不在阴影，小于则处于阴影
