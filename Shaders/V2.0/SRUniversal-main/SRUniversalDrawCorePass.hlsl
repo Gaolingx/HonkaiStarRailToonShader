@@ -404,7 +404,7 @@ void SRUniversalFragment(
 {
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
-    colorTarget = float4(outputColor.rgb, 1);
+    colorTarget = float4(outputColor.rgba);
     bloomTarget = float4(_BloomIntensity0, 0, 0, 0);
 }
 
