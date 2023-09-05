@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace Stalo.ShaderUtils.Editor.Drawers
 {
-    [PublicAPI]
-    internal class HelpBoxDecorator : MaterialPropertyDrawer
+    [PublicAPI, Obsolete("Use HelpBoxWrapper instead.")]
+    internal class LegacyHelpBoxDecorator : MaterialPropertyDrawer
     {
         private readonly MessageType m_MsgType;
         private readonly string m_Message;
 
-        public HelpBoxDecorator(string msgType, params string[] messages)
+        public LegacyHelpBoxDecorator(string msgType, params string[] messages)
         {
             m_MsgType = Enum.Parse<MessageType>(msgType);
             m_Message = string.Join(", ", messages);

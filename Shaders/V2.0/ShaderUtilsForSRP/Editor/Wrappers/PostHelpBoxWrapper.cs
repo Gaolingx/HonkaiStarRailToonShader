@@ -2,7 +2,7 @@ using System;
 using JetBrains.Annotations;
 using UnityEditor;
 
-namespace Stalo.ShaderUtils.Editor
+namespace Stalo.ShaderUtils.Editor.Wrappers
 {
     [PublicAPI]
     internal class PostHelpBoxWrapper : MaterialPropertyWrapper
