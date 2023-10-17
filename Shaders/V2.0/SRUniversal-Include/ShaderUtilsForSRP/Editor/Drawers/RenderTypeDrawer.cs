@@ -69,9 +69,15 @@ namespace Stalo.ShaderUtils.Editor.Drawers
             using (new MemberValueScope<bool>(() => EditorGUI.showMixedValue, prop.hasMixedValue))
             using (new MemberValueScope<float>(() => EditorGUIUtility.labelWidth, 0))
             {
+#if UNITY_2022_1_OR_NEWER
                 MaterialEditor.BeginProperty(position, prop);
+#endif
+
                 renderType = (RenderType)EditorGUI.EnumPopup(position, label, renderType);
+
+#if UNITY_2022_1_OR_NEWER
                 MaterialEditor.EndProperty();
+#endif
             }
 
             if (EditorGUI.EndChangeCheck())
@@ -90,9 +96,15 @@ namespace Stalo.ShaderUtils.Editor.Drawers
 
             using (new MemberValueScope<bool>(() => EditorGUI.showMixedValue, prop.hasMixedValue))
             {
+#if UNITY_2022_1_OR_NEWER
                 MaterialEditor.BeginProperty(position, prop);
+#endif
+
                 renderQueueOffset = EditorGUI.DelayedIntField(position, label, renderQueueOffset);
+
+#if UNITY_2022_1_OR_NEWER
                 MaterialEditor.EndProperty();
+#endif
             }
 
             if (EditorGUI.EndChangeCheck())

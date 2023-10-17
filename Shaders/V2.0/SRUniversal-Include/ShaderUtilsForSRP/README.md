@@ -4,6 +4,11 @@
 
 Utilities for **SRP** shaders.
 
+## Requirements
+
+- Unity >= 2021.3.
+- Core RP Library >= 12.0.0.
+
 ## File Extensions
 
 Create HLSL and SRP Shader files easily using menu item.

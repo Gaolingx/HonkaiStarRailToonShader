@@ -192,36 +192,42 @@ internal class StaloSRPShaderGUI : ShaderGUI
                 return true;
             }
 
+            int outerIndentLevel = EditorGUI.indentLevel;
+
             using (MaterialHeaderScope headerScope = new(m_Title, m_BitExpanded, editor, spaceAtEnd: false))
             {
-                if (expandStates.TryGetValue(m_BitExpanded, out AnimBool isExpanded))
+                // FIX: 低版本 SRP 的 MaterialHeaderScope 会在展开后增加缩进。
+                using (new MemberValueScope<int>(() => EditorGUI.indentLevel, outerIndentLevel))
                 {
-                    isExpanded.target = headerScope.expanded;
-                }
-                else
-                {
-                    isExpanded = new AnimBool(headerScope.expanded);
-                    expandStates.Add(m_BitExpanded, isExpanded);
-                }
-
-                isExpanded.valueChanged.RemoveAllListeners();
-                isExpanded.valueChanged.AddListener(editor.Repaint); // 变化后需要重新绘制，不然动画很卡
-
-                if (EditorGUILayout.BeginFadeGroup(isExpanded.faded))
-                {
-                    GUILayout.Space(5);
-
-                    if (!string.IsNullOrEmpty(m_Helps))
+                    if (expandStates.TryGetValue(m_BitExpanded, out AnimBool isExpanded))
                     {
-                        EditorGUILayout.HelpBox(m_Helps, MessageType.None);
-                        GUILayout.Space(5);
+                        isExpanded.target = headerScope.expanded;
+                    }
+                    else
+                    {
+                        isExpanded = new AnimBool(headerScope.expanded);
+                        expandStates.Add(m_BitExpanded, isExpanded);
                     }
 
-                    propDrawer();
-                    GUILayout.Space(10);
-                }
+                    isExpanded.valueChanged.RemoveAllListeners();
+                    isExpanded.valueChanged.AddListener(editor.Repaint); // 变化后需要重新绘制，不然动画很卡
 
-                EditorGUILayout.EndFadeGroup();
+                    if (EditorGUILayout.BeginFadeGroup(isExpanded.faded))
+                    {
+                        GUILayout.Space(5);
+
+                        if (!string.IsNullOrEmpty(m_Helps))
+                        {
+                            EditorGUILayout.HelpBox(m_Helps, MessageType.None);
+                            GUILayout.Space(5);
+                        }
+
+                        propDrawer();
+                        GUILayout.Space(10);
+                    }
+
+                    EditorGUILayout.EndFadeGroup();
+                }
             }
 
             return true;

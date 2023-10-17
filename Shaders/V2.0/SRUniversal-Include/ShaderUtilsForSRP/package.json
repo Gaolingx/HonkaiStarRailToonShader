@@ -1,11 +1,11 @@
 {
   "name": "com.stalomeow.srp-shader-utils",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "author": "Stalo",
   "displayName": "Shader Utils for SRP",
   "description": "Utilities for SRP shaders.",
-  "unity": "2022.3",
+  "unity": "2021.3",
   "dependencies": {
-    "com.unity.render-pipelines.core": "14.0.7"
+    "com.unity.render-pipelines.core": "12.0.0"
   }
 }
