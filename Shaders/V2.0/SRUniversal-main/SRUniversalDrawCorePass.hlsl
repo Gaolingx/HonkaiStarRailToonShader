@@ -266,7 +266,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
                 #if _METAL_SPECULAR_ON
                     #if  _AREA_UPPERBODY || _AREA_LOWERBODY
                         //金属部分的Alpha值为0.52，此时metallic为1，以0.1为插值范围，确定金属度
-                        metallic = saturate((abs(lightMap.a - 0.52) - 0.1)/(0 - 0.1));
+                        metallic = saturate((abs(lightMap.a - _MetalSpecularMetallic) - 0.1)/(0 - 0.1));
                     #endif
                 #else
                     //因为头发没有金属，所以头发位置要关掉这个keyword

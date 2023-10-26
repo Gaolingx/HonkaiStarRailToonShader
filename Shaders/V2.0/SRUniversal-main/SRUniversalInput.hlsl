@@ -72,6 +72,7 @@ float _ShadowRampOffset;
     float _SpecularExpon;
     float _SpecularKsNonMetal;
     float _SpecularKsMetal;
+    float _MetalSpecularMetallic;
     float3 _SpecularColor;
     float _SpecularBrightness;
 #endif
