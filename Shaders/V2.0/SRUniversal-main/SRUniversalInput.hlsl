@@ -98,8 +98,8 @@ float _RimLightThreshold;
 float _RimLightFadeout;
 float3 _RimLightTintColor;
 float _RimLightBrightness;
-float _RimLightMixAlbedo;
 #endif
+float _RimLightMixAlbedo;
 
 #if _EMISSION_ON
     float _EmissionMixBaseColor;
