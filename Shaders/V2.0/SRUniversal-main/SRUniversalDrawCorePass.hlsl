@@ -65,20 +65,20 @@ Varyings SRUniversalVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
 
-    VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS);
+    VertexPositionInputs vertexPositionInputs = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS,input.tangentOS);
 
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
     // 世界空间
-    output.positionWSAndFogFactor = float4(vertexInput.positionWS, ComputeFogFactor(vertexInput.positionCS.z));
+    output.positionWSAndFogFactor = float4(vertexPositionInputs.positionWS, ComputeFogFactor(vertexPositionInputs.positionCS.z));
     // 世界空间法线
     output.normalWS = vertexNormalInput.normalWS;
     // 世界空间相机向量
-    output.viewDirectionWS = unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexInput.positionWS : GetWorldToViewMatrix()[2].xyz;
+    output.viewDirectionWS = unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexPositionInputs.positionWS : GetWorldToViewMatrix()[2].xyz;
     // 间接光 with 球谐函数
     output.SH = SampleSH(lerp(vertexNormalInput.normalWS, float3(0,0,0), _IndirectLightFlattenNormal));
 
-    output.positionCS = vertexInput.positionCS;
+    output.positionCS = vertexPositionInputs.positionCS;
 
     return output;
 }
