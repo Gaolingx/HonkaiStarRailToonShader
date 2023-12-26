@@ -11,8 +11,10 @@ struct Varyings
     float2 uv                       : TEXCOORD0;
     float4 positionWSAndFogFactor   : TEXCOORD1;
     float3 normalWS                 : TEXCOORD2;
-    float3 viewDirectionWS         : TEXCOORD3;
-    float3 SH                       : TEXCOORD4;
+    float3 bitangentWS              : TEXCOORD3;
+    float3 tangentWS                : TEXCOORD4;
+    float3 viewDirectionWS          : TEXCOORD5;
+    float3 SH                       : TEXCOORD6;
     float4 positionCS               : SV_POSITION;
 };
 
@@ -66,17 +68,19 @@ Varyings SRUniversalVertex(Attributes input)
     Varyings output = (Varyings)0;
 
     VertexPositionInputs vertexPositionInputs = GetVertexPositionInputs(input.positionOS);
-    VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS,input.tangentOS);
+    VertexNormalInputs vertexNormalInputs = GetVertexNormalInputs(input.normalOS,input.tangentOS);
 
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
     // 世界空间
     output.positionWSAndFogFactor = float4(vertexPositionInputs.positionWS, ComputeFogFactor(vertexPositionInputs.positionCS.z));
-    // 世界空间法线
-    output.normalWS = vertexNormalInput.normalWS;
+    // 世界空间法线、切线、副切线
+    output.normalWS = vertexNormalInputs.normalWS;
+    output.tangentWS = vertexNormalInputs.tangentWS;
+    output.bitangentWS = vertexNormalInputs.bitangentWS;
     // 世界空间相机向量
     output.viewDirectionWS = unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexPositionInputs.positionWS : GetWorldToViewMatrix()[2].xyz;
     // 间接光 with 球谐函数
-    output.SH = SampleSH(lerp(vertexNormalInput.normalWS, float3(0,0,0), _IndirectLightFlattenNormal));
+    output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0,0,0), _IndirectLightFlattenNormal));
 
     output.positionCS = vertexPositionInputs.positionCS;
 
@@ -87,16 +91,28 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
 {
     //片元世界空间位置
     float3 positionWS = input.positionWSAndFogFactor.xyz;
+
     //阴影坐标
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
+
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
     Light mainLight = GetMainLight(shadowCoord);
     //获取主光源颜色
     float4 LightColor = float4(mainLight.color.rgb, 1);
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
+
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
-    float3 normalWS = normalize(input.normalWS);
+    #if _NORMAL_MAP_ON
+        float3x3 tangentToWorld = half3x3(input.tangentWS, input.bitangentWS, input.normalWS);
+        float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv);
+        float3 normalTS = UnpackNormal(normalMap);
+        float3 normalWS = TransformTangentToWorld(normalTS, tangentToWorld, true);
+        input.normalWS = normalWS;
+    #else
+        float3 normalWS = normalize(input.normalWS);
+    #endif
+    
     //视线方向
     float3 viewDirectionWS = normalize(input.viewDirectionWS);
 

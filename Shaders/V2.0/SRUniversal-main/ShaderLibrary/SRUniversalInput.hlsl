@@ -3,6 +3,9 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
+TEXTURE2D(_NormalMap);
+SAMPLER(sampler_NormalMap);
+
 CBUFFER_START(UnityPerMaterial);
 float3 _HeadForward;
 float3 _HeadRight;

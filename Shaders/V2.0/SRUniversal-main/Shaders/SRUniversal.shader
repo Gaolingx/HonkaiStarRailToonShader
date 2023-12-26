@@ -38,6 +38,10 @@ Shader "Custom/SRUniversal"
         [Toggle(_ISDAY_MANUAL_ON)] _isDayManualON("Use Lerp coolRamp & warmRamp Manual (Default NO)", float ) = 0
         _isDay("Lerp coolRamp & warmRamp value (Default 1)",Range(0,1)) = 0.5
 
+        [Header(Normal)]
+        [Toggle(_NORMAL_MAP_ON)] _UseNormalMap("Use Normal Map (Default NO)", float) = 0
+        [Normal] _NormalMap("Normal Map", 2D) = "bump" {}
+
         [Header(Indirect Lighting)]
         _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)",Range(0,1)) = 0
         _IndirectLightUsage("Indirect light usage (Default 0.5)",Range(0,1)) = 0.5
@@ -136,6 +140,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _AREA_UPPERBODY
         #pragma shader_feature_local _AREA_LOWERBODY
         #pragma shader_feature_local _ISDAY_MANUAL_ON
+        #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _METAL_SPECULAR_ON
         #pragma shader_feature_local _SPECULAR_COLOR_CUSTOM
@@ -181,8 +186,8 @@ Shader "Custom/SRUniversal"
 
             #pragma multi_compile_fog
 
-            #include "SRUniversalInput.hlsl"
-            #include "SRUniversalDrawCorePass.hlsl"
+            #include "../ShaderLibrary/SRUniversalInput.hlsl"
+            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
             ENDHLSL
         }
 
@@ -215,8 +220,8 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile_fog
 
             #if _DRAW_OVERLAY_ON
-                #include "SRUniversalInput.hlsl"
-                #include "SRUniversalDrawCorePass.hlsl"
+                #include "../ShaderLibrary/SRUniversalInput.hlsl"
+                #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
             #else
                 struct Attributes {};
                 struct Varyings
@@ -269,8 +274,8 @@ Shader "Custom/SRUniversal"
             #if _OUTLINE_ON
 
                 // all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
-                #include "SRUniversalInput.hlsl"
-                #include "SRUniversalDrawOutline.hlsl"
+                #include "../ShaderLibrary/SRUniversalInput.hlsl"
+                #include "../ShaderLibrary/SRUniversalDrawOutline.hlsl"
             #else
                 struct Attributes {};
                 struct Varyings
