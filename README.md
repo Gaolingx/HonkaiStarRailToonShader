@@ -1,10 +1,16 @@
 # HonkaiStarRailToonShader
   
-![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/Final.PNG)
+效果图：（更新于2024年1月10日）
+  
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/Final_20240110_02.PNG)
   
 ## What's This?
   
 这是一个基于Unity引擎URP管线的仿制星穹铁道风格的卡通渲染项目。
+
+## Thanks
+  
+此Shader根据 [Bilibili@给你柠檬椰果养乐多你会跟我玩吗](https://space.bilibili.com/32704665?spm_id_from=333.337.0.0) 大佬的视频制作，另外根据 [Github@stalomeow](https://github.com/stalomeow) 大佬的 [StarRailNPRShader](https://github.com/stalomeow/StarRailNPRShader) 工程加入了后处理部分（bloom、tonemapping），在此非常感谢各位大佬们无私的技术分享。
 
 ## Installation & Usage
   
