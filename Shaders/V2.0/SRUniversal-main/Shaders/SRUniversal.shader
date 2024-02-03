@@ -102,6 +102,11 @@ Shader "Custom/SRUniversal"
 
         [Header(Outline)]
         [Toggle(_OUTLINE_ON)] _UseOutline("Use outline (Default YES)", float ) = 1
+        [ToggleUI]_IsFace("Is Face? (please turn on if this is a face material)", Float) = 0
+        _OutlineZOffset("_OutlineZOffset (View Space)", Range(0,1)) = 0.0001
+        [NoScaleOffset]_OutlineZOffsetMaskTex("_OutlineZOffsetMask (black is apply ZOffset)", 2D) = "black" {}
+        _OutlineZOffsetMaskRemapStart("_OutlineZOffsetMaskRemapStart", Range(0,1)) = 0
+        _OutlineZOffsetMaskRemapEnd("_OutlineZOffsetMaskRemapEnd", Range(0,1)) = 1
         [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", float ) = 1
         _OutlineColor("OutlineColor (Without Ramp Texture)", Color) = (0.5, 0.5, 0.5, 1)
         [Toggle(_OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL)] _OutlineUseVertexColorSmoothNormal("Use vertex color smooth normal (Default NO)", float) = 0
