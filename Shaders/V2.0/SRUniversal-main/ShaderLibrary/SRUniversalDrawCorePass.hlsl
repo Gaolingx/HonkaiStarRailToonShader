@@ -157,6 +157,19 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         faceMap = tex2D(_FaceMap, input.uv);
     #endif
 
+    // Expression
+    #if _AREA_FACE && _Expression_ON
+        float4 exprMap = SAMPLE_TEXTURE2D(_ExpressionMap, sampler_ExpressionMap, input.uv.xy);
+        float3 exCheek = lerp(baseColor.rgb, baseColor.rgb * _ExCheekColor.rgb, exprMap.r);
+        baseColor.rgb = lerp(baseColor.rgb, exCheek, _ExCheekIntensity);
+        float3 exShy = lerp(baseColor.rgb, baseColor.rgb * _ExShyColor.rgb, exprMap.g);
+        baseColor.rgb = lerp(baseColor.rgb, exShy, _ExShyIntensity);
+        float3 exShadow = lerp(baseColor.rgb, baseColor.rgb * _ExShadowColor.rgb, exprMap.b);
+        baseColor.rgb = lerp(baseColor.rgb, exShadow, _ExShadowIntensity);
+        float3 exEyeShadow = lerp(baseColor.rgb, baseColor.rgb * _ExEyeColor.rgb, faceMap.r);
+        baseColor.rgb = lerp(baseColor.rgb, exEyeShadow, _ExShadowIntensity);
+    #endif
+
     //lightmap的R通道是AO，也就是静态阴影，根据AO，来影响环境光照
     float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY

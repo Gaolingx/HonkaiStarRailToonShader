@@ -56,8 +56,19 @@ Shader "Custom/SRUniversal"
 
         [Header(Face)]
         [NoScaleOffset] _FaceMap("Face map (Default black)",2D) = "black" {}
+        [NoScaleOffset] _ExpressionMap("Expression Map (Default white)", 2D) = "white" {}
         _FaceShadowOffset("Face shadow offset (Default -0.01)",Range(-1,1)) = -0.01
         _FaceShadowTransitionSoftness("Face shadow transition softness (Default 0.05)", Range(0,1)) = 0.05
+
+        [Header(Expression)]
+        [Toggle(_Expression_ON)] _UseFaceExpression("Use Face Expression (Default NO)", float) = 0
+        _ExCheekColor("Cheek Color (Default white)", Color) = (1, 1, 1, 1)
+        _ExCheekIntensity("Cheek Intensity (Default 0)", Range(0, 1)) = 0
+        _ExShyColor("Shy Color (Default white)", Color) = (1, 1, 1, 1)
+        _ExShyIntensity("Shy Intensity (Default 0)", Range(0, 1)) = 0
+        _ExShadowColor("Shadow Color (Default white)", Color) = (1, 1, 1, 1)
+        _ExEyeColor("Eye Color (Default white)", Color) = (1, 1, 1, 1)
+        _ExShadowIntensity("Shadow Intensity (Default 0)", Range(0, 1)) = 0
 
         [Header(Specular)]
         [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", float) = 1
@@ -146,6 +157,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _AREA_LOWERBODY
         #pragma shader_feature_local _ISDAY_MANUAL_ON
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
+        #pragma shader_feature_local _Expression_ON
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _METAL_SPECULAR_ON
         #pragma shader_feature_local _SPECULAR_COLOR_CUSTOM

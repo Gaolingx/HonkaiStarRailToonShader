@@ -14,6 +14,8 @@ sampler2D _OutlineZOffsetMaskTex;
 
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
+TEXTURE2D(_ExpressionMap);
+SAMPLER(sampler_ExpressionMap);
 
 // put all your uniforms(usually things inside .shader file's properties{}) inside this CBUFFER, in order to make SRP batcher compatible
 // see -> https://blogs.unity3d.com/2019/02/28/srp-batcher-speed-up-your-rendering/
@@ -80,6 +82,16 @@ float _ShadowRampOffset;
     sampler2D _FaceMap;
     float _FaceShadowOffset;
     float _FaceShadowTransitionSoftness;
+#endif
+
+#if _Expression_ON
+    float4 _ExCheekColor;
+    float _ExCheekIntensity;
+    float4 _ExShyColor;
+    float _ExShyIntensity;
+    float4 _ExShadowColor;
+    float4 _ExEyeColor;
+    float _ExShadowIntensity;
 #endif
 
 #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
