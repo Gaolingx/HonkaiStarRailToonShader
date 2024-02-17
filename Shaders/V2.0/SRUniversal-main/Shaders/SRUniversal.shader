@@ -36,7 +36,7 @@ Shader "Custom/SRUniversal"
         [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)",2D) = "white" {}
         _BodyWarmRampColor("Body warm ramp color (Default white)",Color) = (1,1,1)
         [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", float ) = 0
-        _DayTime("Day Time value (Default 0.5)",Range(0,1)) = 0.5
+        _DayTime("Day Time value (Default 0)",Range(0,12)) = 0
         _ShadowBoost("Shadow Boost (Default 1)", Range(0.0, 1.0)) = 1.0
 
         [Header(Normal)]
