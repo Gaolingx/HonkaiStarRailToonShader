@@ -37,7 +37,6 @@ Shader "Custom/SRUniversal"
         _BodyWarmRampColor("Body warm ramp color (Default white)",Color) = (1,1,1)
         [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", float ) = 0
         _DayTime("Day Time value (Default 12)",Range(0,24)) = 12
-        _ShadowBoost("Shadow Boost (Default 1)", Range(0.0, 1.0)) = 1.0
 
         [Header(Normal)]
         [Toggle(_NORMAL_MAP_ON)] _UseNormalMap("Use Normal Map (Default NO)", float) = 0
@@ -54,6 +53,7 @@ Shader "Custom/SRUniversal"
         _ShadowThresholdCenter("Shadow threshold center (Default 0)",Range(-1,1)) = 0
         _ShadowThresholdSoftness("Shadow threshold softness (Default 0.1)",Range(0,1)) = 0.1
         _ShadowRampOffset("Shadow ramp offset (Default 0.75)",Range(0,1)) = 0.75
+        _ShadowBoost("Shadow Boost (Default 1)", Range(0.0, 1.0)) = 1.0
 
         [Header(Face)]
         [NoScaleOffset] _FaceMap("Face map (Default black)",2D) = "black" {}

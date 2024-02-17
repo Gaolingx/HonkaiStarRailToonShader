@@ -203,9 +203,12 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         {
             float NoL = dot(normalWS, lightDirectionWS);
             float remappedNoL = NoL * 0.5 + 0.5;
-            float shadowThreshold = 1 - lightMap.g;
+            float shadowThreshold = lightMap.g;
             //加个过渡，这里_ShadowThresholdSoftness=0.1
-            mainLightShadow = smoothstep(shadowThreshold - _ShadowThresholdSoftness, shadowThreshold + _ShadowThresholdSoftness, remappedNoL);
+            mainLightShadow = smoothstep(
+                1.0 - shadowThreshold - _ShadowThresholdSoftness,
+                1.0 - shadowThreshold + _ShadowThresholdSoftness,
+                remappedNoL + _ShadowThresholdCenter);
             //应用AO
             mainLightShadow *= lightMap.r;
 
@@ -247,7 +250,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         float sdf = smoothstep(sdfThreshold - _FaceShadowTransitionSoftness, sdfThreshold + _FaceShadowTransitionSoftness, sdfValue);
         //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
         mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
-
+        //脸部ramp直接使用皮肤的行号即可
         rampRowIndex = 1;
         //rampRowIndex = 0;
         rampRowNum = 8;
