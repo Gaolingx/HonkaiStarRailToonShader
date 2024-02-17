@@ -285,7 +285,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     #if _DayTime_MANUAL_ON
         float DayTime = _DayTime;
     #else
-        float DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 24;
+        float DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
     #endif
     float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime);
     rampColor = lerp(f3one, rampColor, _ShadowBoost);
