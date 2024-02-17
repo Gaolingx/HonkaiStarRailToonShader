@@ -74,6 +74,12 @@ float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
     return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
 }
 
+float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFactor)
+{
+    float3 finalColor = lerp(OriginalColor, EnhancedColor, mixFactor);
+    return finalColor;
+}
+
 Varyings SRUniversalVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
@@ -273,13 +279,13 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     #if _AREA_HAIR
         coolRamp = tex2D(_HairCoolRamp, rampUV).rgb;
         warmRamp = tex2D(_HairWarmRamp, rampUV).rgb;
-        coolRampCol = coolRamp * _HairCoolRampColor;
-        warmRampCol = warmRamp * _HairWarmRampColor;
+        coolRampCol = LinearColorMix(coolRamp, _HairCoolRampColor, _HairCoolRampColorMixFactor);
+        warmRampCol = LinearColorMix(warmRamp, _HairWarmRampColor, _HairWarmRampColorMixFactor);
     #elif _AREA_FACE || _AREA_UPPERBODY || _AREA_LOWERBODY
         coolRamp = tex2D(_BodyCoolRamp, rampUV).rgb;
         warmRamp = tex2D(_BodyWarmRamp, rampUV).rgb;
-        coolRampCol = coolRamp * _BodyCoolRampColor;
-        warmRampCol = warmRamp * _BodyWarmRampColor;
+        coolRampCol = LinearColorMix(coolRamp, _BodyCoolRampColor, _BodyCoolRampColorMixFactor);
+        warmRampCol = LinearColorMix(warmRamp, _BodyWarmRampColor, _BodyWarmRampColorMixFactor);
     #endif
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
     #if _DayTime_MANUAL_ON

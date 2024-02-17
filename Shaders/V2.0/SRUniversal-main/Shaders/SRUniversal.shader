@@ -28,12 +28,16 @@ Shader "Custom/SRUniversal"
 
         [Header(Ramp Map)]
         [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)",2D) = "white" {}
+        _HairCoolRampColorMixFactor("Hair cool ramp color mix factor (Default 0)",Range(0,1)) = 0
         _HairCoolRampColor("Hair cool ramp color (Default white)",Color) = (1,1,1)
         [NoScaleOffset] _HairWarmRamp("Hair warm ramp (Default white)",2D) = "white" {}
+        _HairWarmRampColorMixFactor("Hair warm ramp color mix factor (Default 0)",Range(0,1)) = 0
         _HairWarmRampColor("Hair warm ramp color (Default white)",Color) = (1,1,1)
         [NoScaleOffset] _BodyCoolRamp("Body cool ramp (Default white)",2D) = "white" {}
+        _BodyCoolRampColorMixFactor("Body cool ramp color mix factor (Default 0)",Range(0,1)) = 0
         _BodyCoolRampColor("Body cool ramp color (Default white)",Color) = (1,1,1)
         [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)",2D) = "white" {}
+        _BodyWarmRampColorMixFactor("Body warm ramp color mix factor (Default 0)",Range(0,1)) = 0
         _BodyWarmRampColor("Body warm ramp color (Default white)",Color) = (1,1,1)
         [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", float ) = 0
         _DayTime("Day Time value (Default 12)",Range(0,24)) = 12

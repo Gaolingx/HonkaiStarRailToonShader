@@ -61,11 +61,15 @@ float _AlphaClip;
     sampler2D _HairWarmRamp;
     float3 _HairCoolRampColor;
     float3 _HairWarmRampColor;
+    float _HairCoolRampColorMixFactor;
+    float _HairWarmRampColorMixFactor;
 #elif _AREA_FACE || _AREA_UPPERBODY || _AREA_LOWERBODY
     sampler2D _BodyCoolRamp;
     sampler2D _BodyWarmRamp;
     float3 _BodyCoolRampColor;
     float3 _BodyWarmRampColor;
+    float _BodyCoolRampColorMixFactor;
+    float _BodyWarmRampColorMixFactor;
 #endif
 
 float _IndirectLightFlattenNormal;
