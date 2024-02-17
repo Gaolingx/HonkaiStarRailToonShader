@@ -1,3 +1,9 @@
+
+const static float3 f3zero = float3(0.0, 0.0, 0.0);
+const static float3 f3one = float3(1.0, 1.0, 1.0);
+const static float4 f4zero = float4(0.0, 0.0, 0.0, 0.0);
+const static float4 f4one = float4(1.0, 1.0, 1.0, 1.0);
+
 struct Attributes
 {
     float3 positionOS   : POSITION;
@@ -61,6 +67,11 @@ float3 desaturation(float3 color)
     float3 grayXfer = float3(0.3, 0.59, 0.11);
     float grayf = dot(color, grayXfer);
     return float3(grayf, grayf, grayf);
+}
+
+float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
+{
+    return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
 }
 
 Varyings SRUniversalVertex(Attributes input)
@@ -267,13 +278,14 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         coolRampCol = coolRamp * _BodyCoolRampColor;
         warmRampCol = warmRamp * _BodyWarmRampColor;
     #endif
-    //根据白天夜晚，插值获得最终的rampColor，isDay也可以用变量由C#脚本传入Shader
-    #if _ISDAY_MANUAL_ON
-        float isDay = _isDay;
+    //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
+    #if _DayTime_MANUAL_ON
+        float DayTime = _DayTime;
     #else
-        float isDay = lightDirectionWS.y * 0.5 + 0.5;
+        float DayTime = lightDirectionWS.y * 0.5 + 0.5;
     #endif
-    float3 rampColor = lerp(coolRampCol, warmRampCol, isDay);
+    float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime);
+    rampColor = lerp(f3one, rampColor, _ShadowBoost);
     mainLightColor *= baseColor * rampColor;
 
 

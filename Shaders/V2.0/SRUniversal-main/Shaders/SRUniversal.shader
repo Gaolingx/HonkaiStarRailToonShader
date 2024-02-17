@@ -35,8 +35,9 @@ Shader "Custom/SRUniversal"
         _BodyCoolRampColor("Body cool ramp color (Default white)",Color) = (1,1,1)
         [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)",2D) = "white" {}
         _BodyWarmRampColor("Body warm ramp color (Default white)",Color) = (1,1,1)
-        [Toggle(_ISDAY_MANUAL_ON)] _isDayManualON("Use Lerp coolRamp & warmRamp Manual (Default NO)", float ) = 0
-        _isDay("Lerp coolRamp & warmRamp value (Default 1)",Range(0,1)) = 0.5
+        [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", float ) = 0
+        _DayTime("Day Time value (Default 0.5)",Range(0,1)) = 0.5
+        _ShadowBoost("Shadow Boost (Default 1)", Range(0.0, 1.0)) = 1.0
 
         [Header(Normal)]
         [Toggle(_NORMAL_MAP_ON)] _UseNormalMap("Use Normal Map (Default NO)", float) = 0
@@ -155,7 +156,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _AREA_HAIR
         #pragma shader_feature_local _AREA_UPPERBODY
         #pragma shader_feature_local _AREA_LOWERBODY
-        #pragma shader_feature_local _ISDAY_MANUAL_ON
+        #pragma shader_feature_local _DayTime_MANUAL_ON
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _Expression_ON
         #pragma shader_feature_local _SPECULAR_ON

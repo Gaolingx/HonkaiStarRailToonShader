@@ -26,7 +26,7 @@ float3 _HeadRight;
 sampler2D _BaseMap;
 float4 _BaseMap_ST;
 
-float _isDay;
+float _DayTime;
 
 #if _AREA_FACE
     sampler2D _FaceColorMap;
@@ -77,6 +77,7 @@ float _MainLightColorUsage;
 float _ShadowThresholdCenter;
 float _ShadowThresholdSoftness;
 float _ShadowRampOffset;
+float _ShadowBoost;
 
 #if _AREA_FACE
     sampler2D _FaceMap;
