@@ -12,6 +12,8 @@
 // all sampler2D don't need to put inside CBUFFER 
 sampler2D _OutlineZOffsetMaskTex;
 
+float _DayTime;
+
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
 TEXTURE2D(_ExpressionMap);
@@ -26,7 +28,6 @@ float3 _HeadRight;
 sampler2D _BaseMap;
 float4 _BaseMap_ST;
 
-float _DayTime;
 
 #if _AREA_FACE
     sampler2D _FaceColorMap;
