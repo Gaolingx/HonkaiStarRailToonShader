@@ -40,26 +40,32 @@ namespace HSR.NPRShader.Editor.AssetProcessors
 
         private void OnPreprocessModel()
         {
-            if (!IsAvatarModel)
+            if (EditorPrefs.GetBool("EnableAssetsPreProcess"))
             {
-                return;
-            }
+                if (!IsAvatarModel)
+                {
+                    return;
+                }
 
-            ModelImporter importer = (ModelImporter)assetImporter;
-            importer.importTangents = ImportTangents;
+                ModelImporter importer = (ModelImporter)assetImporter;
+                importer.importTangents = ImportTangents;
+            }
         }
 
         private void OnPostprocessModel(GameObject go)
         {
-            if (!IsAvatarModel)
+            if (EditorPrefs.GetBool("EnableAssetsPreProcess"))
             {
-                return;
-            }
+                if (!IsAvatarModel)
+                {
+                    return;
+                }
 
-            List<GameObject> modifiedObjs = new();
-            NormalUtility.SmoothAndStore(go, NormalStoreMode, false, modifiedObjs);
-            string subObjList = string.Join('\n', modifiedObjs.Select(o => o.name));
-            Debug.Log($"<b>[Smooth Normal]</b> {assetPath}\n" + subObjList);
+                List<GameObject> modifiedObjs = new();
+                NormalUtility.SmoothAndStore(go, NormalStoreMode, false, modifiedObjs);
+                string subObjList = string.Join('\n', modifiedObjs.Select(o => o.name));
+                Debug.Log($"<b>[Smooth Normal]</b> {assetPath}\n" + subObjList);
+            }
         }
 
         public override uint GetVersion()

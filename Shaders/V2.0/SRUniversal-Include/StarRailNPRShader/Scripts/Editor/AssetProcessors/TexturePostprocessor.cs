@@ -34,7 +34,7 @@ namespace HSR.NPRShader.Editor.AssetProcessors
 
         private void OnPreprocessTexture()
         {
-            if (EditorPrefs.GetBool("EnableTexturePreProcess"))
+            if (EditorPrefs.GetBool("EnableAssetsPreProcess"))
             {
                 var settings = EditorProjectSettings.instance;
 
