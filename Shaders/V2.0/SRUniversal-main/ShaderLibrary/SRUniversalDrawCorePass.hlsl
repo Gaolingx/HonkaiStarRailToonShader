@@ -407,7 +407,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     #if _EMISSION_ON
         {
             emissionColor = areaMap.a;
-            emissionColor *= lerp(1, baseColor, _EmissionMixBaseColor);
+            emissionColor *= LinearColorMix(f3one, baseColor, _EmissionMixBaseColor);
             emissionColor *= _EmissionTintColor;
             emissionColor *= _EmissionIntensity;
         }
