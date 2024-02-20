@@ -69,6 +69,13 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
+float3 BrightnessFactor(float3 InputColor, float brightnessFactor)
+{
+    float3 scaledColor = InputColor.rgb * brightnessFactor;
+    scaledColor = clamp(scaledColor, 0.0, 1.0);
+    return scaledColor;
+}
+
 float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
 {
     return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
@@ -115,7 +122,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
     Light mainLight = GetMainLight(shadowCoord);
     //获取主光源颜色
-    float4 LightColor = float4(mainLight.color.rgb, 1);
+    float4 LightColor = float4(BrightnessFactor(mainLight.color.rgb, _MainLightBrightnessFactor), 1);
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
 
