@@ -69,6 +69,16 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
+float3 RGBAdjustment(float3 InputColor, float RPower, float GPower, float BPower)
+{
+    float3 finalColor = InputColor.rgb;
+    finalColor.r = pow(finalColor.r, RPower);
+    finalColor.g = pow(finalColor.g, GPower);
+    finalColor.b = pow(finalColor.b, BPower);
+    finalColor = clamp(finalColor, 0.0, 1.0);
+    return finalColor;
+}
+
 float3 BrightnessFactor(float3 InputColor, float brightnessFactor)
 {
     float3 scaledColor = InputColor.rgb * brightnessFactor;
@@ -83,6 +93,8 @@ float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
 
 float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFactor)
 {
+    OriginalColor = clamp(OriginalColor, 0.0, 1.0);
+    EnhancedColor = clamp(EnhancedColor, 0.0, 1.0);
     float3 finalColor = lerp(OriginalColor, EnhancedColor, mixFactor);
     return finalColor;
 }
@@ -159,6 +171,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         areaColor = areaMap * _LowerBodyColorMapColor;
     #endif
     baseColor = areaColor.rgb;
+    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
     //对有LightMap的部位，采样 LightMap

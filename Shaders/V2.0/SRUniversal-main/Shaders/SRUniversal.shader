@@ -16,6 +16,9 @@ Shader "Custom/SRUniversal"
         [HDR] _UpperBodyColorMapColor("Upper body color map color (Default white)",Color) = (1,1,1)
         [NoScaleOffset] _LowerBodyColorMap ("Lower body color map (Default white)", 2D) = "white" {}
         [HDR] _LowerBodyColorMapColor("Lower body color map color (Default white)",Color) = (1,1,1)
+        _BaseColorRPower ("Base color R Power (Default 1)", Range(-5, 5)) = 1.0  
+        _BaseColorGPower ("Base color G Power (Default 1)", Range(-5, 5)) = 1.0  
+        _BaseColorBPower ("Base color B Power (Default 1)", Range(-5, 5)) = 1.0  
         _FrontFaceTintColor("Front face tint color (Default white)",Color) = (1,1,1)
         _BackFaceTintColor("Back face tint color (Default white)",Color) = (1,1,1)
         _Alpha("Alpha (Default 1)", Range(0,1)) = 1
