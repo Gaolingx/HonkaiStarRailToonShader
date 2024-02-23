@@ -12,8 +12,6 @@
 // all sampler2D don't need to put inside CBUFFER 
 sampler2D _OutlineZOffsetMaskTex;
 
-// DayTime
-float _DayTime;
 
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
@@ -59,6 +57,10 @@ float _AlphaClip;
 sampler2D _HairLightMap;
 sampler2D _UpperBodyLightMap;
 sampler2D _LowerBodyLightMap;
+
+
+// DayTime
+float _DayTime;
 
 
 // RampColor

@@ -83,7 +83,7 @@ Shader "Custom/SRUniversal"
         [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", float) = 1
         [Toggle(_METAL_SPECULAR_ON)] _EnableMetalSpecular ("Enable Metal Specular (Default YES)", float) = 1
         _SpecularExpon("Specular exponent (Default 50)",Range(0,100)) = 50
-        _SpecularKsNonMrtal("Specular KS non-metal (Default 0.04)",Range(0,1)) = 0.04
+        _SpecularKsNonMetal("Specular KS non-metal (Default 0.04)",Range(0,1)) = 0.04
         _SpecularKsMetal("Specular KS metal (Default 1)",Range(0,1)) = 1
         _MetalSpecularMetallic("Metal Specular Metallic (Default 0.52)",Range(0,1)) = 0.52
         [Toggle(_SPECULAR_COLOR_CUSTOM)] _EnableCustomSpecularColor ("Enable Custom Specular Color (Default NO)", float) = 1
