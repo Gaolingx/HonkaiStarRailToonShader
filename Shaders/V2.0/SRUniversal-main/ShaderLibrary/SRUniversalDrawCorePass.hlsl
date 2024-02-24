@@ -276,17 +276,22 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+    
     //对有LightMap的部位，采样 LightMap
     float4 lightMap = 0;
+    lightMap = GetLightMapTex(input.uv, _HairLightMap, _UpperBodyLightMap, _LowerBodyLightMap);
 
-    #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
-        lightMap = GetLightMapTex(input.uv, _HairLightMap, _UpperBodyLightMap, _LowerBodyLightMap);
-    #endif
     //对脸部采样 faceMap，脸部的LightMap就是这张FaceMap
     float4 faceMap = 0;
     #if _AREA_FACE
         faceMap = tex2D(_FaceMap, input.uv);
     #endif
+
+    // LightMap
+    float shadowIntensity = lightMap.r;
+    float diffuseThreshold = lightMap.g;
+    float specularThreshold = lightMap.b;
+    float materialId = lightMap.a;
 
     // Expression
     #if _AREA_FACE && _Expression_ON
@@ -307,7 +312,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
         
-        indirectLightColor *= lerp(1, lightMap.r, _IndirectLightOcclusionUsage); // 加个 Ambient Occlusion
+        indirectLightColor *= lerp(1, shadowIntensity, _IndirectLightOcclusionUsage); // 加个 Ambient Occlusion
     #elif _AREA_FACE
         indirectLightColor *= lerp(1, lerp(faceMap.g, 1, step(faceMap.r, 0.5)), _IndirectLightOcclusionUsage);
     #endif
@@ -325,16 +330,16 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         {
             float NoL = dot(normalWS, lightDirectionWS);
             float remappedNoL = NoL * 0.5 + 0.5;
-            float shadowThreshold = lightMap.g;
+            float shadowThreshold = diffuseThreshold;
             //加个过渡，这里_ShadowThresholdSoftness=0.1
             mainLightShadow = smoothstep(
                 1.0 - shadowThreshold - _ShadowThresholdSoftness,
                 1.0 - shadowThreshold + _ShadowThresholdSoftness,
                 remappedNoL + _ShadowThresholdCenter);
             //应用AO
-            mainLightShadow *= lightMap.r;
+            mainLightShadow *= shadowIntensity;
 
-            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, lightMap.a);
+            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);
             rampRowIndex = RRNI.rampRowIndex;
             rampRowNum = RRNI.rampRowNum;
 
@@ -361,7 +366,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
             //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
             mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
 
-            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, lightMap.a);
+            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);
             rampRowIndex = RRNI.rampRowIndex;
             rampRowNum = RRNI.rampRowNum;
         }
@@ -401,15 +406,15 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
                 float NoH = dot(normalWS, halfVectorWS);
                 float blinnPhong = pow(saturate(NoH), _SpecularExpon);
                 //非金属的反射率一般为0.04
-                float nonMetalSpecular = step(1.04 - blinnPhong, lightMap.b) * _SpecularKsNonMetal;
+                float nonMetalSpecular = step(1.04 - blinnPhong, specularThreshold) * _SpecularKsNonMetal;
                 //金属反射率取1
-                float metalSpecular = blinnPhong * lightMap.b * _SpecularKsMetal;
+                float metalSpecular = blinnPhong * specularThreshold * _SpecularKsMetal;
 
                 float metallic = 0;
                 #if _METAL_SPECULAR_ON
                     #if  _AREA_UPPERBODY || _AREA_LOWERBODY
                         //金属部分的Alpha值为0.52，此时metallic为1，以0.1为插值范围，确定金属度
-                        metallic = saturate((abs(lightMap.a - _MetalSpecularMetallic) - 0.1)/(0 - 0.1));
+                        metallic = saturate((abs(materialId - _MetalSpecularMetallic) - 0.1)/(0 - 0.1));
                     #endif
                 #else
                     //因为头发没有金属，所以头发位置要关掉这个keyword
