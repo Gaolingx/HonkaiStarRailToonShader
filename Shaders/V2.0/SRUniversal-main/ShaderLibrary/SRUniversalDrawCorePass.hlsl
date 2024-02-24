@@ -159,13 +159,13 @@ RampColor RampColorConstruct(float2 rampUV, sampler2D HairCoolRamp, float3 HairC
 float4 GetLightMapTex(float2 uv, sampler2D HairLightMap, sampler2D UpperBodyLightMap, sampler2D LowerBodyLightMap)
 {
     float4 lightMap = 0;
-#if _AREA_HAIR
-    lightMap = tex2D(HairLightMap, uv);
-#elif _AREA_UPPERBODY
-    lightMap = tex2D(UpperBodyLightMap, uv);
-#elif _AREA_LOWERBODY
-    lightMap = tex2D(LowerBodyLightMap, uv);
-#endif
+    #if _AREA_HAIR
+        lightMap = tex2D(HairLightMap, uv);
+    #elif _AREA_UPPERBODY
+        lightMap = tex2D(UpperBodyLightMap, uv);
+    #elif _AREA_LOWERBODY
+        lightMap = tex2D(LowerBodyLightMap, uv);
+    #endif
     return lightMap;
 }
 
