@@ -99,6 +99,36 @@ float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFacto
     return finalColor;
 }
 
+struct RampRowNumIndex
+{
+    int rampRowIndex;
+    int rampRowNum;
+};
+
+RampRowNumIndex GetRampRowNumIndex(int rampRowIndex, int rampRowNum, float materialId)
+{
+    RampRowNumIndex R;
+    //头发的Ramp贴图只有一行，因此不用计算
+    #if _AREA_HAIR
+        rampRowIndex = 1;
+        rampRowNum = 1;
+        //上下衣的Ramp贴图有8行
+    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
+        int rawIndex = round(materialId * 8.04 + 0.81);
+        //奇数行不变，偶数行先偏移4行，再对8取余
+        rampRowIndex = lerp(fmod((rawIndex + 4), 8), rawIndex, fmod(rawIndex, 2));
+        //身体的Ramp贴图有8行
+        rampRowNum = 8;
+    #elif _AREA_FACE
+        //脸部ramp直接使用皮肤的行号即可
+        rampRowIndex = 1;
+        rampRowNum = 8;
+    #endif
+    R.rampRowIndex = rampRowIndex;
+    R.rampRowNum = rampRowNum;
+    return R;
+}
+
 float4 GetMainTexColor(float2 uv, sampler2D FaceColorMap, float4 FaceColorMapColor,
     sampler2D HairColorMap, float4 HairColorMapColor,
     sampler2D UpperBodyColorMap, float4 UpperBodyColorMapColor,
@@ -287,23 +317,10 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
             //应用AO
             mainLightShadow *= lightMap.r;
 
-            //头发的Ramp贴图只有一行，因此不用计算
-            #if _AREA_HAIR
-                rampRowIndex = 1;
-                rampRowNum = 1;
-                //rampRowIndex = 0;
-                //rampRowNum = 1;
-                //上下衣的Ramp贴图有8行
-            #elif _AREA_UPPERBODY || _AREA_LOWERBODY
-                int rawIndex = round(lightMap.a * 8.04 + 0.81);
-                //int rawIndex = (round((lightMap.a + 0.0425)/0.0625) - 1)/2;
-                //奇数行不变，偶数行先偏移4行，再对8取余
-                rampRowIndex = lerp(fmod((rawIndex + 4), 8), rawIndex, fmod(rawIndex, 2));
-                //rampRowIndex = lerp(rawIndex, rawIndex + 4 < 8 ? rawIndex + 4 : rawIndex + 4 - 8, fmod(rawIndex, 2));
-                //身体的Ramp贴图有8行
-                rampRowNum = 8;
-                //rampRowNum = 0;
-            #endif
+            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, lightMap.a);
+            rampRowIndex = RRNI.rampRowIndex;
+            rampRowNum = RRNI.rampRowNum;
+
         }
     #elif _AREA_FACE
         float3 headForward = normalize(_HeadForward).xyz;
@@ -325,10 +342,10 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
         float sdf = smoothstep(sdfThreshold - _FaceShadowTransitionSoftness, sdfThreshold + _FaceShadowTransitionSoftness, sdfValue);
         //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
         mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
-        //脸部ramp直接使用皮肤的行号即可
-        rampRowIndex = 1;
-        //rampRowIndex = 0;
-        rampRowNum = 8;
+        
+        RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, lightMap.a);
+        rampRowIndex = RRNI.rampRowIndex;
+        rampRowNum = RRNI.rampRowNum;
     #endif
 
     float3 coolRampCol = 1;
@@ -339,7 +356,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     float rampUVx = mainLightShadow * (1 - _ShadowRampOffset) + _ShadowRampOffset;
     //计算uv的v
     float rampUVy = (2 * rampRowIndex - 1) * (1.0 / (rampRowNum * 2));
-    //float rampUVy = (2 * rampRowIndex + 1) * (1.0 / (rampRowNum * 2));
+
     float2 rampUV = float2(rampUVx, rampUVy);
 
     RampColor RC = RampColorConstruct(rampUV, _HairCoolRamp, _HairCoolRampColor, _HairCoolRampColorMixFactor,
