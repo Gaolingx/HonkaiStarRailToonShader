@@ -99,36 +99,6 @@ float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFacto
     return finalColor;
 }
 
-struct RampRowNumIndex
-{
-    int rampRowIndex;
-    int rampRowNum;
-};
-
-RampRowNumIndex GetRampRowNumIndex(int rampRowIndex, int rampRowNum, float materialId)
-{
-    RampRowNumIndex R;
-    //头发的Ramp贴图只有一行，因此不用计算
-    #if _AREA_HAIR
-        rampRowIndex = 1;
-        rampRowNum = 1;
-        //上下衣的Ramp贴图有8行
-    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
-        int rawIndex = round(materialId * 8.04 + 0.81);
-        //奇数行不变，偶数行先偏移4行，再对8取余
-        rampRowIndex = lerp(fmod((rawIndex + 4), 8), rawIndex, fmod(rawIndex, 2));
-        //身体的Ramp贴图有8行
-        rampRowNum = 8;
-    #elif _AREA_FACE
-        //脸部ramp直接使用皮肤的行号即可
-        rampRowIndex = 1;
-        rampRowNum = 8;
-    #endif
-    R.rampRowIndex = rampRowIndex;
-    R.rampRowNum = rampRowNum;
-    return R;
-}
-
 float4 GetMainTexColor(float2 uv, sampler2D FaceColorMap, float4 FaceColorMapColor,
     sampler2D HairColorMap, float4 HairColorMapColor,
     sampler2D UpperBodyColorMap, float4 UpperBodyColorMapColor,
@@ -199,6 +169,49 @@ float4 GetLightMapTex(float2 uv, sampler2D HairLightMap, sampler2D UpperBodyLigh
     return lightMap;
 }
 
+struct RampRowNumIndex
+{
+    int rampRowIndex;
+    int rampRowNum;
+};
+
+RampRowNumIndex GetRampRowNumIndex(int rampRowIndex, int rampRowNum, float materialId)
+{
+    RampRowNumIndex R;
+    //头发的Ramp贴图只有一行，因此不用计算
+    #if _AREA_HAIR
+        rampRowIndex = 1;
+        rampRowNum = 1;
+        //上下衣的Ramp贴图有8行
+    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
+        int rawIndex = round(materialId * 8.04 + 0.81);
+        //奇数行不变，偶数行先偏移4行，再对8取余
+        rampRowIndex = lerp(fmod((rawIndex + 4), 8), rawIndex, fmod(rawIndex, 2));
+        //身体的Ramp贴图有8行
+        rampRowNum = 8;
+    #elif _AREA_FACE
+        //脸部ramp直接使用皮肤的行号即可
+        rampRowIndex = 1;
+        rampRowNum = 8;
+    #endif
+    R.rampRowIndex = rampRowIndex;
+    R.rampRowNum = rampRowNum;
+    return R;
+}
+
+float2 GetRampUV(float mainLightShadow, float ShadowRampOffset, int rampRowIndex, int rampRowNum)
+{
+    //RampUV计算
+    //根据NdotL计算UV的u，由于ramp贴图的变化主要集中在3/4的地方，把uv乘以0.25然后加上0.75
+    //这里_ShadowRampOffset=0.75
+    float rampUVx = mainLightShadow * (1 - ShadowRampOffset) + ShadowRampOffset;
+    //计算uv的v
+    float rampUVy = (2 * rampRowIndex - 1) * (1.0 / (rampRowNum * 2));
+
+    float2 rampUV = float2(rampUVx, rampUVy);
+    return rampUV;
+}
+
 Varyings SRUniversalVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
@@ -240,11 +253,13 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
 
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
     #if _NORMAL_MAP_ON
-        float3x3 tangentToWorld = half3x3(input.tangentWS, input.bitangentWS, input.normalWS);
-        float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv);
-        float3 normalTS = UnpackNormal(normalMap);
-        float3 normalWS = TransformTangentToWorld(normalTS, tangentToWorld, true);
-        input.normalWS = normalWS;
+        {
+            float3x3 tangentToWorld = half3x3(input.tangentWS, input.bitangentWS, input.normalWS);
+            float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv);
+            float3 normalTS = UnpackNormal(normalMap);
+            float3 normalWS = TransformTangentToWorld(normalTS, tangentToWorld, true);
+            input.normalWS = normalWS;
+        }
     #else
         float3 normalWS = normalize(input.normalWS);
     #endif
@@ -275,15 +290,17 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
 
     // Expression
     #if _AREA_FACE && _Expression_ON
-        float4 exprMap = SAMPLE_TEXTURE2D(_ExpressionMap, sampler_ExpressionMap, input.uv.xy);
-        float3 exCheek = lerp(baseColor.rgb, baseColor.rgb * _ExCheekColor.rgb, exprMap.r);
-        baseColor.rgb = lerp(baseColor.rgb, exCheek, _ExCheekIntensity);
-        float3 exShy = lerp(baseColor.rgb, baseColor.rgb * _ExShyColor.rgb, exprMap.g);
-        baseColor.rgb = lerp(baseColor.rgb, exShy, _ExShyIntensity);
-        float3 exShadow = lerp(baseColor.rgb, baseColor.rgb * _ExShadowColor.rgb, exprMap.b);
-        baseColor.rgb = lerp(baseColor.rgb, exShadow, _ExShadowIntensity);
-        float3 exEyeShadow = lerp(baseColor.rgb, baseColor.rgb * _ExEyeColor.rgb, faceMap.r);
-        baseColor.rgb = lerp(baseColor.rgb, exEyeShadow, _ExShadowIntensity);
+        {
+            float4 exprMap = SAMPLE_TEXTURE2D(_ExpressionMap, sampler_ExpressionMap, input.uv.xy);
+            float3 exCheek = lerp(baseColor.rgb, baseColor.rgb * _ExCheekColor.rgb, exprMap.r);
+            baseColor.rgb = lerp(baseColor.rgb, exCheek, _ExCheekIntensity);
+            float3 exShy = lerp(baseColor.rgb, baseColor.rgb * _ExShyColor.rgb, exprMap.g);
+            baseColor.rgb = lerp(baseColor.rgb, exShy, _ExShyIntensity);
+            float3 exShadow = lerp(baseColor.rgb, baseColor.rgb * _ExShadowColor.rgb, exprMap.b);
+            baseColor.rgb = lerp(baseColor.rgb, exShadow, _ExShadowIntensity);
+            float3 exEyeShadow = lerp(baseColor.rgb, baseColor.rgb * _ExEyeColor.rgb, faceMap.r);
+            baseColor.rgb = lerp(baseColor.rgb, exEyeShadow, _ExShadowIntensity);
+        }
     #endif
 
     //lightmap的R通道是AO，也就是静态阴影，根据AO，来影响环境光照
@@ -323,42 +340,40 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
 
         }
     #elif _AREA_FACE
-        float3 headForward = normalize(_HeadForward).xyz;
-        float3 headRight = normalize(_HeadRight).xyz;
-        float3 headUp = normalize(cross(headForward, headRight));
-        float3 lightDir = normalize(lightDirectionWS - dot(lightDirectionWS, headUp) * headUp);
-        //光照在左脸的时候。左脸的uv采样左脸，右脸的uv采样右脸，而光照在右脸的时候，左脸的uv采样右脸，右脸的uv采样左脸，因为SDF贴图明暗变化在右脸
-        float isRight = step(0, dot(lightDir, headRight));
-        //相当于float sdfUVx=isRight?1-input.uv.x:input.uv.x;
-        //即打在右脸的时候，反转uv的u坐标
-        float sdfUVx = lerp(input.uv.x, 1 - input.uv.x, isRight);
-        float2 sdfUV = float2(sdfUVx, input.uv.y);
-        //使用uv采样面部贴图的a通道
-        float sdfValue = tex2D(_FaceMap, sdfUV).a;
-        sdfValue += _FaceShadowOffset;
-        //dot(lightDir,headForward)的范围是[1,-1]映射到[0,1]
-        float sdfThreshold = 1 - (dot(lightDir, headForward) * 0.5 + 0.5);
-        //采样结果大于点乘结果，不在阴影，小于则处于阴影
-        float sdf = smoothstep(sdfThreshold - _FaceShadowTransitionSoftness, sdfThreshold + _FaceShadowTransitionSoftness, sdfValue);
-        //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
-        mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
-        
-        RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, lightMap.a);
-        rampRowIndex = RRNI.rampRowIndex;
-        rampRowNum = RRNI.rampRowNum;
+        {
+            float3 headForward = normalize(_HeadForward).xyz;
+            float3 headRight = normalize(_HeadRight).xyz;
+            float3 headUp = normalize(cross(headForward, headRight));
+            float3 lightDir = normalize(lightDirectionWS - dot(lightDirectionWS, headUp) * headUp);
+            //光照在左脸的时候。左脸的uv采样左脸，右脸的uv采样右脸，而光照在右脸的时候，左脸的uv采样右脸，右脸的uv采样左脸，因为SDF贴图明暗变化在右脸
+            float isRight = step(0, dot(lightDir, headRight));
+            //相当于float sdfUVx=isRight?1-input.uv.x:input.uv.x;
+            //即打在右脸的时候，反转uv的u坐标
+            float sdfUVx = lerp(input.uv.x, 1 - input.uv.x, isRight);
+            float2 sdfUV = float2(sdfUVx, input.uv.y);
+            //使用uv采样面部贴图的a通道
+            float sdfValue = tex2D(_FaceMap, sdfUV).a;
+            sdfValue += _FaceShadowOffset;
+            //dot(lightDir,headForward)的范围是[1,-1]映射到[0,1]
+            float sdfThreshold = 1 - (dot(lightDir, headForward) * 0.5 + 0.5);
+            //采样结果大于点乘结果，不在阴影，小于则处于阴影
+            float sdf = smoothstep(sdfThreshold - _FaceShadowTransitionSoftness, sdfThreshold + _FaceShadowTransitionSoftness, sdfValue);
+            //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
+            mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
+
+            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, lightMap.a);
+            rampRowIndex = RRNI.rampRowIndex;
+            rampRowNum = RRNI.rampRowNum;
+        }
     #endif
 
     float3 coolRampCol = 1;
     float3 warmRampCol = 1;
+    float2 rampUV;
+
+    rampUV = GetRampUV(mainLightShadow, _ShadowRampOffset, rampRowIndex, rampRowNum);
+
     //Ramp Color
-    //根据NdotL计算UV的u，由于ramp贴图的变化主要集中在3/4的地方，把uv乘以0.25然后加上0.75
-    //这里_ShadowRampOffset=0.75
-    float rampUVx = mainLightShadow * (1 - _ShadowRampOffset) + _ShadowRampOffset;
-    //计算uv的v
-    float rampUVy = (2 * rampRowIndex - 1) * (1.0 / (rampRowNum * 2));
-
-    float2 rampUV = float2(rampUVx, rampUVy);
-
     RampColor RC = RampColorConstruct(rampUV, _HairCoolRamp, _HairCoolRampColor, _HairCoolRampColorMixFactor,
         _HairWarmRamp, _HairWarmRampColor, _HairWarmRampColorMixFactor,
         _BodyCoolRamp, _BodyCoolRampColor, _BodyCoolRampColorMixFactor,
@@ -452,24 +467,26 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     //边缘光部分
     float3 rimLightColor;
     #if _RIM_LIGHTING_ON
-        //获取当前片元的深度
-        float linearEyeDepth = LinearEyeDepth(input.positionCS.z, _ZBufferParams);
-        //根据视线空间的法线采样左边或者右边的深度图
-        float3 normalVS = mul((float3x3)UNITY_MATRIX_V, normalWS);
-        //根据视线空间的法线采样左边或者右边的深度图，根据深度缩放，实现近大远小的效果
-        float2 uvOffset = float2(sign(normalVS.x), 0) * _RimLightWidth / (1 + linearEyeDepth) / 100;
-        int2 loadTexPos = input.positionCS.xy + uvOffset * _ScaledScreenParams.xy;
-        //限制左右，不采样到边界
-        loadTexPos = min(max(loadTexPos, 0), _ScaledScreenParams.xy - 1);
-        //偏移后的片元深度
-        float offsetSceneDepth = LoadSceneDepth(loadTexPos);
-        //转换为LinearEyeDepth
-        float offsetLinearEyeDepth = LinearEyeDepth(offsetSceneDepth, _ZBufferParams);
-        //深度差超过阈值，表示是边界
-        float rimLight = saturate(offsetLinearEyeDepth - (linearEyeDepth + _RimLightThreshold)) / _RimLightFadeout;
-        rimLightColor = rimLight * LightColor.rgb;
-        rimLightColor *= _RimLightTintColor;
-        rimLightColor *= _RimLightBrightness;
+        {
+            //获取当前片元的深度
+            float linearEyeDepth = LinearEyeDepth(input.positionCS.z, _ZBufferParams);
+            //根据视线空间的法线采样左边或者右边的深度图
+            float3 normalVS = mul((float3x3)UNITY_MATRIX_V, normalWS);
+            //根据视线空间的法线采样左边或者右边的深度图，根据深度缩放，实现近大远小的效果
+            float2 uvOffset = float2(sign(normalVS.x), 0) * _RimLightWidth / (1 + linearEyeDepth) / 100;
+            int2 loadTexPos = input.positionCS.xy + uvOffset * _ScaledScreenParams.xy;
+            //限制左右，不采样到边界
+            loadTexPos = min(max(loadTexPos, 0), _ScaledScreenParams.xy - 1);
+            //偏移后的片元深度
+            float offsetSceneDepth = LoadSceneDepth(loadTexPos);
+            //转换为LinearEyeDepth
+            float offsetLinearEyeDepth = LinearEyeDepth(offsetSceneDepth, _ZBufferParams);
+            //深度差超过阈值，表示是边界
+            float rimLight = saturate(offsetLinearEyeDepth - (linearEyeDepth + _RimLightThreshold)) / _RimLightFadeout;
+            rimLightColor = rimLight * LightColor.rgb;
+            rimLightColor *= _RimLightTintColor;
+            rimLightColor *= _RimLightBrightness;
+        }
     #else
         rimLightColor = 0;
     #endif
