@@ -21,6 +21,7 @@ Shader "Custom/SRUniversal"
         _BaseColorBPower ("Base color B Power (Default 1)", Range(-5, 5)) = 1.0  
         _FrontFaceTintColor("Front face tint color (Default white)",Color) = (1,1,1)
         _BackFaceTintColor("Back face tint color (Default white)",Color) = (1,1,1)
+        [Toggle(_UseAlphaClipping)]_UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
         _Alpha("Alpha (Default 1)", Range(0,1)) = 1
         _AlphaClip("Alpha clip (Default 0.333)", Range(0,1)) = 0.333
 
@@ -164,6 +165,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _AREA_HAIR
         #pragma shader_feature_local _AREA_UPPERBODY
         #pragma shader_feature_local _AREA_LOWERBODY
+        #pragma shader_feature_local_fragment _UseAlphaClipping
         #pragma shader_feature_local _DayTime_MANUAL_ON
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _Expression_ON

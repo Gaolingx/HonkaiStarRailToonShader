@@ -212,6 +212,13 @@ float2 GetRampUV(float mainLightShadow, float ShadowRampOffset, int rampRowIndex
     return rampUV;
 }
 
+void DoClipTestToTargetAlphaValue(float alpha) 
+{
+#if _UseAlphaClipping
+    clip(alpha - _AlphaClip);
+#endif
+}
+
 Varyings SRUniversalVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
@@ -545,7 +552,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     #endif
 
     float4 FinalColor = float4(albedo, alpha);
-    clip(FinalColor.a - _AlphaClip);
+    DoClipTestToTargetAlphaValue(FinalColor.a);
     FinalColor.rgb = MixFog(FinalColor.rgb, input.positionWSAndFogFactor.w);
 
     return FinalColor;
