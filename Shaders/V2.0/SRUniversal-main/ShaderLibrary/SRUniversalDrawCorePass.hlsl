@@ -504,7 +504,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
     float3 emissionColor = 0;
     #if _EMISSION_ON
         {
-            emissionColor = baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
+            emissionColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
                 _HairColorMap, _HairColorMapColor,
                 _UpperBodyColorMap, _UpperBodyColorMapColor,
                 _LowerBodyColorMap, _LowerBodyColorMapColor).a;

@@ -66,6 +66,13 @@ float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z)
     return cameraMulFix * 0.00005; // mul a const to make return result = default normal expand amount WS
 }
 
+void DoClipTestToTargetAlphaValue(float alpha) 
+{
+#if _UseAlphaClipping
+    clip(alpha - _AlphaClip);
+#endif
+}
+
 Varyings SRUniversalVertex(Attributes input)
 {
     Varyings output = (Varyings)0;
@@ -147,10 +154,14 @@ float4 colorFragmentTarget(inout Varyings input)
     #else
         OutlineAlbedo += pow(_OutlineColor, _OutlineGamma);
     #endif
-    float4 color = float4(OutlineAlbedo, 1);
-    color.rgb = MixFog(color.rgb, input.fogFactor);
 
-    return color;
+    float alpha = _Alpha;
+
+    float4 FinalOutlineColor = float4(OutlineAlbedo, alpha);
+    DoClipTestToTargetAlphaValue(FinalOutlineColor.a);
+    FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
+
+    return FinalOutlineColor;
 }
 
 void SRUniversalFragment(
