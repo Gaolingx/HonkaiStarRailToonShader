@@ -66,10 +66,10 @@ float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z)
     return cameraMulFix * 0.00005; // mul a const to make return result = default normal expand amount WS
 }
 
-void DoClipTestToTargetAlphaValue(float alpha) 
+void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
 {
 #if _UseAlphaClipping
-    clip(alpha - _AlphaClip);
+    clip(alpha - alphaTestThreshold);
 #endif
 }
 
@@ -158,7 +158,7 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     float alpha = _Alpha;
 
     float4 FinalOutlineColor = float4(OutlineAlbedo, alpha);
-    DoClipTestToTargetAlphaValue(FinalOutlineColor.a);
+    DoClipTestToTargetAlphaValue(FinalOutlineColor.a, _AlphaClip);
     FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
 
     return FinalOutlineColor;
