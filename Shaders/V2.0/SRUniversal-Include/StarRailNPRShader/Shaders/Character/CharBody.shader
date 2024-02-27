@@ -118,17 +118,26 @@ Shader "Honkai Star Rail/Character/Body"
 
         [HeaderFoldout(Bloom)]
         [HSRMaterialIDFoldout] _BloomIntensity("Intensity", Float) = 0
-        [HSRMaterialIDProperty(_BloomIntensity, 0)] _BloomIntensity0("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 31)] _BloomIntensity1("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 63)] _BloomIntensity2("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 95)] _BloomIntensity3("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 127)] _BloomIntensity4("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 159)] _BloomIntensity5("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 192)] _BloomIntensity6("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 223)] _BloomIntensity7("Bloom Intensity", Range(0, 2)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 0)] _BloomIntensity0("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 31)] _BloomIntensity1("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 63)] _BloomIntensity2("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 95)] _BloomIntensity3("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 127)] _BloomIntensity4("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 159)] _BloomIntensity5("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 192)] _BloomIntensity6("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 223)] _BloomIntensity7("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDFoldout] _BloomColor("Color", Float) = 0
+        [HSRMaterialIDProperty(_BloomColor, 0)] _BloomColor0("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 31)] _BloomColor1("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 63)] _BloomColor2("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 95)] _BloomColor3("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 127)] _BloomColor4("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 159)] _BloomColor5("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 192)] _BloomColor6("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 223)] _BloomColor7("Bloom Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Rim Light)]
-        _RimIntensity("Intensity (Front)", Range(0, 1)) = 1
+        _RimIntensity("Intensity (Front)", Range(0, 1)) = 0.5
         _RimIntensityBackFace("Intensity (Back)", Range(0, 1)) = 0
         _RimThresholdMin("Threshold Min", Float) = 0.6
         _RimThresholdMax("Threshold Max", Float) = 0.9
@@ -199,6 +208,16 @@ Shader "Honkai Star Rail/Character/Body"
                 "LightMode" = "HSRForward3"
             }
 
+            // 角色的 Stencil
+            Stencil
+            {
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
+            }
+
             Cull [_Cull]
             ZWrite On
 
@@ -206,7 +225,7 @@ Shader "Honkai Star Rail/Character/Body"
             Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask R 1
+            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -217,6 +236,9 @@ Shader "Honkai Star Rail/Character/Body"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _SINGLEMATERIAL_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharBodyCore.hlsl"
 
@@ -230,6 +252,16 @@ Shader "Honkai Star Rail/Character/Body"
             Tags
             {
                 "LightMode" = "HSROutline"
+            }
+
+            // 角色的 Stencil
+            Stencil
+            {
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
             }
 
             Cull Front
@@ -261,19 +293,18 @@ Shader "Honkai Star Rail/Character/Body"
 
         Pass
         {
-            Name "BodyShadow"
+            Name "PerObjectShadow"
 
             Tags
             {
-                "LightMode" = "ShadowCaster"
+                "LightMode" = "HSRShadowCaster"
             }
 
             Cull [_Cull]
             ZWrite On
             ZTest LEqual
 
-            ColorMask 0 0
-            ColorMask 0 1
+            ColorMask 0
 
             HLSLPROGRAM
 
@@ -304,12 +335,38 @@ Shader "Honkai Star Rail/Character/Body"
 
             Cull [_Cull]
             ZWrite On
-            ColorMask 0
+            ColorMask R
 
             HLSLPROGRAM
 
             #pragma vertex BodyDepthOnlyVertex
             #pragma fragment BodyDepthOnlyFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #include "CharBodyCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "BodyDepthNormals"
+
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            Cull [_Cull]
+            ZWrite On
+
+            HLSLPROGRAM
+
+            #pragma vertex BodyDepthNormalsVertex
+            #pragma fragment BodyDepthNormalsFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON

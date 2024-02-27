@@ -4,7 +4,7 @@ const static float3 f3one = float3(1.0, 1.0, 1.0);
 const static float4 f4zero = float4(0.0, 0.0, 0.0, 0.0);
 const static float4 f4one = float4(1.0, 1.0, 1.0, 1.0);
 
-struct Attributes
+struct CharCoreAttributes
 {
     float3 positionOS   : POSITION;
     half3 normalOS      : NORMAL;
@@ -12,7 +12,7 @@ struct Attributes
     float2 uv           : TEXCOORD0;
 };
 
-struct Varyings
+struct CharCoreVaryings
 {
     float2 uv                       : TEXCOORD0;
     float4 positionWSAndFogFactor   : TEXCOORD1;
@@ -219,9 +219,9 @@ void DoClipTestToTargetAlphaValue(float alpha)
 #endif
 }
 
-Varyings SRUniversalVertex(Attributes input)
+CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
 {
-    Varyings output = (Varyings)0;
+    CharCoreVaryings output = (CharCoreVaryings)0;
 
     VertexPositionInputs vertexPositionInputs = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInputs = GetVertexNormalInputs(input.normalOS,input.tangentOS);
@@ -243,7 +243,7 @@ Varyings SRUniversalVertex(Attributes input)
     return output;
 }
 
-float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
+float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 {
     //片元世界空间位置
     float3 positionWS = input.positionWSAndFogFactor.xyz;
@@ -559,7 +559,7 @@ float4 colorFragmentTarget(inout Varyings input, bool isFrontFace)
 }
 
 void SRUniversalFragment(
-    Varyings input,
+    CharCoreVaryings input,
     bool isFrontFace            : SV_IsFrontFace,
     out float4 colorTarget      : SV_Target0,
     out float4 bloomTarget      : SV_Target1)
@@ -567,6 +567,6 @@ void SRUniversalFragment(
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
     colorTarget = float4(outputColor.rgba);
-    bloomTarget = float4(_BloomIntensity0, 0, 0, 0);
+    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
 }
 

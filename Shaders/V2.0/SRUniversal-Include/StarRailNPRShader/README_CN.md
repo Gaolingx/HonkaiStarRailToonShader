@@ -5,21 +5,13 @@
 
 这是基于 Unity URP 的仿星穹铁道渲染 Shader。这不是逆向工程，Shader 代码不可能和游戏里的一模一样，我只是尽力去还原渲染效果。
 
-![我老婆 0](Screenshots~/sparkle.png)
+![花火](Screenshots~/sparkle.png)
 
-<p align="center">↑↑↑ 我老婆 ↑↑↑</p>
+<p align="center">↑↑↑ 花火 ↑↑↑</p>
 
-![我老婆 1](Screenshots~/silwolf.png)
+![流萤](Screenshots~/firefly.png)
 
-<p align="center">↑↑↑ 我老婆 ↑↑↑</p>
-
-![我老婆 2](Screenshots~/fuxuan_near.png)
-
-<p align="center">↑↑↑ 也是我老婆 ↑↑↑</p>
-
-![咱妈](Screenshots~/kafka_near.png)
-
-<p align="center">↑↑↑ 咱妈 ↑↑↑</p>
+<p align="center">↑↑↑ 流萤 ↑↑↑</p>
 
 ## 角色着色器
 
@@ -27,11 +19,10 @@
 - Honkai Star Rail/Character/Body (Transparent)
 - Honkai Star Rail/Character/EyeShadow
 - Honkai Star Rail/Character/Face
+- Honkai Star Rail/Character/FaceMask
 - Honkai Star Rail/Character/Hair
 
-角色渲染用了 MRT，这个 MRT Pass 是在 URP 的 Forward Pass 之后执行的。渲染透明物体的时候可能会出问题。
-
-*为了维护起来方便，我不会重写整个渲染管线，你可以自己来。
+角色渲染用了 MRT，这个 MRT Pass 是在 URP 的 Forward Pass 之后执行的。使用普通 URP Shader 的透明物体和角色身上的透明物体被分成了两批渲染，可能会出问题。
 
 ## 屏幕后处理
 
@@ -42,15 +33,14 @@
 
     其中 $a,b,c,d,e$ 都是参数。
 
-## 要求
+## 从 git URL 安装
 
-- 卡通渲染的基础知识！！！
-- Unity >= 2022.3。
-- Universal RP >= 14.0。
-- 我的 [ShaderUtilsForSRP](https://github.com/stalomeow/ShaderUtilsForSRP) 包。
-- (可选) Newtonsoft Json 包 >= 3.2.1。
+**这个包要求 Unity >= 2022.3。**
 
-Newtonsoft Json 被一个叫 `Game Material Inspector` 的编辑器工具使用。游戏里的材质解包以后是存在 JSON 里的，这个工具可以帮我们阅读 JSON 内容。想启用这个工具的话，先导入 Newtonsoft Json，再往 player settings 里加编译条件 `PACKAGE_NEWTONSOFT_JSON`。
+![安装](Screenshots~/_install.png)
+
+1. https://github.com/stalomeow/ShaderUtilsForSRP.git
+2. https://github.com/stalomeow/StarRailNPRShader.git
 
 ## 指南
 
@@ -61,10 +51,17 @@ Newtonsoft Json 被一个叫 `Game Material Inspector` 的编辑器工具使用�
 - 目前只能用 Forward 渲染路径。
 - 在 Renderer 上加 Renderer Feature `StarRailForward`。
 - 材质球换 Shader 以后记得先重置一下。
+- 该项目自己实现了屏幕空间阴影，请不要添加 URP 的 `ScreenSpaceShadows` RendererFeature。
 
 ### 推荐的后处理设置
 
 ![后处理设置](Screenshots~/_postprocessing.png)
+
+### 逐物体阴影
+
+在角色根物体上添加 `PerObjectShadowCaster` 组件。支持同屏最多 16 个角色阴影。
+
+![逐物体阴影](Screenshots~/_per_obj_shadow.png)
 
 ### 使用资源预处理器
 
@@ -77,6 +74,12 @@ Newtonsoft Json 被一个叫 `Game Material Inspector` 的编辑器工具使用�
 
 ![资源路径模式设置](Screenshots~/_asset_path_patterns.png)
 
+### 使用 HSRMaterialViewer
+
+HSRMaterialViewer 能帮你浏览 `material.json` 文件，以及自动赋值材质的部分属性（不是所有属性）。**这个工具对 Floats 和 Ints 的赋值支持得不好。**
+
+![hsr-mat-viewer](Screenshots~/_hsr_mat_viewer.gif)
+
 ### 关于 MMD 模型
 
 需要额外加几个步骤：
@@ -86,7 +89,7 @@ Newtonsoft Json 被一个叫 `Game Material Inspector` 的编辑器工具使用�
 
     ![sync-mmd-head-bone](Screenshots~/_sync_mmd_head_bone.png)
 
-    现在，头骨骼方向的值可以自行设置了。另外，组件的菜单里还提供了两个预设。
+    可以自行设置头骨骼方向的值。另外，组件的菜单里还提供了两个预设。
 
     ![sync-mmd-head-bone-ex](Screenshots~/_sync_mmd_head_bone_ex.png)
 

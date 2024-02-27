@@ -26,6 +26,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Shared/CharCore.hlsl"
 #include "Shared/CharDepthOnly.hlsl"
+#include "Shared/CharDepthNormals.hlsl"
 #include "Shared/CharOutline.hlsl"
 #include "Shared/CharShadow.hlsl"
 #include "CharBodyMaterials.hlsl"
@@ -67,6 +68,7 @@ CBUFFER_START(UnityPerMaterial)
     float _EmissionIntensity;
 
     CHAR_MAT_PROP(float, _BloomIntensity);
+    CHAR_MAT_PROP(float4, _BloomColor);
 
     float _RimIntensity;
     float _RimIntensityBackFace;
@@ -117,7 +119,7 @@ void ApplyDebugSettings(float4 lightMap, inout float4 colorTarget, inout float4 
         if (abs(floor(8 * lightMap.a) - _SingleMaterialID) > 0.01)
         {
             colorTarget.rgb = 0;
-            bloomTarget.r = 0;
+            bloomTarget.a = 0; // intensity
         }
     #endif
 }
@@ -142,7 +144,7 @@ void BodyColorFragment(
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    SELECT_CHAR_MAT_PROPS_9(lightMap,
+    SELECT_CHAR_MAT_PROPS_10(lightMap,
         float4, specularColor        = _SpecularColor,
         float , specularMetallic     = _SpecularMetallic,
         float , specularShininess    = _SpecularShininess,
@@ -151,10 +153,11 @@ void BodyColorFragment(
         float , rimWidth             = _RimWidth,
         float4, rimColor             = _RimColor,
         float , rimDark              = _RimDark,
-        float , bloomIntensity       = _BloomIntensity
+        float , bloomIntensity       = _BloomIntensity,
+        float4, bloomColor           = _BloomColor
     );
 
-    Light light = GetMainLight();
+    Light light = GetMainLight(i.shadowCoord);
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
 
     ApplyStockings(texColor.rgb, i.uv.xy, dirWS.NoV);
@@ -191,8 +194,9 @@ void BodyColorFragment(
     emissionData.intensity = _EmissionIntensity;
 
     float3 diffuse = GetRampDiffuse(diffuseData, i.color, texColor.rgb, light.color, lightMap,
-        TEXTURE2D_ARGS(_RampMapCool, sampler_RampMapCool), TEXTURE2D_ARGS(_RampMapWarm, sampler_RampMapWarm));
-    float3 specular = GetSpecular(specularData, texColor.rgb, light.color, lightMap);
+        TEXTURE2D_ARGS(_RampMapCool, sampler_RampMapCool), TEXTURE2D_ARGS(_RampMapWarm, sampler_RampMapWarm),
+        light.shadowAttenuation);
+    float3 specular = GetSpecular(specularData, texColor.rgb, light.color, lightMap, light.shadowAttenuation);
     float3 rimLight = GetRimLight(rimLightData, i.positionHCS, dirWS.N, isFrontFace, lightMap);
     float3 emission = GetEmission(emissionData, texColor.rgb);
 
@@ -213,12 +217,12 @@ void BodyColorFragment(
         specularDataAdd.edgeSoftness = specularEdgeSoftness;
         specularDataAdd.intensity = specularIntensity;
         specularDataAdd.metallic = specularMetallic;
-        specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap) * attenuationAdd;
+        specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap, 1) * attenuationAdd;
     LIGHT_LOOP_END
 
     // Output
     colorTarget = float4(diffuse + specular + rimLight + emission + diffuseAdd + specularAdd, texColor.a);
-    bloomTarget = float4(bloomIntensity, 0, 0, 0);
+    bloomTarget = float4(bloomColor.rgb, bloomIntensity);
     ApplyDebugSettings(lightMap, colorTarget, bloomTarget);
 }
 
@@ -289,6 +293,26 @@ float4 BodyDepthOnlyFragment(
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
     return CharDepthOnlyFragment(i);
+}
+
+CharDepthNormalsVaryings BodyDepthNormalsVertex(CharDepthNormalsAttributes i)
+{
+    return CharDepthNormalsVertex(i, _Maps_ST);
+}
+
+float4 BodyDepthNormalsFragment(
+    CharDepthNormalsVaryings i,
+    FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
+{
+    SetupDualFaceRendering(i.normalWS, i.uv, isFrontFace);
+
+    float4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv.xy);
+    texColor *= IS_FRONT_VFACE(isFrontFace, _Color, _BackColor);
+
+    DoAlphaClip(texColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
+
+    return CharDepthNormalsFragment(i);
 }
 
 #endif

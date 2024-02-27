@@ -115,17 +115,26 @@ Shader "Honkai Star Rail/Character/Body (Transparent)"
 
         [HeaderFoldout(Bloom)]
         [HSRMaterialIDFoldout] _BloomIntensity("Intensity", Float) = 0
-        [HSRMaterialIDProperty(_BloomIntensity, 0)] _BloomIntensity0("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 31)] _BloomIntensity1("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 63)] _BloomIntensity2("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 95)] _BloomIntensity3("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 127)] _BloomIntensity4("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 159)] _BloomIntensity5("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 192)] _BloomIntensity6("Bloom Intensity", Range(0, 2)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 223)] _BloomIntensity7("Bloom Intensity", Range(0, 2)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 0)] _BloomIntensity0("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 31)] _BloomIntensity1("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 63)] _BloomIntensity2("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 95)] _BloomIntensity3("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 127)] _BloomIntensity4("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 159)] _BloomIntensity5("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 192)] _BloomIntensity6("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 223)] _BloomIntensity7("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDFoldout] _BloomColor("Color", Float) = 0
+        [HSRMaterialIDProperty(_BloomColor, 0)] _BloomColor0("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 31)] _BloomColor1("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 63)] _BloomColor2("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 95)] _BloomColor3("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 127)] _BloomColor4("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 159)] _BloomColor5("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 192)] _BloomColor6("Bloom Color", Color) = (1, 1, 1, 1)
+        [HSRMaterialIDProperty(_BloomColor, 223)] _BloomColor7("Bloom Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Rim Light)]
-        _RimIntensity("Intensity (Front)", Range(0, 1)) = 1
+        _RimIntensity("Intensity (Front)", Range(0, 1)) = 0.5
         _RimIntensityBackFace("Intensity (Back)", Range(0, 1)) = 0
         _RimThresholdMin("Threshold Min", Float) = 0.6
         _RimThresholdMax("Threshold Max", Float) = 0.9
@@ -186,7 +195,7 @@ Shader "Honkai Star Rail/Character/Body (Transparent)"
             "RenderPipeline" = "UniversalPipeline"
             "RenderType" = "Transparent"
             "UniversalMaterialType" = "Lit"
-            "Queue" = "Transparent+30"  // 身体默认 +30，放在最后渲染
+            "Queue" = "Transparent"
         }
 
         Pass
@@ -195,16 +204,16 @@ Shader "Honkai Star Rail/Character/Body (Transparent)"
 
             Tags
             {
-                // 与 BodyOpaque 保持一致
-                "LightMode" = "HSRForward3"
+                "LightMode" = "HSRTransparent"
             }
 
+            // 透明部分和角色的 Stencil
             Stencil
             {
-                Ref 8
-                WriteMask 8  // 透明位
+                Ref 5
+                WriteMask 5  // 透明和角色位
                 Comp Always
-                Pass Replace // 写入透明位
+                Pass Replace // 写入透明和角色位
                 Fail Keep
             }
 
@@ -215,7 +224,7 @@ Shader "Honkai Star Rail/Character/Body (Transparent)"
             Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask R 1
+            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -226,6 +235,9 @@ Shader "Honkai Star Rail/Character/Body (Transparent)"
             // #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _SINGLEMATERIAL_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharBodyCore.hlsl"
 
@@ -243,10 +255,11 @@ Shader "Honkai Star Rail/Character/Body (Transparent)"
 
             Stencil
             {
-                Ref 8
-                ReadMask 8    // 透明位
+                Ref 5
+                ReadMask 4    // 透明位
+                WriteMask 1   // 角色位
                 Comp NotEqual // 不透明部分
-                Pass Keep
+                Pass Replace  // 写入角色位
                 Fail Keep
             }
 
@@ -279,19 +292,18 @@ Shader "Honkai Star Rail/Character/Body (Transparent)"
 
         Pass
         {
-            Name "BodyShadow"
+            Name "PerObjectShadow"
 
             Tags
             {
-                "LightMode" = "ShadowCaster"
+                "LightMode" = "HSRShadowCaster"
             }
 
             Cull [_Cull]
             ZWrite On // 写入 Shadow Map
             ZTest LEqual
 
-            ColorMask 0 0
-            ColorMask 0 1
+            ColorMask 0
 
             HLSLPROGRAM
 

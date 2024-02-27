@@ -60,10 +60,11 @@ Shader "Honkai Star Rail/Character/Hair"
         _EmissionIntensity("Intensity", Float) = 0
 
         [HeaderFoldout(Bloom)]
-        _BloomIntensity0("Intensity", Range(0, 2)) = 0.5
+        _BloomIntensity0("Intensity", Range(0, 1)) = 0.5
+        _BloomColor0("Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Rim Light)]
-        _RimIntensity("Intensity (Front)", Range(0, 1)) = 1
+        _RimIntensity("Intensity (Front)", Range(0, 1)) = 0.5
         _RimIntensityBackFace("Intensity (Back)", Range(0, 1)) = 0
         _RimThresholdMin("Threshold Min", Float) = 0.6
         _RimThresholdMax("Threshold Max", Float) = 0.9
@@ -112,11 +113,11 @@ Shader "Honkai Star Rail/Character/Hair"
             // 没有遮住眼睛的部分
             Stencil
             {
-                Ref 7
-                ReadMask 1   // 眼睛位
-                WriteMask 4  // 头发位
+                Ref 3
+                ReadMask 2   // 眼睛位
+                WriteMask 1  // 角色
                 Comp NotEqual
-                Pass Replace // 写入头发位
+                Pass Replace // 写入角色位
                 Fail Keep
             }
 
@@ -127,7 +128,7 @@ Shader "Honkai Star Rail/Character/Hair"
             Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask R 1
+            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -137,6 +138,9 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharHairCore.hlsl"
 
@@ -155,11 +159,11 @@ Shader "Honkai Star Rail/Character/Hair"
             // 遮住眼睛的部分
             Stencil
             {
-                Ref 7
-                ReadMask 1   // 眼睛位
-                WriteMask 4  // 头发位
+                Ref 3
+                ReadMask 2   // 眼睛位
+                WriteMask 2  // 眼睛位
                 Comp Equal
-                Pass Replace // 写入头发位
+                Pass Zero    // 清除眼睛位
                 Fail Keep
             }
 
@@ -172,7 +176,7 @@ Shader "Honkai Star Rail/Character/Hair"
             Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask R 1
+            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -182,6 +186,9 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharHairCore.hlsl"
 
@@ -195,6 +202,16 @@ Shader "Honkai Star Rail/Character/Hair"
             Tags
             {
                 "LightMode" = "HSROutline"
+            }
+
+            // 角色的 Stencil
+            Stencil
+            {
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
             }
 
             Cull Front
@@ -221,19 +238,18 @@ Shader "Honkai Star Rail/Character/Hair"
 
         Pass
         {
-            Name "HairShadow"
+            Name "PerObjectShadow"
 
             Tags
             {
-                "LightMode" = "ShadowCaster"
+                "LightMode" = "HSRShadowCaster"
             }
 
             Cull [_Cull]
             ZWrite On
             ZTest LEqual
 
-            ColorMask 0 0
-            ColorMask 0 1
+            ColorMask 0
 
             HLSLPROGRAM
 
@@ -263,12 +279,37 @@ Shader "Honkai Star Rail/Character/Hair"
 
             Cull [_Cull]
             ZWrite On
-            ColorMask 0
+            ColorMask R
 
             HLSLPROGRAM
 
             #pragma vertex HairDepthOnlyVertex
             #pragma fragment HairDepthOnlyFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+
+            #include "CharHairCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "HairDepthNormals"
+
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            Cull [_Cull]
+            ZWrite On
+
+            HLSLPROGRAM
+
+            #pragma vertex HairDepthNormalsVertex
+            #pragma fragment HairDepthNormalsFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON

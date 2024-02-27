@@ -27,6 +27,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #include "Shared/CharCore.hlsl"
 #include "Shared/CharDepthOnly.hlsl"
+#include "Shared/CharDepthNormals.hlsl"
 #include "Shared/CharOutline.hlsl"
 #include "Shared/CharShadow.hlsl"
 
@@ -49,6 +50,7 @@ CBUFFER_START(UnityPerMaterial)
     float _EmissionIntensity;
 
     float _BloomIntensity0;
+    float4 _BloomColor0;
 
     float _OutlineWidth;
     float _OutlineZOffset;
@@ -85,7 +87,8 @@ float3 GetFaceOrEyeDiffuse(
     float4 uv,
     float3 baseColor,
     float3 lightColor,
-    float4 faceMap)
+    float4 faceMap,
+    float shadowAttenuation)
 {
     // 游戏模型才有 UV2
     #if defined(_MODEL_GAME) && defined(_FACEMAPUV2_ON)
@@ -98,9 +101,10 @@ float3 GetFaceOrEyeDiffuse(
     float2 sdfUV = isRight ? float2(1 - uv.x, uv.y) : uv.xy;
     float threshold = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, sdfUV).a;
 
-    float FoL01 = dot(headDirWS.forward, lightDirProj) * 0.5 + 0.5;
-    float3 faceShadow = lerp(_ShadowColor.rgb, 1, step(1 - threshold, FoL01)); // SDF Shadow
-    float3 eyeShadow = lerp(_EyeShadowColor.rgb, 1, smoothstep(0.3, 0.5, FoL01));
+    float FoL01 = (dot(headDirWS.forward, lightDirProj) * 0.5 + 0.5);
+    // 被阴影挡住时没有伦勃朗光
+    float3 faceShadow = lerp(_ShadowColor.rgb, 1, step(1 - threshold, FoL01) * shadowAttenuation); // SDF Shadow
+    float3 eyeShadow = lerp(_EyeShadowColor.rgb, 1, smoothstep(0.3, 0.5, FoL01) * shadowAttenuation);
     return baseColor * lightColor * lerp(faceShadow, eyeShadow, faceMap.r);
 }
 
@@ -123,7 +127,7 @@ void FaceOpaqueAndZFragment(
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    Light light = GetMainLight();
+    Light light = GetMainLight(i.shadowCoord);
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
     HeadDirections headDirWS = WORLD_SPACE_CHAR_HEAD_DIRECTIONS();
 
@@ -142,7 +146,7 @@ void FaceOpaqueAndZFragment(
     texColor.rgb = lerp(texColor.rgb, exEyeShadow, _ExShadowIntensity);
 
     // Diffuse
-    float3 diffuse = GetFaceOrEyeDiffuse(dirWS, headDirWS, i.uv, texColor.rgb, light.color, faceMap);
+    float3 diffuse = GetFaceOrEyeDiffuse(dirWS, headDirWS, i.uv, texColor.rgb, light.color, faceMap, light.shadowAttenuation);
 
     EmissionData emissionData;
     emissionData.color = _EmissionColor.rgb;
@@ -166,7 +170,7 @@ void FaceOpaqueAndZFragment(
 
     // Output
     colorTarget = float4(diffuse + emission + diffuseAdd, texColor.a);
-    bloomTarget = float4(_BloomIntensity0, 0, 0, 0);
+    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
 }
 
 void FaceWriteEyeStencilFragment(CharCoreVaryings i)
@@ -252,6 +256,21 @@ float4 FaceDepthOnlyFragment(CharDepthOnlyVaryings i) : SV_Target
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
     return CharDepthOnlyFragment(i);
+}
+
+CharDepthNormalsVaryings FaceDepthNormalsVertex(CharDepthNormalsAttributes i)
+{
+    return CharDepthNormalsVertex(i, _Maps_ST);
+}
+
+float4 FaceDepthNormalsFragment(CharDepthNormalsVaryings i) : SV_Target
+{
+    float4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv.xy) * _Color;
+
+    DoAlphaClip(texColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
+
+    return CharDepthNormalsFragment(i);
 }
 
 #endif

@@ -27,6 +27,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #include "Shared/CharCore.hlsl"
 #include "Shared/CharDepthOnly.hlsl"
+#include "Shared/CharDepthNormals.hlsl"
 #include "Shared/CharOutline.hlsl"
 #include "Shared/CharShadow.hlsl"
 
@@ -55,6 +56,7 @@ CBUFFER_START(UnityPerMaterial)
     float _EmissionIntensity;
 
     float _BloomIntensity0;
+    float4 _BloomColor0;
 
     float _RimIntensity;
     float _RimIntensityBackFace;
@@ -96,7 +98,7 @@ float4 BaseHairOpaqueFragment(
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    Light light = GetMainLight();
+    Light light = GetMainLight(i.shadowCoord);
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
 
     DiffuseData diffuseData;
@@ -131,8 +133,9 @@ float4 BaseHairOpaqueFragment(
     emissionData.intensity = _EmissionIntensity;
 
     float3 diffuse = GetRampDiffuse(diffuseData, i.color, texColor.rgb, light.color, lightMap,
-        TEXTURE2D_ARGS(_RampMapCool, sampler_RampMapCool), TEXTURE2D_ARGS(_RampMapWarm, sampler_RampMapWarm));
-    float3 specular = GetSpecular(specularData, texColor.rgb, light.color, lightMap);
+        TEXTURE2D_ARGS(_RampMapCool, sampler_RampMapCool), TEXTURE2D_ARGS(_RampMapWarm, sampler_RampMapWarm),
+        light.shadowAttenuation);
+    float3 specular = GetSpecular(specularData, texColor.rgb, light.color, lightMap, light.shadowAttenuation);
     float3 rimLight = GetRimLight(rimLightData, i.positionHCS, dirWS.N, isFrontFace, lightMap);
     float3 emission = GetEmission(emissionData, texColor.rgb);
 
@@ -153,7 +156,7 @@ float4 BaseHairOpaqueFragment(
         specularDataAdd.edgeSoftness = _SpecularEdgeSoftness0;
         specularDataAdd.intensity = _SpecularIntensity0;
         specularDataAdd.metallic = 0;
-        specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap) * attenuationAdd;
+        specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap, 1) * attenuationAdd;
     LIGHT_LOOP_END
 
     // Output
@@ -169,7 +172,7 @@ void HairOpaqueFragment(
     float4 hairColor = BaseHairOpaqueFragment(i, isFrontFace);
 
     colorTarget = float4(hairColor.rgb, 1);
-    bloomTarget = float4(_BloomIntensity0, 0, 0, 0);
+    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
 }
 
 void HairFakeTransparentFragment(
@@ -200,7 +203,7 @@ void HairFakeTransparentFragment(
 
     // Output
     colorTarget = float4(hairColor.rgb, max(max(alpha1, alpha2), _HairBlendAlpha));
-    bloomTarget = float4(_BloomIntensity0, 0, 0, 0);
+    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
 }
 
 CharOutlineVaryings HairOutlineVertex(CharOutlineAttributes i)
@@ -261,6 +264,26 @@ float4 HairDepthOnlyFragment(
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
     return CharDepthOnlyFragment(i);
+}
+
+CharDepthNormalsVaryings HairDepthNormalsVertex(CharDepthNormalsAttributes i)
+{
+    return CharDepthNormalsVertex(i, _Maps_ST);
+}
+
+float4 HairDepthNormalsFragment(
+    CharDepthNormalsVaryings i,
+    FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
+{
+    SetupDualFaceRendering(i.normalWS, i.uv, isFrontFace);
+
+    float4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv.xy);
+    texColor *= IS_FRONT_VFACE(isFrontFace, _Color, _BackColor);
+
+    DoAlphaClip(texColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
+
+    return CharDepthNormalsFragment(i);
 }
 
 #endif

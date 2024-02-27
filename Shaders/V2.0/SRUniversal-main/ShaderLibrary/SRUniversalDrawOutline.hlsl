@@ -2,7 +2,7 @@
 #include "../ShaderLibrary/NiloInvLerpRemap.hlsl"
 
 
-struct Attributes
+struct CharOutlineAttributes
 {
     float3 positionOS   : POSITION;
     float3 normalOS     : NORMAL;
@@ -11,7 +11,7 @@ struct Attributes
     float2 uv           : TEXCOORD0;
 };
 
-struct Varyings
+struct CharOutlineVaryings
 {
     float4 positionCS               : SV_POSITION;
     float2 uv                       : TEXCOORD0;
@@ -73,9 +73,9 @@ void DoClipTestToTargetAlphaValue(float alpha)
 #endif
 }
 
-Varyings SRUniversalVertex(Attributes input)
+CharOutlineVaryings SRUniversalVertex(CharOutlineAttributes input)
 {
-    Varyings output = (Varyings)0;
+    CharOutlineVaryings output = (CharOutlineVaryings)0;
 
     VertexPositionInputs vertexPositionInput = GetVertexPositionInputs(input.positionOS);
     VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
@@ -114,7 +114,7 @@ Varyings SRUniversalVertex(Attributes input)
     return output;
 }
 
-float4 colorFragmentTarget(inout Varyings input)
+float4 colorFragmentTarget(inout CharOutlineVaryings input)
 {
     float3 coolRamp = 0;
     float3 warmRamp = 0;
@@ -165,7 +165,7 @@ float4 colorFragmentTarget(inout Varyings input)
 }
 
 void SRUniversalFragment(
-    Varyings input,
+    CharOutlineVaryings input,
     out float4 colorTarget      : SV_Target0,
     out float4 bloomTarget      : SV_Target1)
 {

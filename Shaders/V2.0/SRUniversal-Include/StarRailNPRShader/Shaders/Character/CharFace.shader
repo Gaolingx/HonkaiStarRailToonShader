@@ -52,7 +52,8 @@ Shader "Honkai Star Rail/Character/Face"
         _EmissionIntensity("Intensity", Float) = 0.3
 
         [HeaderFoldout(Bloom)]
-        _BloomIntensity0("Intensity", Range(0, 2)) = 0.5
+        _BloomIntensity0("Intensity", Range(0, 1)) = 0.5
+        _BloomColor0("Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Outline)]
         [KeywordEnum(Tangent, Normal)] _OutlineNormal("Normal Source", Float) = 0
@@ -65,7 +66,7 @@ Shader "Honkai Star Rail/Character/Face"
         _NoseLinePower("Power", Range(0, 8)) = 1
 
         [HeaderFoldout(Eye Hair Blend)]
-        _MaxEyeHairDistance("Max Eye Hair Distance", Float) = 0.1
+        _MaxEyeHairDistance("Max Eye Hair Distance", Float) = 0.2
 
         [HeaderFoldout(Expression)]
         _ExCheekColor("Cheek Color", Color) = (1, 1, 1, 1)
@@ -106,11 +107,11 @@ Shader "Honkai Star Rail/Character/Face"
                 "LightMode" = "HSRForward1"
             }
 
-            // 脸的 Stencil
+            // 角色的 Stencil
             Stencil
             {
-                Ref 2
-                WriteMask 2
+                Ref 1
+                WriteMask 1
                 Comp Always
                 Pass Replace
                 Fail Keep
@@ -123,7 +124,7 @@ Shader "Honkai Star Rail/Character/Face"
             Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask R 1
+            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -133,6 +134,9 @@ Shader "Honkai Star Rail/Character/Face"
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _FACEMAPUV2_ON
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharFaceCore.hlsl"
 
@@ -148,11 +152,11 @@ Shader "Honkai Star Rail/Character/Face"
                 "LightMode" = "HSRForward2"
             }
 
-            // 眼睛的 Stencil，需要在其他部分渲染之前写入
+            // 角色和眼睛的 Stencil，需要在其他部分渲染之前写入
             Stencil
             {
-                Ref 1
-                WriteMask 1
+                Ref 3
+                WriteMask 3
                 Comp Always
                 Pass Replace
                 Fail Keep
@@ -188,6 +192,16 @@ Shader "Honkai Star Rail/Character/Face"
                 "LightMode" = "HSROutline"
             }
 
+            // 角色的 Stencil
+            Stencil
+            {
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
+            }
+
             Cull Front
             ZTest LEqual
             ZWrite On
@@ -215,19 +229,18 @@ Shader "Honkai Star Rail/Character/Face"
 
         Pass
         {
-            Name "FaceShadow"
+            Name "PerObjectShadow"
 
             Tags
             {
-                "LightMode" = "ShadowCaster"
+                "LightMode" = "HSRShadowCaster"
             }
 
             Cull Back
             ZWrite On
             ZTest LEqual
 
-            ColorMask 0 0
-            ColorMask 0 1
+            ColorMask 0
 
             HLSLPROGRAM
 
@@ -257,12 +270,37 @@ Shader "Honkai Star Rail/Character/Face"
 
             Cull Back
             ZWrite On
-            ColorMask 0
+            ColorMask R
 
             HLSLPROGRAM
 
             #pragma vertex FaceDepthOnlyVertex
             #pragma fragment FaceDepthOnlyFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+
+            #include "CharFaceCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "FaceDepthNormals"
+
+            Tags
+            {
+                "LightMode" = "DepthNormals"
+            }
+
+            Cull Back
+            ZWrite On
+
+            HLSLPROGRAM
+
+            #pragma vertex FaceDepthNormalsVertex
+            #pragma fragment FaceDepthNormalsFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON

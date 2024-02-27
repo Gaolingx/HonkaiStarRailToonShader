@@ -155,6 +155,8 @@ float _OutlineWidth;
 float _OutlineGamma;
 
 
+// Bloom
 float _BloomIntensity0;
+float4 _BloomColor0;
 
 CBUFFER_END
