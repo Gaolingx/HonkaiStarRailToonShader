@@ -212,10 +212,10 @@ float2 GetRampUV(float mainLightShadow, float ShadowRampOffset, int rampRowIndex
     return rampUV;
 }
 
-void DoClipTestToTargetAlphaValue(float alpha) 
+void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
 {
 #if _UseAlphaClipping
-    clip(alpha - _AlphaClip);
+    clip(alpha - alphaTestThreshold);
 #endif
 }
 
@@ -273,7 +273,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 viewDirectionWS = normalize(input.viewDirectionWS);
 
     float3 baseColor = 0;
-    baseColor = tex2D(_BaseMap, input.uv);
+    baseColor = tex2D(_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
         _HairColorMap, _HairColorMapColor,
         _UpperBodyColorMap, _UpperBodyColorMapColor,
@@ -552,7 +552,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #endif
 
     float4 FinalColor = float4(albedo, alpha);
-    DoClipTestToTargetAlphaValue(FinalColor.a);
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
     FinalColor.rgb = MixFog(FinalColor.rgb, input.positionWSAndFogFactor.w);
 
     return FinalColor;
