@@ -1,3 +1,6 @@
+#include "../ShaderLibrary/CharShadow.hlsl"
+#include "../ShaderLibrary/CharDepthOnly.hlsl"
+#include "../ShaderLibrary/CharDepthNormals.hlsl"
 
 const static float3 f3zero = float3(0.0, 0.0, 0.0);
 const static float3 f3one = float3(1.0, 1.0, 1.0);
@@ -570,3 +573,81 @@ void SRUniversalFragment(
     bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
 }
 
+CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)
+{
+    return CharShadowVertex(input);
+}
+
+void CharacterShadowFragment(
+    CharShadowVaryings input,
+    bool isFrontFace            : SV_IsFrontFace)
+{
+    float3 baseColor = 0;
+    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
+        _HairColorMap, _HairColorMapColor,
+        _UpperBodyColorMap, _UpperBodyColorMapColor,
+        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    //给背面填充颜色，对眼睛，丝袜很有用
+    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+
+    float alpha = _Alpha;
+    float4 FinalColor = float4(baseColor, alpha);
+
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+}
+
+CharDepthOnlyVaryings CharacterDepthOnlyVertex(CharDepthOnlyAttributes input)
+{
+    return CharDepthOnlyVertex(input);
+}
+
+float4 CharacterDepthOnlyFragment(
+    CharDepthOnlyVaryings input,
+    bool isFrontFace            : SV_IsFrontFace) : SV_Target
+{
+    float3 baseColor = 0;
+    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
+        _HairColorMap, _HairColorMapColor,
+        _UpperBodyColorMap, _UpperBodyColorMapColor,
+        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    //给背面填充颜色，对眼睛，丝袜很有用
+    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+
+    float alpha = _Alpha;
+    float4 FinalColor = float4(baseColor, alpha);
+
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+
+    return CharDepthOnlyFragment(input);
+}
+
+CharDepthNormalsVaryings CharacterDepthNormalsVertex(CharDepthNormalsAttributes input)
+{
+    return CharDepthNormalsVertex(input);
+}
+
+float4 CharacterDepthNormalsFragment(
+    CharDepthNormalsVaryings input,
+    bool isFrontFace            : SV_IsFrontFace) : SV_Target
+{
+    float3 baseColor = 0;
+    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
+        _HairColorMap, _HairColorMapColor,
+        _UpperBodyColorMap, _UpperBodyColorMapColor,
+        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    //给背面填充颜色，对眼睛，丝袜很有用
+    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+
+    float alpha = _Alpha;
+    float4 FinalColor = float4(baseColor, alpha);
+
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+
+    return CharDepthNormalsFragment(input);
+}
