@@ -42,6 +42,10 @@ Shader "Hidden/Honkai Star Rail/Post Processing/UberPost"
             "RenderPipeline" = "UniversalPipeline"
         }
 
+        ZTest Always
+        ZWrite Off
+        Cull Off
+
         Pass
         {
             HLSLPROGRAM
@@ -49,6 +53,7 @@ Shader "Hidden/Honkai Star Rail/Post Processing/UberPost"
             #pragma fragment Frag
 
             #pragma multi_compile_local_fragment _ _BLOOM
+            #pragma multi_compile_local_fragment _ _BLOOM_USE_RGBM
             #pragma multi_compile_local_fragment _ _TONEMAPPING_ACES
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -82,7 +87,12 @@ Shader "Hidden/Honkai Star Rail/Post Processing/UberPost"
 
                 #if defined(_BLOOM)
                     float4 bloom = SAMPLE_TEXTURE2D(_BloomTexture, sampler_LinearClamp, i.texcoord);
-                    color.rgb += bloom.rgb * _BloomTint.rgb * _BloomIntensity;
+
+                    #if defined(_BLOOM_USE_RGBM)
+                        color.rgb += DecodeRGBM(bloom) * _BloomTint.rgb * _BloomIntensity;
+                    #else
+                        color.rgb += bloom.rgb * _BloomTint.rgb * _BloomIntensity;
+                    #endif
                 #endif
 
                 #if defined(_TONEMAPPING_ACES)

@@ -31,6 +31,12 @@ namespace HSR.NPRShader
     [DisallowMultipleRendererFeature]
     public class StarRailForward : ScriptableRendererFeature
     {
+#if UNITY_EDITOR
+        [UnityEditor.ShaderKeywordFilter.ApplyRulesIfNotGraphicsAPI(GraphicsDeviceType.OpenGLES2)]
+        [UnityEditor.ShaderKeywordFilter.SelectIf(true, keywordNames: ShaderKeywordStrings.MainLightShadowScreen)]
+        private const bool k_RequiresScreenSpaceShadowsKeyword = true;
+#endif
+
         private static readonly string[] s_GBufferNames =
         {
             "_HSRGBuffer0" // rgb: bloom color, a: bloom intensity
@@ -47,6 +53,7 @@ namespace HSR.NPRShader
 
         [Range(0, 10)] public float DepthBias = 1;
         [Range(0, 10)] public float NormalBias = 0;
+        [Min(0)] public float MaxShadowDistance = 40;
 
         // -------------------------------------------------------
 
@@ -55,6 +62,7 @@ namespace HSR.NPRShader
 
         // -------------------------------------------------------
 
+        [NonSerialized] private RequestResourcePass m_ForceDepthPrepassPass;
         [NonSerialized] private MainLightPerObjectShadowCasterPass m_MainLightPerObjShadowPass;
         [NonSerialized] private ScreenSpaceShadowsPass m_ScreenSpaceShadowPass;
         [NonSerialized] private ScreenSpaceShadowsPostPass m_ScreenSpaceShadowPostPass;
@@ -74,6 +82,8 @@ namespace HSR.NPRShader
 
             // -------------------------------------------------------
 
+            m_ForceDepthPrepassPass = new RequestResourcePass(RenderPassEvent.BeforeRenderingOpaques,
+                ScriptableRenderPassInput.Depth); // 在 Opaque 前要求 DepthTexture，强行 DepthPrepass
             m_MainLightPerObjShadowPass = new MainLightPerObjectShadowCasterPass();
             m_ScreenSpaceShadowPass = new ScreenSpaceShadowsPass();
             m_ScreenSpaceShadowPostPass = new ScreenSpaceShadowsPostPass();
@@ -97,6 +107,7 @@ namespace HSR.NPRShader
             if (renderingData.cameraData.isPreviewCamera)
             {
                 // PreviewCamera 没有 SetupRenderPasses，所以不做 MRT
+                renderer.EnqueuePass(m_ForceDepthPrepassPass);
                 renderer.EnqueuePass(m_DrawOpaqueForward1Pass.SetupPreview());
                 renderer.EnqueuePass(m_DrawOpaqueForward2Pass.SetupPreview());
                 renderer.EnqueuePass(m_DrawOpaqueForward3Pass.SetupPreview());
@@ -109,6 +120,7 @@ namespace HSR.NPRShader
             renderer.EnqueuePass(m_MainLightPerObjShadowPass);
 
             // BeforeRenderingOpaques
+            renderer.EnqueuePass(m_ForceDepthPrepassPass);
             renderer.EnqueuePass(m_ScreenSpaceShadowPass);
 
             // AfterRenderingOpaques
@@ -118,6 +130,8 @@ namespace HSR.NPRShader
             renderer.EnqueuePass(m_DrawOpaqueForward2Pass);
             renderer.EnqueuePass(m_DrawOpaqueForward3Pass);
             renderer.EnqueuePass(m_DrawOpaqueOutlinePass);
+
+            // AfterRenderingTransparents
             renderer.EnqueuePass(m_DrawTransparentPass);
 
             // BeforeRenderingPostProcessing
@@ -136,13 +150,14 @@ namespace HSR.NPRShader
 
             ReAllocateGBuffersIfNeeded(in renderingData.cameraData.cameraTargetDescriptor);
 
-            m_MainLightPerObjShadowPass.Setup(DepthBias, NormalBias);
+            m_MainLightPerObjShadowPass.Setup(DepthBias, NormalBias, MaxShadowDistance);
 
-            m_ClearGBufferPass.SetupClear(m_GBuffers, ClearFlag.All, Color.black);
+            m_ClearGBufferPass.SetupClear(m_GBuffers, ClearFlag.All, new Color(0, 0, 0, 0));
             m_DrawOpaqueForward1Pass.Setup(colorTarget, depthTarget, m_GBuffers);
             m_DrawOpaqueForward2Pass.Setup(colorTarget, depthTarget, m_GBuffers);
             m_DrawOpaqueForward3Pass.Setup(colorTarget, depthTarget, m_GBuffers);
             m_DrawOpaqueOutlinePass.Setup(colorTarget, depthTarget, m_GBuffers);
+
             m_DrawTransparentPass.Setup(colorTarget, depthTarget, m_GBuffers);
 
             m_SetGBufferPass.Setup(m_GBufferNameIds, m_GBuffers);

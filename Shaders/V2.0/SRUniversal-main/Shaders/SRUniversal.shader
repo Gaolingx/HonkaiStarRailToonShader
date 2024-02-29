@@ -113,7 +113,7 @@ Shader "Custom/SRUniversal"
         _RimLightMixAlbedo("Rim light mix albedo (Default 0.9)",Range(0, 1)) = 0.9
 
         [Header(Bloom)]
-        _BloomIntensity0("Intensity", Range(0, 1)) = 0.5
+        _mBloomIntensity0("Intensity", Range(0, 100)) = 1
         _BloomColor0("Color", Color) = (1, 1, 1, 1)
 
         [Header(Emission)]

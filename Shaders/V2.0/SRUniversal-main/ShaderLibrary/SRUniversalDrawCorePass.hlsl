@@ -1,6 +1,7 @@
 #include "../ShaderLibrary/CharShadow.hlsl"
 #include "../ShaderLibrary/CharDepthOnly.hlsl"
 #include "../ShaderLibrary/CharDepthNormals.hlsl"
+#include "../ShaderLibrary/SRUniversalBloomHelper.hlsl"
 
 const static float3 f3zero = float3(0.0, 0.0, 0.0);
 const static float3 f3one = float3(1.0, 1.0, 1.0);
@@ -72,21 +73,25 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-float3 RGBAdjustment(float3 InputColor, float RPower, float GPower, float BPower)
+float3 RGBAdjustment(float3 inputColor, float RPower, float GPower, float BPower)
 {
-    float3 finalColor = InputColor.rgb;
-    finalColor.r = pow(finalColor.r, RPower);
-    finalColor.g = pow(finalColor.g, GPower);
-    finalColor.b = pow(finalColor.b, BPower);
-    finalColor = clamp(finalColor, 0.0, 1.0);
+    inputColor.r = pow(clamp(inputColor.r, 0.0, 1.0), RPower);
+    inputColor.g = pow(clamp(inputColor.g, 0.0, 1.0), GPower);
+    inputColor.b = pow(clamp(inputColor.b, 0.0, 1.0), BPower);
+    float3 finalColor = clamp(inputColor, 0.0, 1.0);
     return finalColor;
 }
 
-float3 BrightnessFactor(float3 InputColor, float brightnessFactor)
+float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor)
 {
-    float3 scaledColor = InputColor.rgb * brightnessFactor;
-    scaledColor = clamp(scaledColor, 0.0, 1.0);
-    return scaledColor;
+    float3 scaledMainLightColor = inputMainLightColor.rgb * brightnessFactor;
+    float4 scaledMainLight = float4(scaledMainLightColor, 1);
+    return scaledMainLight;
+}
+
+float3 GetMainLightColor(float3 inputMainLightColor, float mainLightColorUsage)
+{
+    return lerp(Luminance(inputMainLightColor.rgb), inputMainLightColor.rgb, mainLightColorUsage);
 }
 
 float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
@@ -257,7 +262,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
     Light mainLight = GetMainLight(shadowCoord);
     //获取主光源颜色
-    float4 LightColor = float4(BrightnessFactor(mainLight.color.rgb, _MainLightBrightnessFactor), 1);
+    float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
+    //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
+    float3 mainLightColor = GetMainLightColor(LightColor.rgb, _MainLightColorUsage);
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
 
@@ -325,10 +332,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         indirectLightColor *= lerp(1, lerp(faceMap.g, 1, step(faceMap.r, 0.5)), _IndirectLightOcclusionUsage);
     #endif
     indirectLightColor *= lerp(1, baseColor, _IndirectLightMixBaseColor);
-    
-    //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
-    float3 mainLightColor = lerp(Luminance(LightColor.rgb), LightColor.rgb, _MainLightColorUsage);
-    //float3 mainLightColor = lerp(desaturation(mainLight.color), mainLight.color, _MainLightColorUsage);
+
 
     float mainLightShadow = 1;
     int rampRowIndex = 0;
@@ -570,7 +574,7 @@ void SRUniversalFragment(
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
     colorTarget = float4(outputColor.rgba);
-    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
+    bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
 }
 
 CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)

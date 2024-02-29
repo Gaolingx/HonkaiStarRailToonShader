@@ -52,7 +52,7 @@ Shader "Honkai Star Rail/Character/Face"
         _EmissionIntensity("Intensity", Float) = 0.3
 
         [HeaderFoldout(Bloom)]
-        _BloomIntensity0("Intensity", Range(0, 1)) = 0.5
+        _mBloomIntensity0("Intensity", Range(0, 100)) = 1
         _BloomColor0("Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Outline)]
@@ -135,7 +135,9 @@ Shader "Honkai Star Rail/Character/Face"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _FACEMAPUV2_ON
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharFaceCore.hlsl"
@@ -301,6 +303,33 @@ Shader "Honkai Star Rail/Character/Face"
 
             #pragma vertex FaceDepthNormalsVertex
             #pragma fragment FaceDepthNormalsFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+
+            #include "CharFaceCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "FaceMotionVectors"
+
+            Tags
+            {
+                "LightMode" = "MotionVectors"
+            }
+
+            Cull Back
+
+            HLSLPROGRAM
+
+            #pragma vertex FaceMotionVectorsVertex
+            #pragma fragment FaceMotionVectorsFragment
+
+            #pragma exclude_renderers d3d11_9x
+            #pragma target 3.5
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON

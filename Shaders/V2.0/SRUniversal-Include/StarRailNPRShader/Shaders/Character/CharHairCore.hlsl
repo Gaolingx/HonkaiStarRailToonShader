@@ -30,6 +30,7 @@
 #include "Shared/CharDepthNormals.hlsl"
 #include "Shared/CharOutline.hlsl"
 #include "Shared/CharShadow.hlsl"
+#include "Shared/CharMotionVectors.hlsl"
 
 TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
 TEXTURE2D(_LightMap); SAMPLER(sampler_LightMap);
@@ -55,7 +56,7 @@ CBUFFER_START(UnityPerMaterial)
     float _EmissionThreshold;
     float _EmissionIntensity;
 
-    float _BloomIntensity0;
+    float _mBloomIntensity0;
     float4 _BloomColor0;
 
     float _RimIntensity;
@@ -141,26 +142,29 @@ float4 BaseHairOpaqueFragment(
 
     float3 diffuseAdd = 0;
     float3 specularAdd = 0;
-    uint pixelLightCount = GetAdditionalLightsCount();
-    LIGHT_LOOP_BEGIN(pixelLightCount)
-        Light lightAdd = GetAdditionalLight(lightIndex, i.positionWS);
-        Directions dirWSAdd = GetWorldSpaceDirections(lightAdd, i.positionWS, i.normalWS);
-        float attenuationAdd = saturate(lightAdd.distanceAttenuation);
 
-        diffuseAdd += GetHalfLambertDiffuse(dirWSAdd.NoL, texColor.rgb, lightAdd.color) * attenuationAdd;
+    #if defined(_ADDITIONAL_LIGHTS)
+        uint pixelLightCount = GetAdditionalLightsCount();
+        LIGHT_LOOP_BEGIN(pixelLightCount)
+            Light lightAdd = GetAdditionalLight(lightIndex, i.positionWS);
+            Directions dirWSAdd = GetWorldSpaceDirections(lightAdd, i.positionWS, i.normalWS);
+            float attenuationAdd = saturate(lightAdd.distanceAttenuation);
 
-        SpecularData specularDataAdd;
-        specularDataAdd.color = _SpecularColor0.rgb;
-        specularDataAdd.NoH = dirWSAdd.NoH;
-        specularDataAdd.shininess = _SpecularShininess0;
-        specularDataAdd.edgeSoftness = _SpecularEdgeSoftness0;
-        specularDataAdd.intensity = _SpecularIntensity0;
-        specularDataAdd.metallic = 0;
-        specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap, 1) * attenuationAdd;
-    LIGHT_LOOP_END
+            diffuseAdd += texColor.rgb * lightAdd.color * attenuationAdd;
+
+            SpecularData specularDataAdd;
+            specularDataAdd.color = _SpecularColor0.rgb;
+            specularDataAdd.NoH = dirWSAdd.NoH;
+            specularDataAdd.shininess = _SpecularShininess0;
+            specularDataAdd.edgeSoftness = _SpecularEdgeSoftness0;
+            specularDataAdd.intensity = _SpecularIntensity0;
+            specularDataAdd.metallic = 0;
+            specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap, 1) * attenuationAdd;
+        LIGHT_LOOP_END
+    #endif
 
     // Output
-    return float4(diffuse + specular + rimLight + emission + diffuseAdd + specularAdd, texColor.a);
+    return float4(CombineColorPreserveLuminance(diffuse, diffuseAdd) + specular + specularAdd + rimLight + emission, texColor.a);
 }
 
 void HairOpaqueFragment(
@@ -172,7 +176,7 @@ void HairOpaqueFragment(
     float4 hairColor = BaseHairOpaqueFragment(i, isFrontFace);
 
     colorTarget = float4(hairColor.rgb, 1);
-    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
+    bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
 }
 
 void HairFakeTransparentFragment(
@@ -203,7 +207,7 @@ void HairFakeTransparentFragment(
 
     // Output
     colorTarget = float4(hairColor.rgb, max(max(alpha1, alpha2), _HairBlendAlpha));
-    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
+    bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
 }
 
 CharOutlineVaryings HairOutlineVertex(CharOutlineAttributes i)
@@ -284,6 +288,26 @@ float4 HairDepthNormalsFragment(
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
     return CharDepthNormalsFragment(i);
+}
+
+CharMotionVectorsVaryings HairMotionVectorsVertex(CharMotionVectorsAttributes i)
+{
+    return CharMotionVectorsVertex(i, _Maps_ST);
+}
+
+half4 HairMotionVectorsFragment(
+    CharMotionVectorsVaryings i,
+    FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
+{
+    SetupDualFaceRendering(i.normalWS, i.uv, isFrontFace);
+
+    float4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv.xy);
+    texColor *= IS_FRONT_VFACE(isFrontFace, _Color, _BackColor);
+
+    DoAlphaClip(texColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
+
+    return CharMotionVectorsFragment(i);
 }
 
 #endif

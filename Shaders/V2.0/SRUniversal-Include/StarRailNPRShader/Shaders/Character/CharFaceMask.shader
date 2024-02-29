@@ -39,6 +39,7 @@ Shader "Honkai Star Rail/Character/FaceMask"
         HLSLINCLUDE
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Shared/CharRenderingHelpers.hlsl"
+            #include "Shared/CharMotionVectors.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
                 float _DitherAlpha;
@@ -64,13 +65,14 @@ Shader "Honkai Star Rail/Character/FaceMask"
                 Fail Keep
             }
 
-            Cull Back
+            Cull Off
             ZWrite On
 
             ColorMask RGBA 0
             ColorMask 0 1
 
             HLSLPROGRAM
+
             #pragma vertex vert
             #pragma fragment frag
 
@@ -97,7 +99,7 @@ Shader "Honkai Star Rail/Character/FaceMask"
                 "LightMode" = "HSRShadowCaster"
             }
 
-            Cull Back
+            Cull Off
             ZWrite On
             ZTest LEqual
 
@@ -136,7 +138,7 @@ Shader "Honkai Star Rail/Character/FaceMask"
                 "LightMode" = "DepthOnly"
             }
 
-            Cull Back
+            Cull Off
             ZWrite On
             ColorMask R
 
@@ -170,7 +172,7 @@ Shader "Honkai Star Rail/Character/FaceMask"
                 "LightMode" = "DepthNormals"
             }
 
-            Cull Back
+            Cull Off
             ZWrite On
 
             HLSLPROGRAM
@@ -189,6 +191,39 @@ Shader "Honkai Star Rail/Character/FaceMask"
             {
                 DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
                 return CharDepthNormalsFragment(i);
+            }
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "FaceMaskMotionVectors"
+
+            Tags
+            {
+                "LightMode" = "MotionVectors"
+            }
+
+            Cull Off
+
+            HLSLPROGRAM
+
+            #pragma vertex vert
+            #pragma fragment frag
+
+            #pragma exclude_renderers d3d11_9x
+            #pragma target 3.5
+
+            CharMotionVectorsVaryings vert(CharMotionVectorsAttributes i)
+            {
+                return CharMotionVectorsVertex(i, 0);
+            }
+
+            half4 frag(CharMotionVectorsVaryings i) : SV_Target
+            {
+                DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
+                return CharMotionVectorsFragment(i);
             }
 
             ENDHLSL

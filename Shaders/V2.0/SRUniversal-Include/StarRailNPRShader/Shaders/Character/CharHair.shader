@@ -60,7 +60,7 @@ Shader "Honkai Star Rail/Character/Hair"
         _EmissionIntensity("Intensity", Float) = 0
 
         [HeaderFoldout(Bloom)]
-        _BloomIntensity0("Intensity", Range(0, 1)) = 0.5
+        _mBloomIntensity0("Intensity", Range(0, 100)) = 1
         _BloomColor0("Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Rim Light)]
@@ -139,7 +139,9 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharHairCore.hlsl"
@@ -187,7 +189,9 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharHairCore.hlsl"
@@ -310,6 +314,33 @@ Shader "Honkai Star Rail/Character/Hair"
 
             #pragma vertex HairDepthNormalsVertex
             #pragma fragment HairDepthNormalsFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+
+            #include "CharHairCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "HairMotionVectors"
+
+            Tags
+            {
+                "LightMode" = "MotionVectors"
+            }
+
+            Cull [_Cull]
+
+            HLSLPROGRAM
+
+            #pragma vertex HairMotionVectorsVertex
+            #pragma fragment HairMotionVectorsFragment
+
+            #pragma exclude_renderers d3d11_9x
+            #pragma target 3.5
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON

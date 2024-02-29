@@ -29,6 +29,7 @@
 #include "Shared/CharDepthNormals.hlsl"
 #include "Shared/CharOutline.hlsl"
 #include "Shared/CharShadow.hlsl"
+#include "Shared/CharMotionVectors.hlsl"
 #include "CharBodyMaterials.hlsl"
 
 TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
@@ -67,7 +68,7 @@ CBUFFER_START(UnityPerMaterial)
     float _EmissionThreshold;
     float _EmissionIntensity;
 
-    CHAR_MAT_PROP(float, _BloomIntensity);
+    CHAR_MAT_PROP(float, _mBloomIntensity);
     CHAR_MAT_PROP(float4, _BloomColor);
 
     float _RimIntensity;
@@ -119,7 +120,7 @@ void ApplyDebugSettings(float4 lightMap, inout float4 colorTarget, inout float4 
         if (abs(floor(8 * lightMap.a) - _SingleMaterialID) > 0.01)
         {
             colorTarget.rgb = 0;
-            bloomTarget.a = 0; // intensity
+            bloomTarget = 0; // intensity
         }
     #endif
 }
@@ -153,7 +154,7 @@ void BodyColorFragment(
         float , rimWidth             = _RimWidth,
         float4, rimColor             = _RimColor,
         float , rimDark              = _RimDark,
-        float , bloomIntensity       = _BloomIntensity,
+        float , bloomIntensity       = _mBloomIntensity,
         float4, bloomColor           = _BloomColor
     );
 
@@ -202,27 +203,30 @@ void BodyColorFragment(
 
     float3 diffuseAdd = 0;
     float3 specularAdd = 0;
-    uint pixelLightCount = GetAdditionalLightsCount();
-    LIGHT_LOOP_BEGIN(pixelLightCount)
-        Light lightAdd = GetAdditionalLight(lightIndex, i.positionWS);
-        Directions dirWSAdd = GetWorldSpaceDirections(lightAdd, i.positionWS, i.normalWS);
-        float attenuationAdd = saturate(lightAdd.distanceAttenuation);
 
-        diffuseAdd += GetHalfLambertDiffuse(dirWSAdd.NoL, texColor.rgb, lightAdd.color) * attenuationAdd;
+    #if defined(_ADDITIONAL_LIGHTS)
+        uint pixelLightCount = GetAdditionalLightsCount();
+        LIGHT_LOOP_BEGIN(pixelLightCount)
+            Light lightAdd = GetAdditionalLight(lightIndex, i.positionWS);
+            Directions dirWSAdd = GetWorldSpaceDirections(lightAdd, i.positionWS, i.normalWS);
+            float attenuationAdd = saturate(lightAdd.distanceAttenuation);
 
-        SpecularData specularDataAdd;
-        specularDataAdd.color = specularColor.rgb;
-        specularDataAdd.NoH = dirWSAdd.NoH;
-        specularDataAdd.shininess = specularShininess;
-        specularDataAdd.edgeSoftness = specularEdgeSoftness;
-        specularDataAdd.intensity = specularIntensity;
-        specularDataAdd.metallic = specularMetallic;
-        specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap, 1) * attenuationAdd;
-    LIGHT_LOOP_END
+            diffuseAdd += texColor.rgb * lightAdd.color * attenuationAdd;
+
+            SpecularData specularDataAdd;
+            specularDataAdd.color = specularColor.rgb;
+            specularDataAdd.NoH = dirWSAdd.NoH;
+            specularDataAdd.shininess = specularShininess;
+            specularDataAdd.edgeSoftness = specularEdgeSoftness;
+            specularDataAdd.intensity = specularIntensity;
+            specularDataAdd.metallic = specularMetallic;
+            specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap, 1) * attenuationAdd;
+        LIGHT_LOOP_END
+    #endif
 
     // Output
-    colorTarget = float4(diffuse + specular + rimLight + emission + diffuseAdd + specularAdd, texColor.a);
-    bloomTarget = float4(bloomColor.rgb, bloomIntensity);
+    colorTarget = float4(CombineColorPreserveLuminance(diffuse, diffuseAdd) + specular + specularAdd + rimLight + emission, texColor.a);
+    bloomTarget = EncodeBloomColor(bloomColor.rgb, bloomIntensity);
     ApplyDebugSettings(lightMap, colorTarget, bloomTarget);
 }
 
@@ -313,6 +317,26 @@ float4 BodyDepthNormalsFragment(
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
     return CharDepthNormalsFragment(i);
+}
+
+CharMotionVectorsVaryings BodyMotionVectorsVertex(CharMotionVectorsAttributes i)
+{
+    return CharMotionVectorsVertex(i, _Maps_ST);
+}
+
+half4 BodyMotionVectorsFragment(
+    CharMotionVectorsVaryings i,
+    FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
+{
+    SetupDualFaceRendering(i.normalWS, i.uv, isFrontFace);
+
+    float4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv.xy);
+    texColor *= IS_FRONT_VFACE(isFrontFace, _Color, _BackColor);
+
+    DoAlphaClip(texColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
+
+    return CharMotionVectorsFragment(i);
 }
 
 #endif

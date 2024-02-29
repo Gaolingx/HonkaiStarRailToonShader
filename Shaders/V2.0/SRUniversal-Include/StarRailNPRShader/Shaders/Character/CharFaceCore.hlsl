@@ -30,6 +30,7 @@
 #include "Shared/CharDepthNormals.hlsl"
 #include "Shared/CharOutline.hlsl"
 #include "Shared/CharShadow.hlsl"
+#include "Shared/CharMotionVectors.hlsl"
 
 TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
 TEXTURE2D(_FaceMap); SAMPLER(sampler_FaceMap);
@@ -49,7 +50,7 @@ CBUFFER_START(UnityPerMaterial)
     float _EmissionThreshold;
     float _EmissionIntensity;
 
-    float _BloomIntensity0;
+    float _mBloomIntensity0;
     float4 _BloomColor0;
 
     float _OutlineWidth;
@@ -160,17 +161,19 @@ void FaceOpaqueAndZFragment(
     // TODO: 嘴唇 Outline: 0.5 < faceMap.g < 0.95
 
     float3 diffuseAdd = 0;
-    uint pixelLightCount = GetAdditionalLightsCount();
-    LIGHT_LOOP_BEGIN(pixelLightCount)
-        Light lightAdd = GetAdditionalLight(lightIndex, i.positionWS);
-        Directions dirWSAdd = GetWorldSpaceDirections(lightAdd, i.positionWS, i.normalWS);
-        float attenuationAdd = saturate(lightAdd.distanceAttenuation);
-        diffuseAdd += GetHalfLambertDiffuse(dirWSAdd.NoL, texColor.rgb, lightAdd.color) * attenuationAdd;
-    LIGHT_LOOP_END
+
+    #if defined(_ADDITIONAL_LIGHTS)
+        uint pixelLightCount = GetAdditionalLightsCount();
+        LIGHT_LOOP_BEGIN(pixelLightCount)
+            Light lightAdd = GetAdditionalLight(lightIndex, i.positionWS);
+            float attenuationAdd = saturate(lightAdd.distanceAttenuation);
+            diffuseAdd += texColor.rgb * lightAdd.color * attenuationAdd;
+        LIGHT_LOOP_END
+    #endif
 
     // Output
-    colorTarget = float4(diffuse + emission + diffuseAdd, texColor.a);
-    bloomTarget = float4(_BloomColor0.rgb, _BloomIntensity0);
+    colorTarget = float4(CombineColorPreserveLuminance(diffuse, diffuseAdd) + emission, texColor.a);
+    bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
 }
 
 void FaceWriteEyeStencilFragment(CharCoreVaryings i)
@@ -271,6 +274,21 @@ float4 FaceDepthNormalsFragment(CharDepthNormalsVaryings i) : SV_Target
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
     return CharDepthNormalsFragment(i);
+}
+
+CharMotionVectorsVaryings FaceMotionVectorsVertex(CharMotionVectorsAttributes i)
+{
+    return CharMotionVectorsVertex(i, _Maps_ST);
+}
+
+half4 FaceMotionVectorsFragment(CharMotionVectorsVaryings i) : SV_Target
+{
+    float4 texColor = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv.xy) * _Color;
+
+    DoAlphaClip(texColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
+
+    return CharMotionVectorsFragment(i);
 }
 
 #endif

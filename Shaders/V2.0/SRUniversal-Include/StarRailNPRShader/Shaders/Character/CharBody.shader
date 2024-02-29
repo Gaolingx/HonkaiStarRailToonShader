@@ -118,14 +118,14 @@ Shader "Honkai Star Rail/Character/Body"
 
         [HeaderFoldout(Bloom)]
         [HSRMaterialIDFoldout] _BloomIntensity("Intensity", Float) = 0
-        [HSRMaterialIDProperty(_BloomIntensity, 0)] _BloomIntensity0("Bloom Intensity", Range(0, 1)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 31)] _BloomIntensity1("Bloom Intensity", Range(0, 1)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 63)] _BloomIntensity2("Bloom Intensity", Range(0, 1)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 95)] _BloomIntensity3("Bloom Intensity", Range(0, 1)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 127)] _BloomIntensity4("Bloom Intensity", Range(0, 1)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 159)] _BloomIntensity5("Bloom Intensity", Range(0, 1)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 192)] _BloomIntensity6("Bloom Intensity", Range(0, 1)) = 0.5
-        [HSRMaterialIDProperty(_BloomIntensity, 223)] _BloomIntensity7("Bloom Intensity", Range(0, 1)) = 0.5
+        [HSRMaterialIDProperty(_BloomIntensity, 0)] _mBloomIntensity0("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 31)] _mBloomIntensity1("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 63)] _mBloomIntensity2("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 95)] _mBloomIntensity3("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 127)] _mBloomIntensity4("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 159)] _mBloomIntensity5("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 192)] _mBloomIntensity6("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 223)] _mBloomIntensity7("Bloom Intensity", Range(0, 100)) = 1
         [HSRMaterialIDFoldout] _BloomColor("Color", Float) = 0
         [HSRMaterialIDProperty(_BloomColor, 0)] _BloomColor0("Bloom Color", Color) = (1, 1, 1, 1)
         [HSRMaterialIDProperty(_BloomColor, 31)] _BloomColor1("Bloom Color", Color) = (1, 1, 1, 1)
@@ -237,7 +237,9 @@ Shader "Honkai Star Rail/Character/Body"
             #pragma shader_feature_local_fragment _ _SINGLEMATERIAL_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
 
             #include "CharBodyCore.hlsl"
@@ -367,6 +369,34 @@ Shader "Honkai Star Rail/Character/Body"
 
             #pragma vertex BodyDepthNormalsVertex
             #pragma fragment BodyDepthNormalsFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #include "CharBodyCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "BodyMotionVectors"
+
+            Tags
+            {
+                "LightMode" = "MotionVectors"
+            }
+
+            Cull [_Cull]
+
+            HLSLPROGRAM
+
+            #pragma vertex BodyMotionVectorsVertex
+            #pragma fragment BodyMotionVectorsFragment
+
+            #pragma exclude_renderers d3d11_9x
+            #pragma target 3.5
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
