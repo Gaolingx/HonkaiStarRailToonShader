@@ -186,7 +186,7 @@ Shader "Custom/SRUniversal"
 
         Pass
         {
-            Name "DrawCore"
+            Name "CharDrawCore"
             Tags
             {
                 "RenderPipeline" = "UniversalPipeline"
@@ -222,7 +222,7 @@ Shader "Custom/SRUniversal"
 
         Pass
         {
-            Name "DrawOverlay"
+            Name "CharDrawOverlay"
             Tags
             {
                 "RenderPipeline" = "UniversalPipeline"
@@ -272,7 +272,7 @@ Shader "Custom/SRUniversal"
         
         Pass 
         {
-            Name "DrawOutline"
+            Name "CharDrawOutline"
             Tags 
             {
                 "RenderPipeline" = "UniversalPipeline"
@@ -299,6 +299,9 @@ Shader "Custom/SRUniversal"
 
             #pragma vertex SRUniversalVertex
             #pragma fragment SRUniversalFragment
+
+            // because this is an Outline pass, define "ToonShaderIsOutline" to inject outline related code into both VertexShaderWork() and ShadeFinalColor()
+            #define ToonShaderIsOutline
 
             #if _OUTLINE_ON
 
@@ -359,7 +362,7 @@ Shader "Custom/SRUniversal"
 
         Pass
         {
-            Name "HairDepthOnly"
+            Name "CharDepthOnly"
 
             Tags
             {
@@ -386,7 +389,7 @@ Shader "Custom/SRUniversal"
 
         Pass
         {
-            Name "HairDepthNormals"
+            Name "CharDepthNormals"
 
             Tags
             {
@@ -402,6 +405,34 @@ Shader "Custom/SRUniversal"
             #pragma fragment CharacterDepthNormalsFragment
 
             //#pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+
+            #include "../ShaderLibrary/SRUniversalInput.hlsl"
+            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "CharMotionVectors"
+
+            Tags
+            {
+                "LightMode" = "MotionVectors"
+            }
+
+            Cull [_Cull]
+
+            HLSLPROGRAM
+
+            #pragma vertex CharacterMotionVectorsVertex
+            #pragma fragment CharacterMotionVectorsFragment
+
+            #pragma exclude_renderers d3d11_9x
+            #pragma target 3.5
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"

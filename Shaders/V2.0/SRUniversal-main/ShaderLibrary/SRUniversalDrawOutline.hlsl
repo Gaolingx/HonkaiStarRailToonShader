@@ -84,15 +84,19 @@ CharOutlineVaryings SRUniversalVertex(CharOutlineAttributes input)
     width *= GetOutlineCameraFovAndDistanceFixMultiplier(vertexPositionInput.positionVS.z);
 
     float3 positionWS = vertexPositionInput.positionWS;
+
+#ifdef ToonShaderIsOutline
     #if _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         float3x3 tbn = float3x3(vertexNormalInput.tangentWS, vertexNormalInput.bitangentWS, vertexNormalInput.normalWS);
         positionWS += mul(input.color.rgb * 2 - 1, tbn) * width;
     #else
         positionWS += vertexNormalInput.normalWS * width;
     #endif
+#endif
 
     output.positionCS = TransformWorldToHClip(positionWS);
 
+#ifdef ToonShaderIsOutline
     // [Read ZOffset mask texture]
     // we can't use tex2D() in vertex shader because ddx & ddy is unknown before rasterization, 
     // so use tex2Dlod() with an explict mip level 0, put explict mip level 0 inside the 4th component of param uv)
@@ -106,6 +110,7 @@ CharOutlineVaryings SRUniversalVertex(CharOutlineAttributes input)
 
     // [Apply ZOffset, Use remapped value as ZOffset mask]
     output.positionCS = NiloGetNewClipPosWithZOffset(output.positionCS, _OutlineZOffset * outlineZOffsetMask + 0.03 * _IsFace);
+#endif
 
     output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
 
