@@ -1,10 +1,13 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 //为了在编辑模式下生效
 [ExecuteInEditMode]
 public class SendVector : MonoBehaviour
 {
+    public static SendVector Instance = null;
+
     [SerializeField] private Transform HeadReference;
     [SerializeField] private Transform HeadRightReference;
     [SerializeField] private Transform HeadForwardReference;
@@ -13,17 +16,34 @@ public class SendVector : MonoBehaviour
     private static readonly int HeadRightID = Shader.PropertyToID("_HeadRight");
     private bool needSend;
 
+    public void InitComponent()
+    {
+        Instance = this;
+    }
+
     private void Start()
     {
-        var skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
-        _materials = new List<Material>();
-        foreach (var skinnedMeshRenderer in skinnedMeshRenderers)
+        InitComponent();
+        GetMaterialsByReference();
+    }
+
+    public void GetMaterialsByReference()
+    {
+
+        SkinnedMeshRenderer[] skinnedMeshRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+
+        if (skinnedMeshRenderers != null)
         {
-            foreach (var material in skinnedMeshRenderer.sharedMaterials)
+            _materials = new List<Material>();
+            foreach (var skinnedMeshRenderer in skinnedMeshRenderers)
             {
-                _materials.Add(material);
+                foreach (var material in skinnedMeshRenderer.materials)
+                {
+                    _materials.Add(material);
+                }
             }
         }
+        
         OnValidate();
     }
 
