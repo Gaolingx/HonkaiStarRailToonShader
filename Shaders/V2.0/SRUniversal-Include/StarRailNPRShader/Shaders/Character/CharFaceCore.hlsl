@@ -89,7 +89,7 @@ float3 GetFaceOrEyeDiffuse(
     float3 baseColor,
     float3 lightColor,
     float4 faceMap,
-    float shadowAttenuation)
+    half shadowAttenuation)
 {
     // 游戏模型才有 UV2
     #if defined(_MODEL_GAME) && defined(_FACEMAPUV2_ON)
@@ -128,7 +128,7 @@ void FaceOpaqueAndZFragment(
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    Light light = GetMainLight(i.shadowCoord);
+    Light light = GetCharacterMainLight(i.shadowCoord);
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
     HeadDirections headDirWS = WORLD_SPACE_CHAR_HEAD_DIRECTIONS();
 
@@ -174,6 +174,10 @@ void FaceOpaqueAndZFragment(
     // Output
     colorTarget = float4(CombineColorPreserveLuminance(diffuse, diffuseAdd) + emission, texColor.a);
     bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
+
+    // Fog
+    real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);
+    colorTarget.rgb = MixFog(colorTarget.rgb, fogFactor);
 }
 
 void FaceWriteEyeStencilFragment(CharCoreVaryings i)
@@ -230,7 +234,13 @@ float4 FaceOutlineFragment(CharOutlineVaryings i) : SV_Target0
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    return float4(_OutlineColor0.rgb, 1);
+    float4 colorTarget = float4(_OutlineColor0.rgb, 1);
+
+    // Fog
+    real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);
+    colorTarget.rgb = MixFog(colorTarget.rgb, fogFactor);
+
+    return colorTarget;
 }
 
 CharShadowVaryings FaceShadowVertex(CharShadowAttributes i)

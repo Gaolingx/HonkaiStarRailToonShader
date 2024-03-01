@@ -99,7 +99,7 @@ float4 BaseHairOpaqueFragment(
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    Light light = GetMainLight(i.shadowCoord);
+    Light light = GetCharacterMainLight(i.shadowCoord);
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
 
     DiffuseData diffuseData;
@@ -177,6 +177,10 @@ void HairOpaqueFragment(
 
     colorTarget = float4(hairColor.rgb, 1);
     bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
+
+    // Fog
+    real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);
+    colorTarget.rgb = MixFog(colorTarget.rgb, fogFactor);
 }
 
 void HairFakeTransparentFragment(
@@ -188,7 +192,8 @@ void HairFakeTransparentFragment(
     // 手动做一次深度测试，保证只有最上面一层头发和眼睛做 alpha 混合。这样看上去更加通透
     float sceneDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(i.positionHCS.xy - 0.5));
     float hairDepth = GetLinearEyeDepthAnyProjection(i.positionHCS);
-    clip(sceneDepth - hairDepth); // if (hairDepth > sceneDepth) discard;
+    // 部分安卓设备存在精度问题，加一个 EPSILON，避免 fighting
+    clip(sceneDepth - hairDepth + REAL_EPS); // if (hairDepth > sceneDepth) discard;
 
     float4 hairColor = BaseHairOpaqueFragment(i, isFrontFace);
 
@@ -208,6 +213,10 @@ void HairFakeTransparentFragment(
     // Output
     colorTarget = float4(hairColor.rgb, max(max(alpha1, alpha2), _HairBlendAlpha));
     bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
+
+    // Fog
+    real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);
+    colorTarget.rgb = MixFog(colorTarget.rgb, fogFactor);
 }
 
 CharOutlineVaryings HairOutlineVertex(CharOutlineAttributes i)
@@ -229,7 +238,13 @@ float4 HairOutlineFragment(CharOutlineVaryings i) : SV_Target0
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    return float4(_OutlineColor0.rgb, 1);
+    float4 colorTarget = float4(_OutlineColor0.rgb, 1);
+
+    // Fog
+    real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);
+    colorTarget.rgb = MixFog(colorTarget.rgb, fogFactor);
+
+    return colorTarget;
 }
 
 CharShadowVaryings HairShadowVertex(CharShadowAttributes i)

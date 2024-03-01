@@ -137,10 +137,10 @@ Shader "Custom/SRUniversal"
         [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", float ) = 1
 
         [Header(Surface Options)]
-        [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull (Default back)", Float) = 2
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendMode ("Cull (Default back)", Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendMode ("Cull (Default back)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("Cull (Default back)", Float) = 0
+        [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode (Default Back)", Float) = 2
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendMode ("SrcBlendMode (Default One)", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendMode ("DstBlendMode (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("BlendOp (Default Add)", Float) = 0
         [Enum(Off,0, On,1)] _ZWrite("ZWrite (Default On)",Float) = 1
         _StencilRef ("Stencil reference (Default 0)",Range(0,255)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil comparison (Default disabled)",Int) = 0
@@ -193,7 +193,7 @@ Shader "Custom/SRUniversal"
                 "RenderType" = "Opaque"
                 "LightMode" = "HSRForward2"
             }
-            Cull[_Cull]
+            Cull[_CullMode]
             Stencil{
                 Ref [_StencilRef]
                 Comp [_StencilComp]
@@ -229,7 +229,7 @@ Shader "Custom/SRUniversal"
                 "RenderType" = "Opaque"
                 "LightMode" = "HSRForward3"
             }
-            Cull[_Cull]
+            Cull[_CullMode]
             Stencil{
                 Ref [_StencilRefOverlay]
                 Comp [_StencilCompOverlay]
@@ -336,8 +336,8 @@ Shader "Custom/SRUniversal"
                 "LightMode" = "HSRShadowCaster"
             }
 
-            Cull [_Cull]
-            ZWrite [_ZWrite]
+            Cull [_CullMode]
+            ZWrite On
             ZTest LEqual
 
             ColorMask 0
@@ -349,8 +349,9 @@ Shader "Custom/SRUniversal"
             #pragma vertex CharacterShadowVertex
             #pragma fragment CharacterShadowFragment
 
-            //#pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
 
@@ -369,8 +370,8 @@ Shader "Custom/SRUniversal"
                 "LightMode" = "DepthOnly"
             }
 
-            Cull [_Cull]
-            ZWrite [_ZWrite]
+            Cull [_CullMode]
+            ZWrite On
             ColorMask R
 
             HLSLPROGRAM
@@ -378,8 +379,9 @@ Shader "Custom/SRUniversal"
             #pragma vertex CharacterDepthOnlyVertex
             #pragma fragment CharacterDepthOnlyFragment
 
-            //#pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
@@ -396,16 +398,17 @@ Shader "Custom/SRUniversal"
                 "LightMode" = "DepthNormals"
             }
 
-            Cull [_Cull]
-            ZWrite [_ZWrite]
+            Cull [_CullMode]
+            ZWrite On
 
             HLSLPROGRAM
 
             #pragma vertex CharacterDepthNormalsVertex
             #pragma fragment CharacterDepthNormalsFragment
 
-            //#pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
@@ -422,7 +425,7 @@ Shader "Custom/SRUniversal"
                 "LightMode" = "MotionVectors"
             }
 
-            Cull [_Cull]
+            Cull [_CullMode]
 
             HLSLPROGRAM
 
@@ -434,6 +437,7 @@ Shader "Custom/SRUniversal"
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"

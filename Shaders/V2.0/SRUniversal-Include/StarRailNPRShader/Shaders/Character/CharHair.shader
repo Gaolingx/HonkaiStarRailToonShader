@@ -139,10 +139,12 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
 
             #include "CharHairCore.hlsl"
 
@@ -163,9 +165,11 @@ Shader "Honkai Star Rail/Character/Hair"
             {
                 Ref 3
                 ReadMask 2   // 眼睛位
-                WriteMask 2  // 眼睛位
                 Comp Equal
-                Pass Zero    // 清除眼睛位
+                // 不能清除眼睛的 Stencil
+                // 有时候头发存在重叠，如果被盖在下面的头发先画并清除了眼睛的 Stencil，那么上面的头发就画不上了
+                // 上面的头发画不上的话，深度也写不上，后面描边就会出问题
+                Pass Keep
                 Fail Keep
             }
 
@@ -189,10 +193,12 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT _SHADOWS_SOFT_LOW _SHADOWS_SOFT_MEDIUM _SHADOWS_SOFT_HIGH
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
 
             #include "CharHairCore.hlsl"
 
@@ -234,6 +240,8 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
 
             #pragma shader_feature_local_vertex _OUTLINENORMAL_TANGENT _OUTLINENORMAL_NORMAL
+
+            #pragma multi_compile_fog
 
             #include "CharHairCore.hlsl"
 
