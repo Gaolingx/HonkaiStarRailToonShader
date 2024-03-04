@@ -83,6 +83,23 @@ float3 RGBAdjustment(float3 inputColor, float RPower, float GPower, float BPower
     return finalColor;
 }
 
+Light GetCharacterMainLightStruct(float4 shadowCoord)
+{
+    Light light = GetMainLight();
+
+    #if defined(MAIN_LIGHT_CALCULATE_SHADOWS)
+        ShadowSamplingData shadowSamplingData = GetMainLightShadowSamplingData();
+        half4 shadowParams = GetMainLightShadowParams();
+
+        // 我自己试下来，在角色身上 LowQuality 比 Medium 和 High 好
+        // Medium 和 High 采样数多，过渡的区间大，在角色身上更容易出现 Perspective aliasing
+        shadowSamplingData.softShadowQuality = SOFT_SHADOW_QUALITY_LOW;
+        light.shadowAttenuation = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_LinearClampCompare), shadowCoord, shadowSamplingData, shadowParams, false);
+    #endif
+
+    return light;
+}
+
 float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor)
 {
     float3 scaledMainLightColor = inputMainLightColor.rgb * brightnessFactor;
@@ -261,7 +278,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
 
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
-    Light mainLight = GetMainLight(shadowCoord);
+    Light mainLight = GetCharacterMainLightStruct(shadowCoord);
     //获取主光源颜色
     float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
     //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
@@ -351,6 +368,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 remappedNoL + _ShadowThresholdCenter);
             //应用AO
             mainLightShadow *= shadowIntensity;
+            mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
 
             RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);
             rampRowIndex = RRNI.rampRowIndex;
@@ -378,6 +396,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             float sdf = smoothstep(sdfThreshold - _FaceShadowTransitionSoftness, sdfThreshold + _FaceShadowTransitionSoftness, sdfValue);
             //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
             mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
+            mainLightShadow *= mainLight.shadowAttenuation;
 
             RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);
             rampRowIndex = RRNI.rampRowIndex;
@@ -443,6 +462,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 #endif
                 //强度系数
                 specularColor *= _SpecularBrightness;
+                specularColor *= mainLight.shadowAttenuation;
             }
         #endif
     #else
