@@ -367,7 +367,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 1.0 - shadowThreshold + _ShadowThresholdSoftness,
                 remappedNoL + _ShadowThresholdCenter);
             //应用AO
-            mainLightShadow *= shadowIntensity;
+            mainLightShadow *= lerp(1, shadowIntensity, _LerpAOIntensity);
             mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
 
             RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);

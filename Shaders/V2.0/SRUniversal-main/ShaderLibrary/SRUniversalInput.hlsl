@@ -80,12 +80,13 @@ float _BodyWarmRampColorMixFactor;
 
 
 // Lighting
-float _MainLightBrightnessFactor;
 float _IndirectLightFlattenNormal;
 float _IndirectLightUsage;
 float _IndirectLightOcclusionUsage;
 float _IndirectLightMixBaseColor;
 
+float _MainLightBrightnessFactor;
+float _LerpAOIntensity;
 float _MainLightColorUsage;
 float _ShadowThresholdCenter;
 float _ShadowThresholdSoftness;
