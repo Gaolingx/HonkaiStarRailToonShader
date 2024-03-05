@@ -132,13 +132,16 @@ float _StockingsTextureUsage;
 
 
 // RimLight
-float _RimLightWidth;
-float _RimLightThreshold;
-float _RimLightFadeout;
-float3 _RimLightTintColor;
-float _RimLightBrightness;
+float _ModelScale;
+float _RimIntensity;
+float _RimIntensityBackFace;
+float _RimThresholdMin;
+float _RimThresholdMax;
+float _RimEdgeSoftness;
+float _RimWidth0;
+float4 _RimColor0;
+float _RimDark0;
 float _RimLightMixAlbedo;
-
 
 // Emission
 float _EmissionMixBaseColor;

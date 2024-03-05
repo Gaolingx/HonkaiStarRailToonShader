@@ -238,6 +238,85 @@ float2 GetRampUV(float mainLightShadow, float ShadowRampOffset, int rampRowIndex
     return rampUV;
 }
 
+float GetLinearEyeDepthAnyProjection(float depth)
+{
+    if (IsPerspectiveProjection())
+    {
+        return LinearEyeDepth(depth, _ZBufferParams);
+    }
+
+    return LinearDepthToEyeDepth(depth);
+}
+
+// works only in fragment shader
+float GetLinearEyeDepthAnyProjection(float4 svPosition)
+{
+    // 透视投影时，Scene View 里直接返回 svPosition.w 会出问题，Game View 里没事
+
+    return GetLinearEyeDepthAnyProjection(svPosition.z);
+}
+
+struct RimLightData
+{
+    float3 rimlightcolor;
+    float3 mainLightColor;
+    float rimlightwidth;
+    float edgeSoftness;
+    float thresholdMin;
+    float thresholdMax;
+    float darkenValue;
+    float intensityFrontFace;
+    float intensityBackFace;
+    float modelScale;
+};
+
+float3 GetRimLight(
+    RimLightData rimLightData,
+    float4 svPosition,
+    float3 normalWS,
+    bool isFrontFace,
+    float4 lightMap)
+{
+    float rimWidth = rimLightData.rimlightwidth / 2000.0; // rimWidth 表示的是屏幕上像素的偏移量，和 modelScale 无关
+    float rimThresholdMin = rimLightData.thresholdMin * rimLightData.modelScale * 10.0;
+    float rimThresholdMax = rimLightData.thresholdMax * rimLightData.modelScale * 10.0;
+
+    rimWidth *= lightMap.r; // 有些地方不要边缘光
+    rimWidth *= _ScaledScreenParams.y; // 在不同分辨率下看起来等宽
+
+    if (IsPerspectiveProjection())
+    {
+        // unity_CameraProjection._m11: cot(FOV / 2)
+        // 2.414 是 FOV 为 45 度时的值
+        rimWidth *= unity_CameraProjection._m11 / 2.414; // FOV 越小，角色越大，边缘光越宽
+    }
+    else
+    {
+        // unity_CameraProjection._m11: (1 / Size)
+        // 1.5996 纯 Magic Number
+        rimWidth *= unity_CameraProjection._m11 / 1.5996; // Size 越小，角色越大，边缘光越宽
+    }
+
+    float depth = GetLinearEyeDepthAnyProjection(svPosition);
+    rimWidth *= 10.0 * rsqrt(depth / rimLightData.modelScale); // 近大远小
+
+    float3 normalVS = TransformWorldToViewNormal(normalWS);
+    float2 indexOffset = float2(sign(normalVS.x), 0) * rimWidth; // 只横向偏移
+    uint2 index = clamp(svPosition.xy - 0.5 + indexOffset, 0, _ScaledScreenParams.xy - 1); // 避免出界
+    float offsetDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(index));
+
+    float depthDelta = (offsetDepth - depth) * 50; // 只有 depth 小于 offsetDepth 的时候再画
+    float intensity = rimLightData.darkenValue * smoothstep(-rimLightData.edgeSoftness, 0, depthDelta - rimThresholdMin);
+    intensity = lerp(intensity, 1, smoothstep(0, rimLightData.edgeSoftness, depthDelta - rimThresholdMax));
+    intensity *= lerp(rimLightData.intensityBackFace, rimLightData.intensityFrontFace, isFrontFace);
+
+    float3 FinalRimColor = 0;
+    FinalRimColor = rimLightData.mainLightColor;
+    FinalRimColor *= intensity;
+    
+    return FinalRimColor;
+}
+
 void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
 {
 #if _UseAlphaClipping
@@ -506,24 +585,19 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 rimLightColor;
     #if _RIM_LIGHTING_ON
         {
-            //获取当前片元的深度
-            float linearEyeDepth = LinearEyeDepth(input.positionCS.z, _ZBufferParams);
-            //根据视线空间的法线采样左边或者右边的深度图
-            float3 normalVS = mul((float3x3)UNITY_MATRIX_V, normalWS);
-            //根据视线空间的法线采样左边或者右边的深度图，根据深度缩放，实现近大远小的效果
-            float2 uvOffset = float2(sign(normalVS.x), 0) * _RimLightWidth / (1 + linearEyeDepth) / 100;
-            int2 loadTexPos = input.positionCS.xy + uvOffset * _ScaledScreenParams.xy;
-            //限制左右，不采样到边界
-            loadTexPos = min(max(loadTexPos, 0), _ScaledScreenParams.xy - 1);
-            //偏移后的片元深度
-            float offsetSceneDepth = LoadSceneDepth(loadTexPos);
-            //转换为LinearEyeDepth
-            float offsetLinearEyeDepth = LinearEyeDepth(offsetSceneDepth, _ZBufferParams);
-            //深度差超过阈值，表示是边界
-            float rimLight = saturate(offsetLinearEyeDepth - (linearEyeDepth + _RimLightThreshold)) / _RimLightFadeout;
-            rimLightColor = rimLight * LightColor.rgb;
-            rimLightColor *= _RimLightTintColor;
-            rimLightColor *= _RimLightBrightness;
+            RimLightData rimLightData;
+            rimLightData.rimlightcolor = _RimColor0.rgb;
+            rimLightData.rimlightwidth = _RimWidth0;
+            rimLightData.edgeSoftness = _RimEdgeSoftness;
+            rimLightData.thresholdMin = _RimThresholdMin;
+            rimLightData.thresholdMax = _RimThresholdMax;
+            rimLightData.darkenValue = _RimDark0;
+            rimLightData.intensityFrontFace = _RimIntensity;
+            rimLightData.intensityBackFace = _RimIntensityBackFace;
+            rimLightData.modelScale = _ModelScale;
+            rimLightData.mainLightColor = mainLightColor;
+
+            rimLightColor = GetRimLight(rimLightData, input.positionCS, normalize(normalWS), isFrontFace, lightMap);
         }
     #else
         rimLightColor = 0;

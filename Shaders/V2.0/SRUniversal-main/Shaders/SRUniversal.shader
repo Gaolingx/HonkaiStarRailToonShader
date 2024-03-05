@@ -106,11 +106,15 @@ Shader "Custom/SRUniversal"
 
         [Header(Rim Lighting)]
         [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)",float) = 1
-        _RimLightWidth("Rim light width (Default 1)",Range(0, 10)) = 1
-        _RimLightThreshold("Rin light threshold (Default 0.05)",Range(-1, 1)) = 0.05
-        _RimLightFadeout("Rim light fadeout (Default 1)",Range(0.01, 1)) = 1
-        [HDR] _RimLightTintColor("Rim light tint colar (Default white)",Color) = (1,1,1)
-        _RimLightBrightness("Rim light brightness (Default 1)",Range(0, 10)) = 1
+        _ModelScale("Model Scale (Default 1)", Float) = 1
+        _RimIntensity("Intensity (Front) (Default 0.5)", Range(0, 1)) = 0.5
+        _RimIntensityBackFace("Intensity (Back) (Default 0)", Range(0, 1)) = 0
+        _RimThresholdMin("Threshold Min (Default 0.6)", Float) = 0.6
+        _RimThresholdMax("Threshold Max (Default 0.9)", Float) = 0.9
+        _RimEdgeSoftness("Edge Softness (Default 0.05)", Float) = 0.05
+        _RimWidth0("Width (Default 0.5)", Range(0, 5)) = 0.5
+        _RimColor0("Color (Default white)", Color) = (1.0, 1.0, 1.0, 1.0)
+        _RimDark0("Darken Value (Default 0.5)", Range(0, 1)) = 0.5
         _RimLightMixAlbedo("Rim light mix albedo (Default 0.9)",Range(0, 1)) = 0.9
 
         [Header(Bloom)]
