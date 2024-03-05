@@ -109,7 +109,7 @@ float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor
 
 float3 GetMainLightColor(float3 inputMainLightColor, float mainLightColorUsage)
 {
-    return lerp(Luminance(inputMainLightColor.rgb), inputMainLightColor.rgb, mainLightColorUsage);
+    return lerp(desaturation(inputMainLightColor.rgb), inputMainLightColor.rgb, mainLightColorUsage);
 }
 
 float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
