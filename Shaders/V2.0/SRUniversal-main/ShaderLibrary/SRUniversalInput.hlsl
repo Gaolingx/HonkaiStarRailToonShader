@@ -15,6 +15,8 @@ sampler2D _OutlineZOffsetMaskTex;
 
 TEXTURE2D(_NormalMap);
 SAMPLER(sampler_NormalMap);
+TEXTURE2D(_FaceMap);
+SAMPLER(sampler_FaceMap);
 TEXTURE2D(_ExpressionMap);
 SAMPLER(sampler_ExpressionMap);
 
@@ -95,7 +97,6 @@ float _ShadowBoost;
 
 
 // FaceShadow
-sampler2D _FaceMap;
 float _FaceShadowOffset;
 float _FaceShadowTransitionSoftness;
 
@@ -122,6 +123,7 @@ float _SpecularBrightness;
 // Stockings
 sampler2D _UpperBodyStockings;
 sampler2D _LowerBodyStockings;
+float _stockingsMapBChannelUVScale;
 float3 _StockingsDarkColor;
 float3 _StockingsLightColor;
 float3 _StockingsTransitionColor;

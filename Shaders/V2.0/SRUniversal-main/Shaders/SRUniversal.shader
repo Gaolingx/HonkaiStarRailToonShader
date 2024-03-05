@@ -96,6 +96,7 @@ Shader "Custom/SRUniversal"
         [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)",float) = 0
         _UpperBodyStockings("Upper body stockings (Default black)",2D) = "black" {}
         _LowerBodyStockings("Lower body stockings (Default black)",2D) = "black" {}
+        _stockingsMapBChannelUVScale("Stockings texture channel B UV Scale (Default 20)",Range(1,50)) = 20
         _StockingsDarkColor("Stockings dark color (Default black)",Color) = (0,0,0)
         [HDR] _StockingsLightColor("Stockings light color (Default 1.8, 1.48299, 0.856821)",Color) = (1.8, 1.48299, 0.856821)
         _StockingsTransitionColor("Stockings transition color (Default 0.360381, 0.242986, 0.358131)",Color) = (0.360381, 0.242986, 0.358131)

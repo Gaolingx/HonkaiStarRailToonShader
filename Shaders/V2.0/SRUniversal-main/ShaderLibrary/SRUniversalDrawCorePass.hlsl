@@ -396,7 +396,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //对脸部采样 faceMap，脸部的LightMap就是这张FaceMap
     float4 faceMap = 0;
     #if _AREA_FACE
-        faceMap = tex2D(_FaceMap, input.uv);
+        faceMap = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, input.uv);
     #endif
 
     // LightMap
@@ -467,7 +467,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             float sdfUVx = lerp(input.uv.x, 1 - input.uv.x, isRight);
             float2 sdfUV = float2(sdfUVx, input.uv.y);
             //使用uv采样面部贴图的a通道
-            float sdfValue = tex2D(_FaceMap, sdfUV).a;
+            float sdfValue = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, sdfUV).a;
             sdfValue += _FaceShadowOffset;
             //dot(lightDir,headForward)的范围是[1,-1]映射到[0,1]
             float sdfThreshold = 1 - (dot(lightDir, headForward) * 0.5 + 0.5);
@@ -556,10 +556,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 float stockingsMapB = 0;
                 #if _AREA_UPPERBODY
                     stockingsMapRG = tex2D(_UpperBodyStockings, input.uv).rg;
-                    stockingsMapB = tex2D(_UpperBodyStockings, input.uv * 20).b;
+                    stockingsMapB = tex2D(_UpperBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
                 #elif _AREA_LOWERBODY
                     stockingsMapRG = tex2D(_LowerBodyStockings, input.uv).rg;
-                    stockingsMapB = tex2D(_LowerBodyStockings, input.uv * 20).b;
+                    stockingsMapB = tex2D(_LowerBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
                 #endif
                 float NoV = dot(normalWS, viewDirectionWS);
                 float fac = NoV;
