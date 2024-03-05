@@ -41,7 +41,7 @@ This package is verified on Windows & Android.
 
 ### Install via git URL
 
-Install these packages **in order**. The second one requires Unity >= 2022.3.
+Install these packages **in order**. The second one requires Unity >= 2022.3, but it is recommended not to use a version that is too high.
 
 1. https://github.com/stalomeow/ShaderUtilsForSRP.git
 2. https://github.com/stalomeow/StarRailNPRShader.git
@@ -51,7 +51,7 @@ Install these packages **in order**. The second one requires Unity >= 2022.3.
 ### RenderPipeline settings
 
 - Use linear color space instead of gamma.
-- Use forward rendering path.
+- Use `Forward` or `Forward+` rendering path.
 - Disable depth priming.
 - Add `StarRailForward` RendererFeature to the renderer.
 
@@ -124,7 +124,7 @@ flowchart TD
 
 ## Advanced topics
 
-- [Working with asset preprocessor](Documentation~/WorkingWithAssetPreprocessor.md)
+- [Working with asset processor](Documentation~/WorkingWithAssetProcessor.md)
 - [Working with HSRMaterialViewer](Documentation~/WorkingWithHSRMaterialViewer.md)
 - [For MMD models](Documentation~/ForMMDModels.md)
 - [FAQ](Documentation~/FAQ.md)

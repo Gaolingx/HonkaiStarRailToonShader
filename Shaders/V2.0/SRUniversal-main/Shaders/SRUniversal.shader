@@ -207,14 +207,15 @@ Shader "Custom/SRUniversal"
             ZWrite [_ZWrite]
 
             HLSLPROGRAM
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _SHADOWS_SOFT
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
 
             #pragma vertex SRUniversalVertex
             #pragma fragment SRUniversalFragment
-
-            #pragma multi_compile_fog
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
@@ -240,14 +241,15 @@ Shader "Custom/SRUniversal"
             ZWrite [_ZWrite]
 
             HLSLPROGRAM
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _SHADOWS_SOFT
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
 
             #pragma vertex SRUniversalVertex
             #pragma fragment SRUniversalFragment
-
-            #pragma multi_compile_fog
 
             #if _DRAW_OVERLAY_ON
                 #include "../ShaderLibrary/SRUniversalInput.hlsl"

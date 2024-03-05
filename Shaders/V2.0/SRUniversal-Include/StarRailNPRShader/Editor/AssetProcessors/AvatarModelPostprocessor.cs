@@ -19,58 +19,35 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-using HSR.NPRShader.Editor.Settings;
 using HSR.NPRShader.Utils;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
 namespace HSR.NPRShader.Editor.AssetProcessors
 {
-    public class AvatarModelPostprocessor : AssetPostprocessor
+    internal class AvatarModelPostprocessor : AssetPostprocessor
     {
-        public static readonly ModelImporterTangents ImportTangents = ModelImporterTangents.None;
-        public static readonly NormalUtility.StoreMode NormalStoreMode = NormalUtility.StoreMode.ObjectSpaceTangent;
-        public static readonly uint LogicVersion = 11u;
-
-        private bool IsAvatarModel => Regex.IsMatch(assetPath,
-            EditorProjectSettings.instance.AvatarModelPathPattern, RegexOptions.IgnoreCase);
-
         private void OnPreprocessModel()
         {
-            if (EditorPrefs.GetBool("EnableAssetsPreProcess"))
-            {
-                if (!IsAvatarModel)
-                {
-                    return;
-                }
+            AssetProcessorConfig config = AssetProcessorGlobalSettings.instance.AvatarModelProcessConfig;
+            context.DependsOnCustomDependency(AssetProcessorGlobalSettings.AvatarModelDependencyName);
 
-                ModelImporter importer = (ModelImporter)assetImporter;
-                importer.importTangents = ImportTangents;
+            if (config.IsEnableAndAssetPathMatch(assetPath))
+            {
+                config.ApplyPreset(context, assetImporter);
             }
         }
 
         private void OnPostprocessModel(GameObject go)
         {
-            if (EditorPrefs.GetBool("EnableAssetsPreProcess"))
-            {
-                if (!IsAvatarModel)
-                {
-                    return;
-                }
+            AssetProcessorConfig config = AssetProcessorGlobalSettings.instance.AvatarModelProcessConfig;
 
-                List<GameObject> modifiedObjs = new();
-                NormalUtility.SmoothAndStore(go, NormalStoreMode, false, modifiedObjs);
-                string subObjList = string.Join('\n', modifiedObjs.Select(o => o.name));
-                Debug.Log($"<b>[Smooth Normal]</b> {assetPath}\n" + subObjList);
+            if (config.IsEnableAndAssetPathMatch(assetPath))
+            {
+                NormalUtility.SmoothAndStore(go, config.SmoothNormalStoreMode, false);
             }
         }
 
-        public override uint GetVersion()
-        {
-            return EditorProjectSettings.instance.AvatarModelPostprocessorVersion + LogicVersion;
-        }
+        public override uint GetVersion() => 29u;
     }
 }

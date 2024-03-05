@@ -39,7 +39,7 @@
 
 ### 从 git URL 安装
 
-**按顺序**安装这些包。第二个包要求 Unity >= 2022.3。
+**按顺序**安装这些包。第二个包要求 Unity >= 2022.3，但建议别用太高的版本。
 
 1. https://github.com/stalomeow/ShaderUtilsForSRP.git
 2. https://github.com/stalomeow/StarRailNPRShader.git
@@ -49,7 +49,7 @@
 ### 渲染管线设置
 
 - 用 linear color space，别用 gamma。
-- 用 Forward 渲染路径。
+- 用 `Forward` 或 `Forward+` 渲染路径。
 - 关 Depth priming。
 - 在 Renderer 上加 `StarRailForward` RendererFeature。
 
@@ -122,7 +122,7 @@ flowchart TD
 
 ## 高级主题
 
-- [使用资源预处理器](Documentation~/WorkingWithAssetPreprocessor_CN.md)
+- [使用资产处理器](Documentation~/WorkingWithAssetProcessor_CN.md)
 - [使用 HSRMaterialViewer](Documentation~/WorkingWithHSRMaterialViewer_CN.md)
 - [关于 MMD 模型](Documentation~/ForMMDModels_CN.md)
 - [常见问题](Documentation~/FAQ_CN.md)

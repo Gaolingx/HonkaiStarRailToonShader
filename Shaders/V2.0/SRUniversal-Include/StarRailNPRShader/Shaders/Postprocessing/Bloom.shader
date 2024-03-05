@@ -45,6 +45,8 @@ Shader "Hidden/Honkai Star Rail/Post Processing/Bloom"
 
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
         #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
+        #include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
+        #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
         #include "../Includes/HSRGBuffer.hlsl"
         #include "../Character/Shared/CharRenderingHelpers.hlsl"
 
@@ -85,11 +87,49 @@ Shader "Hidden/Honkai Star Rail/Post Processing/Bloom"
         #endif
         }
 
-        float4 FragPrefilter(Varyings input) : SV_Target
+        void VertMipDown(
+            Attributes input,
+            out Varyings output,
+            out float4 uv1 : TEXCOORD3,
+            out float4 uv2 : TEXCOORD4)
+        {
+            output = Vert(input);
+
+            // 采样中间像素，抗闪烁
+            float4 texelSize = _BlitTexture_TexelSize;
+            float4 offset1 = float4(-0.5, -0.5, -0.5, +0.5);
+            float4 offset2 = float4(+0.5, -0.5, +0.5, +0.5);
+            uv1 = texelSize.xyxy * offset1 + output.texcoord.xyxy;
+            uv2 = texelSize.xyxy * offset2 + output.texcoord.xyxy;
+        }
+
+        half4 FragMipDown(
+            Varyings input,
+            float4 uv1 : TEXCOORD3,
+            float4 uv2 : TEXCOORD4) : SV_Target
+        {
+            UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
+
+            half4 c1 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv1.xy);
+            half4 c2 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv1.zw);
+            half4 c3 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv2.xy);
+            half4 c4 = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv2.zw);
+            return 0.25 * (c1 + c2 + c3 + c4);
+        }
+
+        half4 FragPrefilter(Varyings input) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
 
             float2 uv = UnityStereoTransformScreenSpaceTex(input.texcoord);
+
+#if defined(SUPPORTS_FOVEATED_RENDERING_NON_UNIFORM_RASTER)
+            UNITY_BRANCH if (_FOVEATED_RENDERING_NON_UNIFORM_RASTER)
+            {
+                uv = RemapFoveatedRenderingLinearToNonUniform(uv);
+            }
+#endif
+
             float3 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
             float4 bloom = HSRSampleGBuffer0(uv);
             color = max(0, color - _BloomThreshold.rrr) * DecodeBloomColor(bloom);
@@ -158,6 +198,16 @@ Shader "Hidden/Honkai Star Rail/Post Processing/Bloom"
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment FragPrefilter
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "Bloom Mip Down"
+
+            HLSLPROGRAM
+            #pragma vertex VertMipDown
+            #pragma fragment FragMipDown
             ENDHLSL
         }
 
