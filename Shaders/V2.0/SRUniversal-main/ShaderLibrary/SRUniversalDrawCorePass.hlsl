@@ -626,10 +626,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             float2 outlineUV = float2(0, 0.0625);
             coolRampCol = tex2D(_BodyCoolRamp, outlineUV).rgb;
             warmRampCol = tex2D(_BodyWarmRamp, outlineUV).rgb;
+            float3 OutlineRamp = 0;
             #if _USE_RAMP_COLOR_ON
-                float3 OutlineRamp = abs(lerp(coolRampCol, warmRampCol, 0.5));
+                OutlineRamp = abs(lerp(coolRampCol, warmRampCol, 0.5));
             #else
-                float3 OutlineRamp = _OutlineColor.rgb;
+                OutlineRamp = _OutlineColor.rgb;
             #endif
             fakeOutlineColor = pow(OutlineRamp, _OutlineGamma);
         }
