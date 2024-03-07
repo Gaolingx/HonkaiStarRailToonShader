@@ -108,8 +108,8 @@ Shader "Custom/SRUniversal"
         [Header(Rim Lighting)]
         [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)",float) = 1
         _ModelScale("Model Scale (Default 1)", Float) = 1
-        _RimIntensity("Intensity (Front) (Default 0.5)", Range(0, 1)) = 0.5
-        _RimIntensityBackFace("Intensity (Back) (Default 0)", Range(0, 1)) = 0
+        _RimIntensity("Intensity (Front) (Default 0.5)", Range(0, 5)) = 0.5
+        _RimIntensityBackFace("Intensity (Back) (Default 0)", Range(0, 5)) = 0
         _RimThresholdMin("Threshold Min (Default 0.6)", Float) = 0.6
         _RimThresholdMax("Threshold Max (Default 0.9)", Float) = 0.9
         _RimEdgeSoftness("Edge Softness (Default 0.05)", Float) = 0.05

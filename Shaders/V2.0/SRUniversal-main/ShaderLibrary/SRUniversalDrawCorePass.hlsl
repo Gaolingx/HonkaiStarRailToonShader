@@ -504,7 +504,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #endif
     float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime);
     rampColor = lerp(f3one, rampColor, _ShadowBoost);
-    mainLightColor *= baseColor * rampColor;
+    float3 FinalDiffuse = mainLightColor * baseColor * rampColor;
 
 
     //高光
@@ -525,7 +525,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 #if _METAL_SPECULAR_ON
                     #if  _AREA_UPPERBODY || _AREA_LOWERBODY
                         //金属部分的Alpha值为0.52，此时metallic为1，以0.1为插值范围，确定金属度
-                        metallic = saturate((abs(materialId - _MetalSpecularMetallic) - 0.1)/(0 - 0.1));
+                        metallic = saturate((abs(materialId - _MetalSpecularMetallic) - 0.1) / (0 - 0.1));
                     #endif
                 #else
                     //因为头发没有金属，所以头发位置要关掉这个keyword
@@ -641,7 +641,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     float3 albedo = 0;
     albedo += indirectLightColor;
-    albedo += mainLightColor;
+    albedo += FinalDiffuse;
     albedo += specularColor;
     albedo *= stockingsEffect;
     albedo += rimLightColor * lerp(1, albedo, _RimLightMixAlbedo);
