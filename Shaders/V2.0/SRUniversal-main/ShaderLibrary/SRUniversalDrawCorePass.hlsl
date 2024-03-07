@@ -40,7 +40,7 @@ Gradient GradientConstruct()
 {
     Gradient g;
     g.colorsLength = 2;
-    g.colors[0] = float4(1,1,1,0);
+    g.colors[0] = float4(1,1,1,0); //第四位不是alpha，而是它在轴上的坐标
     g.colors[1] = float4(1,1,1,1);
     g.colors[2] = float4(0,0,0,0);
     g.colors[3] = float4(0,0,0,0);
@@ -561,10 +561,13 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                     stockingsMapRG = tex2D(_LowerBodyStockings, input.uv).rg;
                     stockingsMapB = tex2D(_LowerBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
                 #endif
+                //用法线点乘视角向量模拟皮肤透过丝袜
                 float NoV = dot(normalWS, viewDirectionWS);
                 float fac = NoV;
+                //做一次幂运算，调整亮区大小
                 fac = pow(saturate(fac), _StockingsTransitionPower);
-                fac = saturate((fac - _StockingsTransitionHardness/2)/(1 - _StockingsTransitionHardness));
+                //调整亮暗过渡的硬度
+                fac = saturate((fac - _StockingsTransitionHardness / 2) / (1 - _StockingsTransitionHardness));
                 fac = fac * (stockingsMapB * _StockingsTextureUsage + (1 - _StockingsTextureUsage)); // 细节纹理
                 fac = lerp(fac, 1, stockingsMapRG.g); // 厚度插值亮区
                 Gradient curve = GradientConstruct();
@@ -572,9 +575,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 curve.colors[0] = float4(_StockingsDarkColor, 0);
                 curve.colors[1] = float4(_StockingsTransitionColor, _StockingsTransitionThreshold);
                 curve.colors[2] = float4(_StockingsLightColor, 1);
-                float3 stockingsColor = SampleGradient(curve, fac);
+                float3 stockingsColor = SampleGradient(curve, fac); // 将亮区的系数映射成颜色
 
-                stockingsEffect = lerp(1, stockingsColor, stockingsMapRG.r);
+                stockingsEffect = lerp(f3one, stockingsColor, stockingsMapRG.r);
 
             }
         #endif
