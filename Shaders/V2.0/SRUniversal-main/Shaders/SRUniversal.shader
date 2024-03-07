@@ -83,14 +83,13 @@ Shader "Custom/SRUniversal"
 
         [Header(Specular)]
         [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", float) = 1
-        [Toggle(_METAL_SPECULAR_ON)] _EnableMetalSpecular ("Enable Metal Specular (Default YES)", float) = 1
-        _SpecularExpon("Specular exponent (Default 50)",Range(0,100)) = 50
-        _SpecularKsNonMetal("Specular KS non-metal (Default 0.04)",Range(0,1)) = 0.04
-        _SpecularKsMetal("Specular KS metal (Default 1)",Range(0,1)) = 1
+        [Toggle(_ANISOTROPY_SPECULAR)] _AnisotropySpecularToggle("Is Anisotropy Specular (Default NO)", Float) = 0
+        _SpecularColor("Spwcular Color (Default white)", Color) = (1, 1, 1, 1)
+        _SpecularShininess("Specular Shininess (Default 10)", Range(0.1, 100)) = 10
+        _SpecularRoughness("Specular Roughness (Default 0.1)", Range(0, 1)) = 0.1
+        _SpecularIntensity("Specualr Intensity (Default 1)", Range(0, 50)) = 1
         _MetalSpecularMetallic("Metal Specular Metallic (Default 0.52)",Range(0,1)) = 0.52
-        [Toggle(_SPECULAR_COLOR_CUSTOM)] _EnableCustomSpecularColor ("Enable Custom Specular Color (Default NO)", float) = 1
-        _SpecularColor("Stockings dark color (Default white)",Color) = (1,1,1)
-        _SpecularBrightness("Specular brightness (Default 1)",Range(0,10)) = 10
+
 
         [Header(Stockings)]
         [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)",float) = 0
@@ -177,8 +176,6 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _Expression_ON
         #pragma shader_feature_local _SPECULAR_ON
-        #pragma shader_feature_local _METAL_SPECULAR_ON
-        #pragma shader_feature_local _SPECULAR_COLOR_CUSTOM
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
         #pragma shader_feature_local _OUTLINE_ON

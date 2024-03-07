@@ -112,12 +112,11 @@ float _ExShadowIntensity;
 
 
 // Specular
-float _SpecularExpon;
-float _SpecularKsNonMetal;
-float _SpecularKsMetal;
-float _MetalSpecularMetallic;
-float3 _SpecularColor;
-float _SpecularBrightness;
+half3 _SpecularColor;
+half _SpecularShininess;
+half _SpecularRoughness;
+half _SpecularIntensity;
+half _MetalSpecularMetallic;
 
 
 // Stockings
