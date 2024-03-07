@@ -22,18 +22,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace HSR.NPRShader.Editor.Tools
+namespace HSR.NPRShader.Shadow
 {
-    public class EyeShadowMaterialSetter : BaseMaterialSetter
+    public interface IPerObjectShadowCaster
     {
-        protected override IReadOnlyDictionary<string, string> SupportedShaderMap => new Dictionary<string, string>()
-        {
-            ["miHoYo/CRP_Character/CharacterEyeShadow"] = "Honkai Star Rail/Character/EyeShadow"
-        };
+        Transform transform { get; }
 
-        protected override IEnumerable<(string, Color)> ApplyColors(IReadOnlyDictionary<string, Color> colors)
-        {
-            yield return ("_Color", colors["_Color"]);
-        }
+        bool IsActiveAndCastingShadow { get; }
+
+        Bounds GetActiveRenderersAndBounds(List<Renderer> outRendererListOrNull);
     }
 }

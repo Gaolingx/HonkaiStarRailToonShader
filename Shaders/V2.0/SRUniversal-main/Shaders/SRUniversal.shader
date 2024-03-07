@@ -338,7 +338,7 @@ Shader "Custom/SRUniversal"
 
             Tags
             {
-                "LightMode" = "HSRShadowCaster"
+                "LightMode" = "HSRPerObjectShadowCaster"
             }
 
             Cull [_CullMode]
