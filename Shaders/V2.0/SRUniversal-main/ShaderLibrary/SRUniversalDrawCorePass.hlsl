@@ -314,12 +314,20 @@ float3 GetRimLight(
     return FinalRimColor;
 }
 
+float3 fresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
+{
+    //return F0 + (max(float3(1 ,1, 1) * (1 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+    return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
 struct SpecularData
 {
     half3 color;
     half specularIntensity;
     half specularThreshold;
     half materialId;
+    half SpecularKsNonMetal;
+    half SpecularKsMetal;
     half MetalSpecularMetallic;
 };
 
@@ -329,15 +337,17 @@ half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, hal
     //roughness = lerp(1.0, roughness * roughness, metallic);
     //float smoothness = exp2(shininess * (1.0 - roughness) + 1.0) + 1.0;
     float3 halfDirWS = normalize(light.direction + viewDirWS);
+    float NoH = dot(normalWS, halfDirWS);
     float blinnPhong = pow(saturate(dot(halfDirWS, normalWS)), shininess);
     float threshold = 1.0 - surface.specularThreshold;
     float stepPhong = smoothstep(threshold - roughness, threshold + roughness, blinnPhong);
 
-    float3 f0 = lerp(0.04, surface.color, metallic);
-    float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - saturate(dot(viewDirWS, halfDirWS)), 5.0);
+    float3 f0 = lerp(surface.SpecularKsNonMetal, surface.color, metallic);
+    //float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - saturate(dot(viewDirWS, halfDirWS)), 5.0);
+    float3 fresnel = fresnelSchlickRoughness(NoH, f0, roughness);
 
     half3 lightColor = light.color * light.shadowAttenuation;
-    half3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, 1.0, metallic);
+    half3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, surface.SpecularKsMetal, metallic);
     
     return specular * intensity * surface.specularIntensity;
 }
@@ -554,6 +564,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 specularData.specularIntensity = shadowIntensity;
                 specularData.specularThreshold = specularThreshold;
                 specularData.materialId = materialId;
+                specularData.SpecularKsNonMetal = _SpecularKsNonMetal;
+                specularData.SpecularKsMetal = _SpecularKsMetal;
                 specularData.MetalSpecularMetallic = _MetalSpecularMetallic;
 
                 specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirWS, positionWS, _SpecularColor, _SpecularShininess, _SpecularRoughness, _SpecularIntensity, diffuseFac);

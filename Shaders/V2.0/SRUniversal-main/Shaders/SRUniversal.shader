@@ -88,6 +88,8 @@ Shader "Custom/SRUniversal"
         _SpecularShininess("Specular Shininess (Default 10)", Range(0.1, 100)) = 10
         _SpecularRoughness("Specular Roughness (Default 0.1)", Range(0, 1)) = 0.1
         _SpecularIntensity("Specualr Intensity (Default 1)", Range(0, 50)) = 1
+        _SpecularKsNonMetal("Specular KS non-metal (Default 0.04)",Range(0,1)) = 0.04
+        _SpecularKsMetal("Specular KS metal (Default 1)",Range(0,1)) = 1
         _MetalSpecularMetallic("Metal Specular Metallic (Default 0.52)",Range(0,1)) = 0.52
 
 

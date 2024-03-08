@@ -116,6 +116,8 @@ half3 _SpecularColor;
 half _SpecularShininess;
 half _SpecularRoughness;
 half _SpecularIntensity;
+half _SpecularKsNonMetal;
+half _SpecularKsMetal;
 half _MetalSpecularMetallic;
 
 
