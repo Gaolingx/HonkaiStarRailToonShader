@@ -74,13 +74,12 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-float3 RGBAdjustment(float3 inputColor, float RPower, float GPower, float BPower)
+float3 RGBAdjustment(float3 color, float RPower, float GPower, float BPower)
 {
-    inputColor.r = pow(clamp(inputColor.r, 0.0, 1.0), RPower);
-    inputColor.g = pow(clamp(inputColor.g, 0.0, 1.0), GPower);
-    inputColor.b = pow(clamp(inputColor.b, 0.0, 1.0), BPower);
-    float3 finalColor = clamp(inputColor, 0.0, 1.0);
-    return finalColor;
+    color.r = pow(clamp(color.r, 0.0, 1.0), RPower);
+    color.g = pow(clamp(color.g, 0.0, 1.0), GPower);
+    color.b = pow(clamp(color.b, 0.0, 1.0), BPower);
+    return clamp(color, 0.0, 1.0);
 }
 
 float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
