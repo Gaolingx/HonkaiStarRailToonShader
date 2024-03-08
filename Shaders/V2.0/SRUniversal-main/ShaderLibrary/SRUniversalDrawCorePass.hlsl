@@ -274,6 +274,7 @@ struct RimLightData
     float intensityBackFace;
     float modelScale;
     float3 lightColor;
+    float rimLightMixMainLightColor;
 };
 
 float3 GetRimLight(
@@ -316,10 +317,9 @@ float3 GetRimLight(
     intensity = lerp(intensity, 1, smoothstep(0, rimLightData.edgeSoftness, depthDelta - rimThresholdMax));
     intensity *= lerp(rimLightData.intensityBackFace, rimLightData.intensityFrontFace, isFrontFace);
 
-    float3 rimlightcolorAdd;
-    rimlightcolorAdd = rimLightData.rimlightcolor * intensity * rimLightData.lightColor;
     float3 FinalRimColor;
-    FinalRimColor = CombineColorPreserveLuminance((rimLightData.rimlightcolor * intensity), rimlightcolorAdd);
+    FinalRimColor = lerp(rimLightData.rimlightcolor, CombineColorPreserveLuminance(rimLightData.lightColor, 0), rimLightData.rimLightMixMainLightColor) * intensity;
+
     return FinalRimColor;
 }
 
@@ -637,6 +637,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightData.intensityBackFace = _RimIntensityBackFace;
             rimLightData.modelScale = _ModelScale;
             rimLightData.lightColor = mainLightColor.rgb;
+            rimLightData.rimLightMixMainLightColor = _RimLightMixMainLightColor;
 
             rimLightColor = GetRimLight(rimLightData, input.positionCS, normalize(normalWS), isFrontFace, lightMap);
         }

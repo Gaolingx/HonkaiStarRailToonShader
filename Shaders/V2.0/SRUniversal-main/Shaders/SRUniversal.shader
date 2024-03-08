@@ -117,7 +117,8 @@ Shader "Custom/SRUniversal"
         _RimWidth0("Width (Default 0.5)", Range(0, 5)) = 0.5
         _RimColor0("Color (Default white)", Color) = (1.0, 1.0, 1.0, 1.0)
         _RimDark0("Darken Value (Default 0.5)", Range(0, 1)) = 0.5
-        _RimLightMixAlbedo("Rim light mix albedo (Default 0.9)",Range(0, 1)) = 0.9
+        _RimLightMixMainLightColor("Rim light mix mainlight color (Default 0)",Range(0, 1)) = 0
+        _RimLightMixAlbedo("Rim light mix albedo (Default 0)",Range(0, 1)) = 0
 
         [Header(Bloom)]
         _mBloomIntensity0("Intensity", Range(0, 100)) = 1
