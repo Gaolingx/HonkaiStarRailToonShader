@@ -83,6 +83,13 @@ float3 RGBAdjustment(float3 inputColor, float RPower, float GPower, float BPower
     return finalColor;
 }
 
+float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
+{
+    float3 hsv = RgbToHsv(color + colorAdd);
+    hsv.z = RgbToHsv(color).z;
+    return HsvToRgb(hsv);
+}
+
 Light GetCharacterMainLightStruct(float4 shadowCoord)
 {
     Light light = GetMainLight();
@@ -267,6 +274,7 @@ struct RimLightData
     float intensityFrontFace;
     float intensityBackFace;
     float modelScale;
+    float3 lightColor;
 };
 
 float3 GetRimLight(
@@ -309,8 +317,10 @@ float3 GetRimLight(
     intensity = lerp(intensity, 1, smoothstep(0, rimLightData.edgeSoftness, depthDelta - rimThresholdMax));
     intensity *= lerp(rimLightData.intensityBackFace, rimLightData.intensityFrontFace, isFrontFace);
 
+    float3 rimlightcolorAdd;
+    rimlightcolorAdd = rimLightData.rimlightcolor * intensity * rimLightData.lightColor;
     float3 FinalRimColor;
-    FinalRimColor = rimLightData.rimlightcolor * intensity;
+    FinalRimColor = CombineColorPreserveLuminance((rimLightData.rimlightcolor * intensity), rimlightcolorAdd);
     return FinalRimColor;
 }
 
@@ -444,7 +454,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #endif
 
     // LightMap
-    float shadowIntensity = lightMap.r;
+    float specularIntensity = lightMap.r;
     float diffuseThreshold = lightMap.g;
     float specularThreshold = lightMap.b;
     float materialId = lightMap.a;
@@ -468,7 +478,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
         
-        indirectLightColor *= lerp(1, shadowIntensity, _IndirectLightOcclusionUsage); // 加个 Ambient Occlusion
+        indirectLightColor *= lerp(1, specularIntensity, _IndirectLightOcclusionUsage); // 加个 Ambient Occlusion
     #elif _AREA_FACE
         indirectLightColor *= lerp(1, lerp(faceMap.g, 1, step(faceMap.r, 0.5)), _IndirectLightOcclusionUsage);
     #endif
@@ -490,7 +500,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 1.0 - shadowThreshold + _ShadowThresholdSoftness,
                 remappedNoL + _ShadowThresholdCenter);
             //应用AO
-            mainLightShadow *= lerp(1, shadowIntensity, _LerpAOIntensity);
+            mainLightShadow *= lerp(1, specularIntensity, _LerpAOIntensity);
             mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
 
             RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);
@@ -561,7 +571,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             {
                 SpecularData specularData;
                 specularData.color = baseColor;
-                specularData.specularIntensity = shadowIntensity;
+                specularData.specularIntensity = specularIntensity;
                 specularData.specularThreshold = specularThreshold;
                 specularData.materialId = materialId;
                 specularData.SpecularKsNonMetal = _SpecularKsNonMetal;
@@ -627,6 +637,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
             rimLightData.modelScale = _ModelScale;
+            rimLightData.lightColor = mainLightColor.rgb;
 
             rimLightColor = GetRimLight(rimLightData, input.positionCS, normalize(normalWS), isFrontFace, lightMap);
         }
