@@ -259,7 +259,6 @@ float GetLinearEyeDepthAnyProjection(float4 svPosition)
 struct RimLightData
 {
     float3 rimlightcolor;
-    float3 mainLightColor;
     float rimlightwidth;
     float edgeSoftness;
     float thresholdMin;
@@ -310,14 +309,12 @@ float3 GetRimLight(
     intensity = lerp(intensity, 1, smoothstep(0, rimLightData.edgeSoftness, depthDelta - rimThresholdMax));
     intensity *= lerp(rimLightData.intensityBackFace, rimLightData.intensityFrontFace, isFrontFace);
 
-    float3 FinalRimColor = 0;
-    FinalRimColor = rimLightData.mainLightColor;
-    FinalRimColor *= intensity;
-    
+    float3 FinalRimColor;
+    FinalRimColor = rimLightData.rimlightcolor * intensity;
     return FinalRimColor;
 }
 
-struct Surface
+struct SpecularData
 {
     half3 color;
     half specularIntensity;
@@ -326,7 +323,7 @@ struct Surface
     half MetalSpecularMetallic;
 };
 
-half3 CalculateSpecular(Surface surface, Light light, float3 viewDirWS, half3 normalWS, 
+half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
     half3 specColor, float shininess, float roughness, float intensity, float diffuseFac, float metallic = 0.0)
 {
     //roughness = lerp(1.0, roughness * roughness, metallic);
@@ -345,7 +342,7 @@ half3 CalculateSpecular(Surface surface, Light light, float3 viewDirWS, half3 no
     return specular * intensity * surface.specularIntensity;
 }
 
-half3 CalculateBaseSpecular(Surface surface, Light light, float3 viewDirWS, half3 normalWS, 
+half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
     half3 specColor, float shininess, float roughness, float intensity, float diffuseFac)
 {
     half3 FinalSpecularColor = 0;
@@ -404,7 +401,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
     #if _NORMAL_MAP_ON
-        float3x3 tangentToWorld = half3x3(input.tangentWS, input.bitangentWS, input.normalWS);
+        float3x3 tangentToWorld = float3x3(input.tangentWS, input.bitangentWS, input.normalWS);
         float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv);
         float3 normalTS = UnpackNormal(normalMap);
         float3 normalWS = TransformTangentToWorld(normalTS, tangentToWorld, true);
@@ -552,7 +549,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #if _SPECULAR_ON
         #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
             {
-                Surface specularData;
+                SpecularData specularData;
                 specularData.color = baseColor;
                 specularData.specularIntensity = shadowIntensity;
                 specularData.specularThreshold = specularThreshold;
@@ -618,7 +615,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
             rimLightData.modelScale = _ModelScale;
-            rimLightData.mainLightColor = mainLightColor;
 
             rimLightColor = GetRimLight(rimLightData, input.positionCS, normalize(normalWS), isFrontFace, lightMap);
         }
