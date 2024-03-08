@@ -132,25 +132,25 @@ float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFacto
     return finalColor;
 }
 
-float4 GetMainTexColor(float2 uv, sampler2D FaceColorMap, float4 FaceColorMapColor,
-    sampler2D HairColorMap, float4 HairColorMapColor,
-    sampler2D UpperBodyColorMap, float4 UpperBodyColorMapColor,
-    sampler2D LowerBodyColorMap, float4 LowerBodyColorMapColor)
+float4 GetMainTexColor(float2 uv, TEXTURE2D(FaceColorMap), float4 FaceColorMapColor,
+    TEXTURE2D(HairColorMap), float4 HairColorMapColor,
+    TEXTURE2D(UpperBodyColorMap), float4 UpperBodyColorMapColor,
+    TEXTURE2D(LowerBodyColorMap), float4 LowerBodyColorMapColor)
 {
     float4 areaMap = 0;
     float4 areaColor = 0;
     //根据不同的Keyword，采样不同的贴图，作为额漫反射颜色
     #if _AREA_FACE
-        areaMap = tex2D(FaceColorMap, uv);
+        areaMap = SAMPLE_TEXTURE2D(FaceColorMap, sampler_FaceColorMap, uv);
         areaColor = areaMap * FaceColorMapColor;
     #elif _AREA_HAIR
-        areaMap = tex2D(HairColorMap, uv);
+        areaMap = SAMPLE_TEXTURE2D(HairColorMap, sampler_HairColorMap, uv);
         areaColor = areaMap * HairColorMapColor;
     #elif _AREA_UPPERBODY
-        areaMap = tex2D(UpperBodyColorMap, uv);
+        areaMap = SAMPLE_TEXTURE2D(UpperBodyColorMap, sampler_UpperBodyColorMap, uv);
         areaColor = areaMap * UpperBodyColorMapColor;
     #elif _AREA_LOWERBODY
-        areaMap = tex2D(LowerBodyColorMap, uv);
+        areaMap = SAMPLE_TEXTURE2D(LowerBodyColorMap, sampler_LowerBodyColorMap, uv);
         areaColor = areaMap * LowerBodyColorMapColor;
     #endif
     return areaColor;
@@ -162,10 +162,10 @@ struct RampColor
     float3 warmRampCol;
 };
 
-RampColor RampColorConstruct(float2 rampUV, sampler2D HairCoolRamp, float3 HairCoolRampColor, float HairCoolRampColorMixFactor,
-    sampler2D HairWarmRamp, float3 HairWarmRampColor, float HairWarmRampColorMixFactor,
-    sampler2D BodyCoolRamp, float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
-    sampler2D BodyWarmRamp, float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
+RampColor RampColorConstruct(float2 rampUV, TEXTURE2D(HairCoolRamp), float3 HairCoolRampColor, float HairCoolRampColorMixFactor,
+    TEXTURE2D(HairWarmRamp), float3 HairWarmRampColor, float HairWarmRampColorMixFactor,
+    TEXTURE2D(BodyCoolRamp), float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
+    TEXTURE2D(BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
 {
     RampColor R;
     float3 coolRampTexCol = 1;
@@ -174,13 +174,13 @@ RampColor RampColorConstruct(float2 rampUV, sampler2D HairCoolRamp, float3 HairC
     float3 warmRampCol = 1;
     //hair的Ramp贴图和身体或脸部的不一样，按照keyword采样
     #if _AREA_HAIR
-        coolRampTexCol = tex2D(HairCoolRamp, rampUV).rgb;
-        warmRampTexCol = tex2D(HairWarmRamp, rampUV).rgb;
+        coolRampTexCol = SAMPLE_TEXTURE2D(HairCoolRamp, sampler_HairCoolRamp, rampUV).rgb;
+        warmRampTexCol = SAMPLE_TEXTURE2D(HairWarmRamp, sampler_HairWarmRamp, rampUV).rgb;
         coolRampCol = LinearColorMix(coolRampTexCol, HairCoolRampColor, HairCoolRampColorMixFactor);
         warmRampCol = LinearColorMix(warmRampTexCol, HairWarmRampColor, HairWarmRampColorMixFactor);
     #elif _AREA_FACE || _AREA_UPPERBODY || _AREA_LOWERBODY
-        coolRampTexCol = tex2D(BodyCoolRamp, rampUV).rgb;
-        warmRampTexCol = tex2D(BodyWarmRamp, rampUV).rgb;
+        coolRampTexCol = SAMPLE_TEXTURE2D(BodyCoolRamp, sampler_BodyCoolRamp, rampUV).rgb;
+        warmRampTexCol = SAMPLE_TEXTURE2D(BodyWarmRamp, sampler_BodyWarmRamp, rampUV).rgb;
         coolRampCol = LinearColorMix(coolRampTexCol, BodyCoolRampColor, BodyCoolRampColorMixFactor);
         warmRampCol = LinearColorMix(warmRampTexCol, BodyWarmRampColor, BodyWarmRampColorMixFactor);
     #endif
@@ -189,15 +189,15 @@ RampColor RampColorConstruct(float2 rampUV, sampler2D HairCoolRamp, float3 HairC
     return R;
 }
 
-float4 GetLightMapTex(float2 uv, sampler2D HairLightMap, sampler2D UpperBodyLightMap, sampler2D LowerBodyLightMap)
+float4 GetLightMapTex(float2 uv, TEXTURE2D(HairLightMap), TEXTURE2D(UpperBodyLightMap), TEXTURE2D(LowerBodyLightMap))
 {
     float4 lightMap = 0;
     #if _AREA_HAIR
-        lightMap = tex2D(HairLightMap, uv);
+        lightMap = SAMPLE_TEXTURE2D(HairLightMap, sampler_HairLightMap, uv);
     #elif _AREA_UPPERBODY
-        lightMap = tex2D(UpperBodyLightMap, uv);
+        lightMap = SAMPLE_TEXTURE2D(UpperBodyLightMap, sampler_UpperBodyLightMap, uv);
     #elif _AREA_LOWERBODY
-        lightMap = tex2D(LowerBodyLightMap, uv);
+        lightMap = SAMPLE_TEXTURE2D(LowerBodyLightMap, sampler_LowerBodyLightMap, uv);
     #endif
     return lightMap;
 }
@@ -434,7 +434,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 viewDirectionWS = normalize(input.viewDirectionWS);
 
     float3 baseColor = 0;
-    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
         _HairColorMap, _HairColorMapColor,
         _UpperBodyColorMap, _UpperBodyColorMapColor,
@@ -594,11 +594,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 float2 stockingsMapRG = 0;
                 float stockingsMapB = 0;
                 #if _AREA_UPPERBODY
-                    stockingsMapRG = tex2D(_UpperBodyStockings, input.uv).rg;
-                    stockingsMapB = tex2D(_UpperBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
+                    stockingsMapRG = SAMPLE_TEXTURE2D(_UpperBodyStockings, sampler_UpperBodyStockings, input.uv).rg;
+                    stockingsMapB = SAMPLE_TEXTURE2D(_UpperBodyStockings, sampler_UpperBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
                 #elif _AREA_LOWERBODY
-                    stockingsMapRG = tex2D(_LowerBodyStockings, input.uv).rg;
-                    stockingsMapB = tex2D(_LowerBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
+                    stockingsMapRG = SAMPLE_TEXTURE2D(_LowerBodyStockings, sampler_LowerBodyStockings, input.uv).rg;
+                    stockingsMapB = SAMPLE_TEXTURE2D(_LowerBodyStockings, sampler_LowerBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
                 #endif
                 //用法线点乘视角向量模拟皮肤透过丝袜
                 float NoV = dot(normalWS, viewDirectionWS);
@@ -666,8 +666,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             float3 headForward = normalize(_HeadForward);
             fakeOutlineEffect = smoothstep(0.0, 0.25, pow(saturate(dot(headForward, viewDirectionWS)), 20) * fakeOutline);
             float2 outlineUV = float2(0, 0.0625);
-            coolRampCol = tex2D(_BodyCoolRamp, outlineUV).rgb;
-            warmRampCol = tex2D(_BodyWarmRamp, outlineUV).rgb;
+            coolRampCol = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, outlineUV).rgb;
+            warmRampCol = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, outlineUV).rgb;
             float3 OutlineRamp = 0;
             #if _USE_RAMP_COLOR_ON
                 OutlineRamp = abs(lerp(coolRampCol, warmRampCol, 0.5));
@@ -725,7 +725,7 @@ void CharacterShadowFragment(
     bool isFrontFace            : SV_IsFrontFace)
 {
     float3 baseColor = 0;
-    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
         _HairColorMap, _HairColorMapColor,
         _UpperBodyColorMap, _UpperBodyColorMapColor,
@@ -750,7 +750,7 @@ float4 CharacterDepthOnlyFragment(
     bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
-    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
         _HairColorMap, _HairColorMapColor,
         _UpperBodyColorMap, _UpperBodyColorMapColor,
@@ -777,7 +777,7 @@ float4 CharacterDepthNormalsFragment(
     bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
-    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
         _HairColorMap, _HairColorMapColor,
         _UpperBodyColorMap, _UpperBodyColorMapColor,
@@ -804,7 +804,7 @@ half4 CharacterMotionVectorsFragment(
     bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
-    baseColor = tex2D(_BaseMap, input.uv).rgb;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
         _HairColorMap, _HairColorMapColor,
         _UpperBodyColorMap, _UpperBodyColorMapColor,

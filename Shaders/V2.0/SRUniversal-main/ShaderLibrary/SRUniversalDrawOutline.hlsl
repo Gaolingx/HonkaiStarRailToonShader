@@ -81,29 +81,29 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     #if _AREA_HAIR
         {
             float2 outlineUV = float2(0, 0.5);
-            coolRamp = tex2D(_HairCoolRamp, outlineUV).rgb;
-            warmRamp = tex2D(_HairWarmRamp, outlineUV).rgb;
+            coolRamp = SAMPLE_TEXTURE2D(_HairCoolRamp, sampler_HairCoolRamp, outlineUV).rgb;
+            warmRamp = SAMPLE_TEXTURE2D(_HairWarmRamp, sampler_HairWarmRamp, outlineUV).rgb;
         }
     #elif _AREA_UPPERBODY || _AREA_LOWERBODY
         {
             float4 lightMap = 0;
             #if _AREA_UPPERBODY
-                lightMap = tex2D(_UpperBodyLightMap, input.uv);
+                lightMap = SAMPLE_TEXTURE2D(_UpperBodyLightMap, sampler_UpperBodyLightMap, input.uv);
             #elif _AREA_LOWERBODY
-                lightMap = tex2D(_LowerBodyLightMap, input.uv);
+                lightMap = SAMPLE_TEXTURE2D(_LowerBodyLightMap, sampler_LowerBodyLightMap, input.uv);
             #endif
             float materialEnum = lightMap.a;
             float materialEnumOffset = materialEnum + 0.0425;
             float outlineUVy = lerp(materialEnumOffset, materialEnumOffset + 0.5 > 1 ? materialEnumOffset + 0.5 - 1 : materialEnumOffset + 0.5, fmod((round(materialEnumOffset/0.0625) - 1)/2, 2));
             float2 outlineUV = float2(0, outlineUVy);
-            coolRamp = tex2D(_BodyCoolRamp, outlineUV).rgb;
-            warmRamp = tex2D(_BodyWarmRamp, outlineUV).rgb;
+            coolRamp = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, outlineUV).rgb;
+            warmRamp = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, outlineUV).rgb;
         }
     #elif _AREA_FACE
         {
             float2 outlineUV = float2(0, 0.0625);
-            coolRamp = tex2D(_BodyCoolRamp, outlineUV).rgb;
-            warmRamp = tex2D(_BodyWarmRamp, outlineUV).rgb;
+            coolRamp = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, outlineUV).rgb;
+            warmRamp = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, outlineUV).rgb;
         }
     #endif
 
