@@ -346,14 +346,14 @@ half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, hal
     //roughness = lerp(1.0, roughness * roughness, metallic);
     //float smoothness = exp2(shininess * (1.0 - roughness) + 1.0) + 1.0;
     float3 halfDirWS = normalize(light.direction + viewDirWS);
-    float NoH = dot(normalWS, halfDirWS);
+    float HoV = saturate(dot(viewDirWS, halfDirWS));
     float blinnPhong = pow(saturate(dot(halfDirWS, normalWS)), shininess);
     float threshold = 1.0 - surface.specularThreshold;
     float stepPhong = smoothstep(threshold - roughness, threshold + roughness, blinnPhong);
 
     float3 f0 = lerp(surface.SpecularKsNonMetal, surface.color, metallic);
     //float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - saturate(dot(viewDirWS, halfDirWS)), 5.0);
-    float3 fresnel = fresnelSchlickRoughness(NoH, f0, roughness);
+    float3 fresnel = fresnelSchlickRoughness(HoV, f0, roughness);
 
     half3 lightColor = light.color * light.shadowAttenuation;
     half3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, surface.SpecularKsMetal, metallic);
