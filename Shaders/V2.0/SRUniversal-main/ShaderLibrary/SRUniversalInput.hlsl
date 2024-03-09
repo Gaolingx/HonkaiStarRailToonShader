@@ -124,6 +124,7 @@ float _MainLightBrightnessFactor;
 float _LerpAOIntensity;
 float _MainLightColorUsage;
 float _ShadowThresholdCenter;
+float _MainLightShadowOffset;
 float _ShadowThresholdSoftness;
 float _ShadowRampOffset;
 float _ShadowBoost;

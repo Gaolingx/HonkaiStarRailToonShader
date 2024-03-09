@@ -497,7 +497,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             mainLightShadow = smoothstep(
                 1.0 - shadowThreshold - _ShadowThresholdSoftness,
                 1.0 - shadowThreshold + _ShadowThresholdSoftness,
-                remappedNoL + _ShadowThresholdCenter);
+                remappedNoL + _ShadowThresholdCenter) + _MainLightShadowOffset;
             //应用AO
             mainLightShadow *= lerp(1, specularIntensity, _LerpAOIntensity);
             mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));

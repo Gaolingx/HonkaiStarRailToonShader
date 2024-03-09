@@ -59,6 +59,7 @@ Shader "Custom/SRUniversal"
         [Header(Main Lighting)]
         _MainLightBrightnessFactor("Main light brightness factor (Default 1)",Range(0,1)) = 1
         _MainLightColorUsage("Main light color usage (Default 1)",Range(0,1)) = 1
+        _MainLightShadowOffset("Main light shadow offset (Default 0)",Range(-1,1)) = 0
         _LerpAOIntensity("Lerp AO Intensity (Default 1)",Range(0,1)) = 1
         _ShadowThresholdCenter("Shadow threshold center (Default 0)",Range(-1,1)) = 0
         _ShadowThresholdSoftness("Shadow threshold softness (Default 0.1)",Range(0,1)) = 0.1
