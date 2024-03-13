@@ -49,14 +49,6 @@ namespace HSR.NPRShader
 
         // -------------------------------------------------------
 
-        [Header("MainLightPerObjectShadow")]
-
-        [Range(0, 10)] public float DepthBias = 1;
-        [Range(0, 10)] public float NormalBias = 1;
-        [Min(0)] public float MaxShadowDistance = 40;
-
-        // -------------------------------------------------------
-
         [NonSerialized] private RTHandle[] m_GBuffers;
         [NonSerialized] private int[] m_GBufferNameIds;
 
@@ -84,7 +76,7 @@ namespace HSR.NPRShader
 
             m_ForceDepthPrepassPass = new RequestResourcePass(RenderPassEvent.BeforeRenderingOpaques,
                 ScriptableRenderPassInput.Depth); // 在 Opaque 前要求 DepthTexture，强行 DepthPrepass
-            m_MainLightPerObjShadowPass = new MainLightPerObjectShadowCasterPass(new ShaderTagId("HSRPerObjectShadowCaster"));
+            m_MainLightPerObjShadowPass = new MainLightPerObjectShadowCasterPass();
             m_ScreenSpaceShadowPass = new ScreenSpaceShadowsPass();
             m_ScreenSpaceShadowPostPass = new ScreenSpaceShadowsPostPass();
             m_ClearGBufferPass = new ClearRTPass(RenderPassEvent.AfterRenderingOpaques);
@@ -149,8 +141,6 @@ namespace HSR.NPRShader
             RTHandle depthTarget = renderer.cameraDepthTargetHandle;
 
             ReAllocateGBuffersIfNeeded(in renderingData.cameraData.cameraTargetDescriptor);
-
-            m_MainLightPerObjShadowPass.Setup(DepthBias, NormalBias, MaxShadowDistance);
 
             m_ClearGBufferPass.SetupClear(m_GBuffers, ClearFlag.All, new Color(0, 0, 0, 0));
             m_DrawOpaqueForward1Pass.Setup(colorTarget, depthTarget, m_GBuffers);

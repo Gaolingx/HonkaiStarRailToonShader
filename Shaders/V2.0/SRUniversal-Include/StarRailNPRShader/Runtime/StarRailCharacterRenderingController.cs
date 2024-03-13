@@ -21,7 +21,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using HSR.NPRShader.Shadow;
 using HSR.NPRShader.Utils;
 using UnityEngine;
@@ -32,7 +31,7 @@ namespace HSR.NPRShader
     [ExecuteAlways]
     [DisallowMultipleComponent]
     [AddComponentMenu("StarRail NPR Shader/StarRail Character Rendering Controller")]
-    public sealed class StarRailCharacterRenderingController : MonoBehaviour, IPerObjectShadowCaster
+    public sealed class StarRailCharacterRenderingController : MonoBehaviour
     {
         private enum TransformDirection
         {
@@ -58,6 +57,7 @@ namespace HSR.NPRShader
 
         [NonSerialized] private readonly List<Renderer> m_Renderers = new();
         [NonSerialized] private readonly Lazy<MaterialPropertyBlock> m_PropertyBlock = new();
+        [NonSerialized] private PerObjectShadowCasterHandle m_ShadowCasterHandle;
 
         public float RampCoolWarmMix
         {
@@ -92,115 +92,145 @@ namespace HSR.NPRShader
         public bool IsCastingShadow
         {
             get => m_IsCastingShadow;
-            set => m_IsCastingShadow = value;
+            set
+            {
+                m_IsCastingShadow = value;
+                UpdateShadowCasterHandle();
+            }
         }
-
-        public MaterialPropertyBlock PropertyBlock => m_PropertyBlock.Value;
 
         private void OnEnable()
         {
+            UpdateShadowCasterHandle(true);
             UpdateRendererList();
-            PerObjectShadowManager.Register(this);
+
+#if UNITY_EDITOR
+            UnityEditor.SceneVisibilityManager.visibilityChanged += OnCharacterVisibilityChanged;
+#endif
         }
 
         private void OnDisable()
         {
-            PerObjectShadowManager.Unregister(this);
+            UpdateShadowCasterHandle(false);
 
-            // 这里就不要更新 RendererList 了，只清除之前的
-            foreach (Renderer renderer in m_Renderers)
-            {
-                renderer.SetPropertyBlock(null);
-            }
+#if UNITY_EDITOR
+            UnityEditor.SceneVisibilityManager.visibilityChanged -= OnCharacterVisibilityChanged;
+#endif
 
             m_Renderers.Clear();
             m_PropertyBlock.Value.Clear();
         }
 
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            UpdateShadowCasterHandle();
+        }
+
+        private void OnCharacterVisibilityChanged()
+        {
+            UpdateShadowCasterHandle();
+        }
+#endif
+
+        private void UpdateShadowCasterHandle(bool? scriptEnabled = null)
+        {
+            bool enable = scriptEnabled ?? enabled;
+
+#if UNITY_EDITOR
+            enable &= !UnityEditor.SceneVisibilityManager.instance.IsHidden(gameObject);
+#endif
+
+            if (!enable || !m_IsCastingShadow)
+            {
+                PerObjectShadowManager.FreeIfNot(in m_ShadowCasterHandle);
+            }
+            else
+            {
+                PerObjectShadowManager.AllocateIfNot(ref m_ShadowCasterHandle);
+            }
+        }
+
         private void Update()
         {
-            MaterialPropertyBlock properties = m_PropertyBlock.Value;
+            UpdateMaterialsAndShadowBounds(refreshRenderers: !Application.isPlaying);
+        }
 
-            properties.SetFloat(PropertyIds._RampCoolWarmLerpFactor, m_RampCoolWarmMix);
-            properties.SetFloat(PropertyIds._DitherAlpha, m_DitherAlpha);
-            properties.SetFloat(PropertyIds._ExCheekIntensity, m_ExCheekIntensity);
-            properties.SetFloat(PropertyIds._ExShyIntensity, m_ExShyIntensity);
-            properties.SetFloat(PropertyIds._ExShadowIntensity, m_ExShadowIntensity);
+        private void UpdateMaterialProperties()
+        {
+            List<(int, float)> floats = ListPool<(int, float)>.Get();
+            List<(int, Vector4)> vectors = ListPool<(int, Vector4)>.Get();
 
-            if (m_MMDHeadBone != null)
+            try
             {
-                Vector4 forward = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneForward);
-                Vector4 up = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneUp);
-                Vector4 right = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneRight);
+                floats.Add((PropertyIds._RampCoolWarmLerpFactor, m_RampCoolWarmMix));
+                floats.Add((PropertyIds._DitherAlpha, m_DitherAlpha));
+                floats.Add((PropertyIds._ExCheekIntensity, m_ExCheekIntensity));
+                floats.Add((PropertyIds._ExShyIntensity, m_ExShyIntensity));
+                floats.Add((PropertyIds._ExShadowIntensity, m_ExShadowIntensity));
 
-                properties.SetVector(PropertyIds._MMDHeadBoneForward, forward);
-                properties.SetVector(PropertyIds._MMDHeadBoneUp, up);
-                properties.SetVector(PropertyIds._MMDHeadBoneRight, right);
+                if (m_MMDHeadBone != null)
+                {
+                    Vector4 forward = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneForward);
+                    Vector4 up = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneUp);
+                    Vector4 right = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneRight);
+
+                    vectors.Add((PropertyIds._MMDHeadBoneForward, forward));
+                    vectors.Add((PropertyIds._MMDHeadBoneUp, up));
+                    vectors.Add((PropertyIds._MMDHeadBoneRight, right));
+                }
+
+                RendererUtility.SetMaterialPropertiesPerRenderer(m_Renderers, m_PropertyBlock.Value, floats, vectors);
             }
-
-            ForceUpdateRendererListInEditor();
-
-            foreach (Renderer renderer in m_Renderers)
+            finally
             {
-                renderer.SetPropertyBlock(properties);
+                ListPool<(int, float)>.Release(floats);
+                ListPool<(int, Vector4)>.Release(vectors);
             }
         }
 
         private void OnDrawGizmosSelected()
         {
+            if (!m_ShadowCasterHandle.TryGetBounds(out Bounds bounds))
+            {
+                return;
+            }
+
             Color color = Gizmos.color;
             Gizmos.color = Color.green;
-
-            IPerObjectShadowCaster caster = this;
-            Bounds bounds = caster.GetActiveRenderersAndBounds(null);
             Gizmos.DrawWireCube(bounds.center, bounds.size);
-
             Gizmos.color = color;
         }
 
         public void UpdateRendererList()
         {
-            m_Renderers.Clear();
-            GetComponentsInChildren(true, m_Renderers);
+            UpdateMaterialsAndShadowBounds(refreshRenderers: true);
         }
 
-        [Conditional("UNITY_EDITOR")]
-        private void ForceUpdateRendererListInEditor()
+        private void UpdateMaterialsAndShadowBounds(bool refreshRenderers)
         {
-            if (!Application.isPlaying)
+            if (refreshRenderers)
             {
-                UpdateRendererList();
-            }
-        }
-
-        bool IPerObjectShadowCaster.IsActiveAndCastingShadow => isActiveAndEnabled && m_IsCastingShadow;
-
-        Bounds IPerObjectShadowCaster.GetActiveRenderersAndBounds(List<Renderer> outRendererListOrNull)
-        {
-            ForceUpdateRendererListInEditor();
-
-            Bounds bounds = default;
-            bool first = true;
-
-            foreach (var r in m_Renderers)
-            {
-                if (r.gameObject.activeInHierarchy && r.enabled && r.shadowCastingMode != ShadowCastingMode.Off)
-                {
-                    if (first)
-                    {
-                        bounds = r.bounds;
-                        first = false;
-                    }
-                    else
-                    {
-                        bounds.Encapsulate(r.bounds);
-                    }
-
-                    outRendererListOrNull?.Add(r);
-                }
+                m_Renderers.Clear();
+                GetComponentsInChildren(true, m_Renderers);
             }
 
-            return bounds;
+            // 因为 Build 之后需要实例化 Material，所以必须要先设置 MaterialProperties
+            // 这样后面访问 SharedMaterial 时才能拿到正确的材质
+            UpdateMaterialProperties();
+
+#if UNITY_EDITOR
+            // Editor 中 Shader 可以任意修改，所以每次都要更新 Renderer
+            refreshRenderers = true;
+#endif
+            if (refreshRenderers)
+            {
+                m_ShadowCasterHandle.TryUpdateRenderersAndBounds(m_Renderers);
+            }
+            else
+            {
+                m_ShadowCasterHandle.TryUpdateBounds();
+            }
         }
 
         private static Vector3 GetTransformDirection(Transform transform, TransformDirection direction)

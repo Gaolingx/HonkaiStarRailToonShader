@@ -35,94 +35,86 @@ namespace HSR.NPRShader.Passes
         private const int TileResolution = 512;
         private const int ShadowMapBufferBits = 16;
 
-        private readonly ShaderTagId m_ShadowCasterTagId;
-        private readonly List<IPerObjectShadowCaster> m_ShadowCasterList;
+        private readonly List<ShadowCasterData> m_ShadowCasterList;
         private readonly Matrix4x4[] m_ShadowMatrixArray;
         private readonly Vector4[] m_ShadowMapRectArray;
         private int m_ShadowMapSizeInTile; // 一行/一列有多少个 tile
         private RTHandle m_ShadowMap;
-        private float m_DepthBias;
-        private float m_NormalBias;
-        private float m_MaxShadowDistance;
 
-        public MainLightPerObjectShadowCasterPass(ShaderTagId shadowCasterTagId)
+        public MainLightPerObjectShadowCasterPass()
         {
             renderPassEvent = RenderPassEvent.AfterRenderingShadows;
             profilingSampler = new ProfilingSampler("MainLightPerObjectShadow");
 
-            m_ShadowCasterTagId = shadowCasterTagId;
-            m_ShadowCasterList = new List<IPerObjectShadowCaster>();
+            m_ShadowCasterList = new List<ShadowCasterData>();
             m_ShadowMatrixArray = new Matrix4x4[MaxShadowCount];
             m_ShadowMapRectArray = new Vector4[MaxShadowCount];
         }
 
         public void Dispose()
         {
+            m_ShadowCasterList.Clear();
             m_ShadowMap?.Release();
-        }
-
-        public void Setup(float depthBias, float normalBias, float maxShadowDistance)
-        {
-            m_DepthBias = depthBias;
-            m_NormalBias = normalBias;
-            m_MaxShadowDistance = maxShadowDistance;
         }
 
         public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
         {
             base.OnCameraSetup(cmd, ref renderingData);
 
-            Camera camera = renderingData.cameraData.camera;
-            PerObjectShadowManager.GetCasterList(camera, m_ShadowCasterList, m_MaxShadowDistance, MaxShadowCount);
+            m_ShadowCasterList.Clear();
+
+            if (TryGetMainLight(ref renderingData, out VisibleLight mainLight))
+            {
+                Camera camera = renderingData.cameraData.camera;
+                Quaternion mainLightRotation = mainLight.localToWorldMatrix.rotation;
+                PerObjectShadowManager.GetCasterList(camera, mainLightRotation, m_ShadowCasterList, MaxShadowCount);
+            }
+        }
+
+        private static bool TryGetMainLight(ref RenderingData renderingData, out VisibleLight mainLight)
+        {
+            int mainLightIndex = renderingData.lightData.mainLightIndex;
+
+            if (mainLightIndex < 0)
+            {
+                mainLight = default;
+                return false;
+            }
+
+            mainLight = renderingData.lightData.visibleLights[mainLightIndex];
+            return mainLight.lightType == LightType.Directional;
         }
 
         public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
         {
             base.Configure(cmd, cameraTextureDescriptor);
 
-            if (m_ShadowCasterList.Count <= 0)
+            if (m_ShadowCasterList.Count > 0)
             {
-                return;
+                // 保证 shadow map 是正方形
+                m_ShadowMapSizeInTile = Mathf.CeilToInt(Mathf.Sqrt(m_ShadowCasterList.Count));
+                int shadowRTSize = m_ShadowMapSizeInTile * TileResolution;
+                ShadowUtils.ShadowRTReAllocateIfNeeded(ref m_ShadowMap, shadowRTSize, shadowRTSize, ShadowMapBufferBits);
+
+                ConfigureTarget(m_ShadowMap);
+                ConfigureClear(ClearFlag.All, Color.black);
             }
-
-            // 保证 shadow map 是正方形
-            m_ShadowMapSizeInTile = Mathf.CeilToInt(Mathf.Sqrt(m_ShadowCasterList.Count));
-            int shadowRTSize = m_ShadowMapSizeInTile * TileResolution;
-            ShadowUtils.ShadowRTReAllocateIfNeeded(ref m_ShadowMap, shadowRTSize, shadowRTSize, ShadowMapBufferBits);
-
-            ConfigureTarget(m_ShadowMap);
-            ConfigureClear(ClearFlag.All, Color.black);
-        }
-
-        public override void OnCameraCleanup(CommandBuffer cmd)
-        {
-            m_ShadowCasterList.Clear();
-
-            base.OnCameraCleanup(cmd);
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
             CommandBuffer cmd = CommandBufferPool.Get();
-            int mainLightIndex = renderingData.lightData.mainLightIndex;
 
             using (new ProfilingScope(cmd, profilingSampler))
             {
-                bool hasShadow = false;
-
-                if (mainLightIndex >= 0 && m_ShadowCasterList.Count > 0)
+                if (m_ShadowCasterList.Count > 0)
                 {
+                    int mainLightIndex = renderingData.lightData.mainLightIndex;
                     VisibleLight mainLight = renderingData.lightData.visibleLights[mainLightIndex];
-
-                    if (mainLight.lightType == LightType.Directional)
-                    {
-                        ExecuteShadowCasters(cmd, ref mainLight);
-                        SetShadowSamplingData(cmd);
-                        hasShadow = true;
-                    }
+                    RenderMainLightShadowMap(cmd, ref mainLight, mainLightIndex, ref renderingData.shadowData);
+                    SetShadowSamplingData(cmd);
                 }
-
-                if (!hasShadow)
+                else
                 {
                     cmd.SetGlobalInt(PropertyIds._PerObjShadowCount, 0);
                 }
@@ -132,57 +124,22 @@ namespace HSR.NPRShader.Passes
             CommandBufferPool.Release(cmd);
         }
 
-        private void ExecuteShadowCasters(CommandBuffer cmd, ref VisibleLight mainLight)
+        private void RenderMainLightShadowMap(CommandBuffer cmd, ref VisibleLight mainLight, int mainLightIndex, ref ShadowData shadowData)
         {
             cmd.SetGlobalDepthBias(1.0f, 2.5f); // these values match HDRP defaults (see https://github.com/Unity-Technologies/Graphics/blob/9544b8ed2f98c62803d285096c91b44e9d8cbc47/com.unity.render-pipelines.high-definition/Runtime/Lighting/Shadow/HDShadowAtlas.cs#L197 )
 
-            Quaternion mainLightRotation = mainLight.localToWorldMatrix.rotation;
-            Vector2 tileSize = new Vector2(TileResolution, TileResolution);
-            float scale = 1.0f / m_ShadowMapSizeInTile;
-
             for (int i = 0; i < m_ShadowCasterList.Count; i++)
             {
-                List<Renderer> rendererList = ListPool<Renderer>.Get();
+                ShadowCasterData casterData = m_ShadowCasterList[i];
 
-                Bounds boundsWS = m_ShadowCasterList[i].GetActiveRenderersAndBounds(rendererList);
-                var viewMatrix = Matrix4x4.TRS(boundsWS.center, mainLightRotation, Vector3.one).inverse;
-                viewMatrix.SetRow(2, -viewMatrix.GetRow(2)); // flip z
-
-                Bounds boundsVS = TransformBounds(boundsWS, viewMatrix);
-                Matrix4x4 projectionMatrix = ToProjectionMatrix(boundsVS);
-
-                Vector4 shadowBias = GetShadowBias(ref mainLight, projectionMatrix, m_ShadowMap.rt.width);
+                Vector4 shadowBias = ShadowUtils.GetShadowBias(ref mainLight, mainLightIndex, ref shadowData, casterData.ProjectionMatrix, m_ShadowMap.rt.width);
                 ShadowUtils.SetupShadowCasterConstantBuffer(cmd, ref mainLight, shadowBias);
                 CoreUtils.SetKeyword(cmd, ShaderKeywordStrings.CastingPunctualLightShadow, false);
 
-                Vector2Int offset = new(i % m_ShadowMapSizeInTile, i / m_ShadowMapSizeInTile);
-                Rect viewport = new(offset * TileResolution, tileSize);
-                DrawRenderers(cmd, rendererList, in viewport, in viewMatrix, in projectionMatrix);
-
-                ListPool<Renderer>.Release(rendererList);
-
-                Matrix4x4 coordMatrix = new Matrix4x4();
-                coordMatrix.SetRow(0, new Vector4(0.5f * scale, 0, 0, (0.5f + offset.x) * scale));
-                coordMatrix.SetRow(1, new Vector4(0, 0.5f * scale, 0, (0.5f + offset.y) * scale));
-                coordMatrix.SetRow(2, new Vector4(0, 0, 0.5f, 0.5f));
-                coordMatrix.SetRow(3, new Vector4(0, 0, 0, 1));
-
-                if (SystemInfo.usesReversedZBuffer)
-                {
-                    var projMat = projectionMatrix;
-                    projMat.SetRow(2, -projMat.GetRow(2));
-                    m_ShadowMatrixArray[i] = coordMatrix * projMat * viewMatrix;
-                }
-                else
-                {
-                    m_ShadowMatrixArray[i] = coordMatrix * projectionMatrix * viewMatrix;
-                }
-
-                // x: xMin
-                // y: xMax
-                // z: yMin
-                // w: yMax
-                m_ShadowMapRectArray[i] = scale * new Vector4(offset.x, 1 + offset.x, offset.y, 1 + offset.y);
+                Vector2Int tilePos = new(i % m_ShadowMapSizeInTile, i / m_ShadowMapSizeInTile);
+                DrawShadow(cmd, tilePos, in casterData);
+                m_ShadowMatrixArray[i] = GetShadowMatrix(tilePos, in casterData);
+                m_ShadowMapRectArray[i] = GetShadowMapRect(tilePos);
             }
 
             cmd.SetGlobalDepthBias(0.0f, 0.0f); // Restore previous depth bias values
@@ -191,50 +148,6 @@ namespace HSR.NPRShader.Passes
             cmd.SetGlobalInt(PropertyIds._PerObjShadowCount, m_ShadowCasterList.Count);
             cmd.SetGlobalMatrixArray(PropertyIds._PerObjShadowMatrices, m_ShadowMatrixArray);
             cmd.SetGlobalVectorArray(PropertyIds._PerObjShadowMapRects, m_ShadowMapRectArray);
-        }
-
-        private Vector4 GetShadowBias(ref VisibleLight shadowLight, Matrix4x4 lightProjectionMatrix, float shadowResolution)
-        {
-            // Frustum size is guaranteed to be a cube as we wrap shadow frustum around a sphere
-            float frustumSize = 2.0f / lightProjectionMatrix.m00;
-
-            // depth and normal bias scale is in shadowmap texel size in world space
-            float texelSize = frustumSize / shadowResolution;
-            float depthBias = -m_DepthBias * texelSize;
-            float normalBias = -m_NormalBias * texelSize;
-
-            // The current implementation of NormalBias in Universal RP is the same as in Unity Built-In RP (i.e moving shadow caster vertices along normals when projecting them to the shadow map).
-            // This does not work well with Point Lights, which is why NormalBias value is hard-coded to 0.0 in Built-In RP (see value of unity_LightShadowBias.z in FrameDebugger, and native code that sets it: https://github.cds.internal.unity3d.com/unity/unity/blob/a9c916ba27984da43724ba18e70f51469e0c34f5/Runtime/Camera/Shadows.cpp#L1686 )
-            // We follow the same convention in Universal RP:
-            if (shadowLight.lightType == LightType.Point)
-                normalBias = 0.0f;
-
-            if (shadowLight.light.shadows == LightShadows.Soft)
-            {
-                SoftShadowQuality softShadowQuality = SoftShadowQuality.Medium;
-                if (shadowLight.light.TryGetComponent(out UniversalAdditionalLightData additionalLightData))
-                    softShadowQuality = additionalLightData.softShadowQuality;
-
-                // TODO: depth and normal bias assume sample is no more than 1 texel away from shadowmap
-                // This is not true with PCF. Ideally we need to do either
-                // cone base bias (based on distance to center sample)
-                // or receiver place bias based on derivatives.
-                // For now we scale it by the PCF kernel size of non-mobile platforms (5x5)
-                float kernelRadius = 2.5f;
-
-                switch (softShadowQuality)
-                {
-                    case SoftShadowQuality.High: kernelRadius = 3.5f; break; // 7x7
-                    case SoftShadowQuality.Medium: kernelRadius = 2.5f; break; // 5x5
-                    case SoftShadowQuality.Low: kernelRadius = 1.5f; break; // 3x3
-                    default: break;
-                }
-
-                depthBias *= kernelRadius;
-                normalBias *= kernelRadius;
-            }
-
-            return new Vector4(depthBias, normalBias, 0.0f, 0.0f);
         }
 
         private void SetShadowSamplingData(CommandBuffer cmd)
@@ -254,98 +167,56 @@ namespace HSR.NPRShader.Passes
                 new Vector4(invShadowAtlasWidth, invShadowAtlasHeight, renderTargetWidth, renderTargetHeight));
         }
 
-        private void DrawRenderers(CommandBuffer cmd, List<Renderer> renderers, in Rect viewport, in Matrix4x4 viewMatrix, in Matrix4x4 projectionMatrix)
+        private static void DrawShadow(CommandBuffer cmd, Vector2Int tilePos, in ShadowCasterData casterData)
         {
-            cmd.SetViewProjectionMatrices(viewMatrix, projectionMatrix);
+            Rect viewport = new(tilePos * TileResolution, new Vector2(TileResolution, TileResolution));
+
+            cmd.SetViewProjectionMatrices(casterData.ViewMatrix, casterData.ProjectionMatrix);
             cmd.SetViewport(viewport);
             cmd.EnableScissorRect(new Rect(viewport.x + 4, viewport.y + 4, viewport.width - 8, viewport.height - 8));
 
-            List<Material> materialList = ListPool<Material>.Get();
-            Dictionary<Shader, int> shaderTagCache = DictionaryPool<Shader, int>.Get();
-
-            foreach (var renderer in renderers)
+            for (int i = 0; i < casterData.ShadowRenderers.Count; i++)
             {
-                materialList.Clear();
-                renderer.GetSharedMaterials(materialList);
-
-                for (int i = 0; i < materialList.Count; i++)
-                {
-                    Material material = materialList[i];
-
-                    if (TryGetShadowCasterPass(shaderTagCache, material, out int passIndex))
-                    {
-                        cmd.DrawRenderer(renderer, material, i, passIndex);
-                    }
-                }
+                ShadowRendererData data = casterData.ShadowRenderers[i];
+                cmd.DrawRenderer(data.Renderer, data.Material, data.SubmeshIndex, data.ShaderPass);
             }
-
-            DictionaryPool<Shader, int>.Release(shaderTagCache);
-            ListPool<Material>.Release(materialList);
 
             cmd.DisableScissorRect();
         }
 
-        private static readonly ShaderTagId s_LightModeTagName = new("LightMode");
-
-        private bool TryGetShadowCasterPass(Dictionary<Shader, int> cache, Material material, out int passIndex)
+        private Matrix4x4 GetShadowMatrix(Vector2Int tilePos, in ShadowCasterData casterData)
         {
-            Shader shader = material.shader;
+            Matrix4x4 proj = casterData.ProjectionMatrix;
 
-            if (cache.TryGetValue(shader, out passIndex))
+            if (SystemInfo.usesReversedZBuffer)
             {
-                return true;
+                proj.m20 = -proj.m20;
+                proj.m21 = -proj.m21;
+                proj.m22 = -proj.m22;
+                proj.m23 = -proj.m23;
             }
 
-            for (int i = 0; i < shader.passCount; i++)
-            {
-                if (shader.FindPassTagValue(i, s_LightModeTagName) == m_ShadowCasterTagId)
-                {
-                    passIndex = i;
-                    cache[shader] = i;
-                    return true;
-                }
-            }
+            float oneOverTileCount = 1.0f / m_ShadowMapSizeInTile;
 
-            return false;
+            Matrix4x4 textureScaleAndBias = Matrix4x4.identity;
+            textureScaleAndBias.m00 = 0.5f * oneOverTileCount;
+            textureScaleAndBias.m11 = 0.5f * oneOverTileCount;
+            textureScaleAndBias.m22 = 0.5f;
+            textureScaleAndBias.m03 = (0.5f + tilePos.x) * oneOverTileCount;
+            textureScaleAndBias.m13 = (0.5f + tilePos.y) * oneOverTileCount;
+            textureScaleAndBias.m23 = 0.5f;
+
+            // Apply texture scale and offset to save a MAD in shader.
+            return textureScaleAndBias * proj * casterData.ViewMatrix;
         }
 
-        private static readonly Vector3[] s_BoundsCornerBuffer = new Vector3[8];
-
-        private static Bounds TransformBounds(Bounds bounds, Matrix4x4 transformMatrix)
+        private Vector4 GetShadowMapRect(Vector2Int tilePos)
         {
-            Vector3 min = bounds.min;
-            Vector3 max = bounds.max;
-
-            s_BoundsCornerBuffer[0] = min;
-            s_BoundsCornerBuffer[1] = new Vector3(max.x, min.y, min.z);
-            s_BoundsCornerBuffer[2] = new Vector3(min.x, max.y, min.z);
-            s_BoundsCornerBuffer[3] = new Vector3(min.x, min.y, max.z);
-            s_BoundsCornerBuffer[4] = new Vector3(max.x, max.y, min.z);
-            s_BoundsCornerBuffer[5] = new Vector3(max.x, min.y, max.z);
-            s_BoundsCornerBuffer[6] = new Vector3(min.x, max.y, max.z);
-            s_BoundsCornerBuffer[7] = max;
-
-            return GeometryUtility.CalculateBounds(s_BoundsCornerBuffer, transformMatrix);
-        }
-
-        private static Matrix4x4 ToProjectionMatrix(Bounds bounds)
-        {
-            Vector3 min = bounds.min;
-            Vector3 max = bounds.max;
-
-            float left = min.x;
-            float right = max.x;
-            float bottom = min.y;
-            float top = max.y;
-            float zNear = min.z;
-            float zFar = max.z + 1000;
-
-            // https://docs.unity3d.com/ScriptReference/Matrix4x4.Ortho.html
-            // The returned matrix embeds a z-flip operation
-            // whose purpose is to cancel the z-flip performed by the camera view matrix.
-            // If the view matrix is an identity or some custom matrix that doesn't perform a z-flip,
-            // consider multiplying the third column of the projection matrix (i.e. m02, m12, m22 and m32) by -1.
-            return Matrix4x4.Ortho(left, right, bottom, top, zNear, zFar);
+            // x: xMin
+            // y: xMax
+            // z: yMin
+            // w: yMax
+            return new Vector4(tilePos.x, 1 + tilePos.x, tilePos.y, 1 + tilePos.y) / m_ShadowMapSizeInTile;
         }
 
         private static class PropertyIds
