@@ -57,6 +57,10 @@ Shader "Custom/SRUniversal"
         _IndirectLightMixBaseColor("Indirect light mix base color (Default 1)",Range(0,1)) = 1
 
         [Header(Main Lighting)]
+        [Toggle(_AUTO_Brightness_ON)] _UseAutoBrightness("Use Auto Brightness (Default NO)", float) = 0
+        _AutoBrightnessThresholdMin("Auto Brightness Threshold Min (Default 0.5)", Float) = 0.5
+        _AutoBrightnessThresholdMax("Auto Brightness Threshold Max (Default 1.0)", Float) = 1.0
+        _AutoBrightnessOffset("Auto Brightness Offset (Default 0)",Range(-1,1)) = 0
         _MainLightBrightnessFactor("Main light brightness factor (Default 1)",Range(0,1)) = 1
         _MainLightColorUsage("Main light color usage (Default 1)",Range(0,1)) = 1
         _MainLightShadowOffset("Main light shadow offset (Default 0)",Range(-1,1)) = 0
@@ -112,8 +116,8 @@ Shader "Custom/SRUniversal"
         _ModelScale("Model Scale (Default 1)", Float) = 1
         _RimIntensity("Intensity (Front) (Default 0.5)", Range(0, 5)) = 0.5
         _RimIntensityBackFace("Intensity (Back) (Default 0)", Range(0, 5)) = 0
-        _RimThresholdMin("Threshold Min (Default 0.6)", Float) = 0.6
-        _RimThresholdMax("Threshold Max (Default 0.9)", Float) = 0.9
+        _RimThresholdMin("Rim Threshold Min (Default 0.6)", Float) = 0.6
+        _RimThresholdMax("Rim Threshold Max (Default 0.9)", Float) = 0.9
         _RimEdgeSoftness("Edge Softness (Default 0.05)", Float) = 0.05
         _RimWidth0("Width (Default 0.5)", Range(0, 5)) = 0.5
         _RimColor0("Color (Default white)", Color) = (1.0, 1.0, 1.0, 1.0)
@@ -177,6 +181,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _AREA_LOWERBODY
         #pragma shader_feature_local_fragment _UseAlphaClipping
         #pragma shader_feature_local _DayTime_MANUAL_ON
+        #pragma shader_feature_local _AUTO_Brightness_ON
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _Expression_ON
         #pragma shader_feature_local _SPECULAR_ON

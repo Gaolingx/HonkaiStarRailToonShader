@@ -132,9 +132,9 @@ float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFacto
 }
 
 float4 GetMainTexColor(float2 uv, TEXTURE2D(FaceColorMap), float4 FaceColorMapColor,
-    TEXTURE2D(HairColorMap), float4 HairColorMapColor,
-    TEXTURE2D(UpperBodyColorMap), float4 UpperBodyColorMapColor,
-    TEXTURE2D(LowerBodyColorMap), float4 LowerBodyColorMapColor)
+TEXTURE2D(HairColorMap), float4 HairColorMapColor,
+TEXTURE2D(UpperBodyColorMap), float4 UpperBodyColorMapColor,
+TEXTURE2D(LowerBodyColorMap), float4 LowerBodyColorMapColor)
 {
     float4 areaMap = 0;
     float4 areaColor = 0;
@@ -162,9 +162,9 @@ struct RampColor
 };
 
 RampColor RampColorConstruct(float2 rampUV, TEXTURE2D(HairCoolRamp), float3 HairCoolRampColor, float HairCoolRampColorMixFactor,
-    TEXTURE2D(HairWarmRamp), float3 HairWarmRampColor, float HairWarmRampColorMixFactor,
-    TEXTURE2D(BodyCoolRamp), float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
-    TEXTURE2D(BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
+TEXTURE2D(HairWarmRamp), float3 HairWarmRampColor, float HairWarmRampColorMixFactor,
+TEXTURE2D(BodyCoolRamp), float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
+TEXTURE2D(BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
 {
     RampColor R;
     float3 coolRampTexCol = 1;
@@ -278,11 +278,11 @@ struct RimLightData
 };
 
 float3 GetRimLight(
-    RimLightData rimLightData,
-    float4 svPosition,
-    float3 normalWS,
-    bool isFrontFace,
-    float4 lightMap)
+RimLightData rimLightData,
+float4 svPosition,
+float3 normalWS,
+bool isFrontFace,
+float4 lightMap)
 {
     float rimWidth = rimLightData.rimlightwidth / 2000.0; // rimWidth 表示的是屏幕上像素的偏移量，和 modelScale 无关
     float rimThresholdMin = rimLightData.thresholdMin * rimLightData.modelScale * 10.0;
@@ -341,7 +341,7 @@ struct SpecularData
 };
 
 half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
-    half3 specColor, float shininess, float roughness, float intensity, float diffuseFac, float metallic = 0.0)
+half3 specColor, float shininess, float roughness, float intensity, float diffuseFac, float metallic = 0.0)
 {
     //roughness = lerp(1.0, roughness * roughness, metallic);
     //float smoothness = exp2(shininess * (1.0 - roughness) + 1.0) + 1.0;
@@ -362,7 +362,7 @@ half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, hal
 }
 
 half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
-    half3 specColor, float shininess, float roughness, float intensity, float diffuseFac)
+half3 specColor, float shininess, float roughness, float intensity, float diffuseFac)
 {
     half3 FinalSpecularColor = 0;
     float metallic = saturate((abs(surface.materialId - surface.MetalSpecularMetallic) - 0.1) / (0 - 0.1));
@@ -372,9 +372,9 @@ half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS,
 
 void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
 {
-#if _UseAlphaClipping
-    clip(alpha - alphaTestThreshold);
-#endif
+    #if _UseAlphaClipping
+        clip(alpha - alphaTestThreshold);
+    #endif
 }
 
 CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
@@ -413,8 +413,19 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     Light mainLight = GetCharacterMainLightStruct(shadowCoord);
     //获取主光源颜色
     float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
+    #if _AUTO_Brightness_ON
+        if (LightColor.r <= 1 || LightColor.g <= 1 || LightColor.b <= 1)
+        {
+            LightColor = clamp((1 / LightColor), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _AutoBrightnessOffset;
+        }
+        else
+        {
+            LightColor += _AutoBrightnessOffset;
+        }
+    #endif
     //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
     float3 mainLightColor = GetMainLightColor(LightColor.rgb, _MainLightColorUsage);
+
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
 
@@ -435,9 +446,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-        _HairColorMap, _HairColorMapColor,
-        _UpperBodyColorMap, _UpperBodyColorMapColor,
-        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    _HairColorMap, _HairColorMapColor,
+    _UpperBodyColorMap, _UpperBodyColorMapColor,
+    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
@@ -495,9 +506,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             float shadowThreshold = diffuseThreshold;
             //加个过渡，这里_ShadowThresholdSoftness=0.1
             mainLightShadow = smoothstep(
-                1.0 - shadowThreshold - _ShadowThresholdSoftness,
-                1.0 - shadowThreshold + _ShadowThresholdSoftness,
-                remappedNoL + _ShadowThresholdCenter) + _MainLightShadowOffset;
+            1.0 - shadowThreshold - _ShadowThresholdSoftness,
+            1.0 - shadowThreshold + _ShadowThresholdSoftness,
+            remappedNoL + _ShadowThresholdCenter) + _MainLightShadowOffset;
             //应用AO
             mainLightShadow *= lerp(1, specularIntensity, _LerpAOIntensity);
             mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
@@ -544,9 +555,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     //Ramp Color
     RampColor RC = RampColorConstruct(rampUV, _HairCoolRamp, _HairCoolRampColor, _HairCoolRampColorMixFactor,
-        _HairWarmRamp, _HairWarmRampColor, _HairWarmRampColorMixFactor,
-        _BodyCoolRamp, _BodyCoolRampColor, _BodyCoolRampColorMixFactor,
-        _BodyWarmRamp, _BodyWarmRampColor, _BodyWarmRampColorMixFactor);
+    _HairWarmRamp, _HairWarmRampColor, _HairWarmRampColorMixFactor,
+    _BodyCoolRamp, _BodyCoolRampColor, _BodyCoolRampColorMixFactor,
+    _BodyWarmRamp, _BodyWarmRampColor, _BodyWarmRampColorMixFactor);
     coolRampCol = RC.coolRampCol;
     warmRampCol = RC.warmRampCol;
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
@@ -649,9 +660,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #if _EMISSION_ON
         {
             emissionColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-                _HairColorMap, _HairColorMapColor,
-                _UpperBodyColorMap, _UpperBodyColorMapColor,
-                _LowerBodyColorMap, _LowerBodyColorMapColor).a;
+            _HairColorMap, _HairColorMapColor,
+            _UpperBodyColorMap, _UpperBodyColorMapColor,
+            _LowerBodyColorMap, _LowerBodyColorMapColor).a;
             emissionColor *= LinearColorMix(f3one, baseColor, _EmissionMixBaseColor);
             emissionColor *= _EmissionTintColor;
             emissionColor *= _EmissionIntensity;
@@ -704,10 +715,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 }
 
 void SRUniversalFragment(
-    CharCoreVaryings input,
-    bool isFrontFace            : SV_IsFrontFace,
-    out float4 colorTarget      : SV_Target0,
-    out float4 bloomTarget      : SV_Target1)
+CharCoreVaryings input,
+bool isFrontFace            : SV_IsFrontFace,
+out float4 colorTarget      : SV_Target0,
+out float4 bloomTarget      : SV_Target1)
 {
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
@@ -721,15 +732,15 @@ CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)
 }
 
 void CharacterShadowFragment(
-    CharShadowVaryings input,
-    bool isFrontFace            : SV_IsFrontFace)
+CharShadowVaryings input,
+bool isFrontFace            : SV_IsFrontFace)
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-        _HairColorMap, _HairColorMapColor,
-        _UpperBodyColorMap, _UpperBodyColorMapColor,
-        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    _HairColorMap, _HairColorMapColor,
+    _UpperBodyColorMap, _UpperBodyColorMapColor,
+    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
@@ -746,15 +757,15 @@ CharDepthOnlyVaryings CharacterDepthOnlyVertex(CharDepthOnlyAttributes input)
 }
 
 float4 CharacterDepthOnlyFragment(
-    CharDepthOnlyVaryings input,
-    bool isFrontFace            : SV_IsFrontFace) : SV_Target
+CharDepthOnlyVaryings input,
+bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-        _HairColorMap, _HairColorMapColor,
-        _UpperBodyColorMap, _UpperBodyColorMapColor,
-        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    _HairColorMap, _HairColorMapColor,
+    _UpperBodyColorMap, _UpperBodyColorMapColor,
+    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
@@ -773,15 +784,15 @@ CharDepthNormalsVaryings CharacterDepthNormalsVertex(CharDepthNormalsAttributes 
 }
 
 float4 CharacterDepthNormalsFragment(
-    CharDepthNormalsVaryings input,
-    bool isFrontFace            : SV_IsFrontFace) : SV_Target
+CharDepthNormalsVaryings input,
+bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-        _HairColorMap, _HairColorMapColor,
-        _UpperBodyColorMap, _UpperBodyColorMapColor,
-        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    _HairColorMap, _HairColorMapColor,
+    _UpperBodyColorMap, _UpperBodyColorMapColor,
+    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
@@ -800,15 +811,15 @@ CharMotionVectorsVaryings CharacterMotionVectorsVertex(CharMotionVectorsAttribut
 }
 
 half4 CharacterMotionVectorsFragment(
-    CharMotionVectorsVaryings input,
-    bool isFrontFace            : SV_IsFrontFace) : SV_Target
+CharMotionVectorsVaryings input,
+bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-        _HairColorMap, _HairColorMapColor,
-        _UpperBodyColorMap, _UpperBodyColorMapColor,
-        _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    _HairColorMap, _HairColorMapColor,
+    _UpperBodyColorMap, _UpperBodyColorMapColor,
+    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);

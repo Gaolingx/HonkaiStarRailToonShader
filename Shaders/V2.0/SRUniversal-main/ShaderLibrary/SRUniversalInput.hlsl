@@ -120,6 +120,10 @@ float _IndirectLightUsage;
 float _IndirectLightOcclusionUsage;
 float _IndirectLightMixBaseColor;
 
+
+float _AutoBrightnessThresholdMin;
+float _AutoBrightnessThresholdMax;
+float _AutoBrightnessOffset;
 float _MainLightBrightnessFactor;
 float _LerpAOIntensity;
 float _MainLightColorUsage;
