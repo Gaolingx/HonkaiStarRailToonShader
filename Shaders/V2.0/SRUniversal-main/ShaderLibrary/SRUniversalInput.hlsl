@@ -73,10 +73,8 @@ float4 _UpperBodyColorMapColor;
 //sampler2D _LowerBodyColorMap;
 float4 _LowerBodyColorMapColor;
 
-// ColorPower
-float _BaseColorRPower;
-float _BaseColorGPower;
-float _BaseColorBPower;
+// ColorSaturation
+float _ColorSaturation;
 
 // FaceTintColor
 float3 _FrontFaceTintColor;

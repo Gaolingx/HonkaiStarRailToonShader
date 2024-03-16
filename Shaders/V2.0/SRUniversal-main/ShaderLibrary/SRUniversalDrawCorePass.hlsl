@@ -74,19 +74,19 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-float3 RGBAdjustment(float3 color, float RPower, float GPower, float BPower)
-{
-    color.r = pow(clamp(color.r, 0.0, 1.0), RPower);
-    color.g = pow(clamp(color.g, 0.0, 1.0), GPower);
-    color.b = pow(clamp(color.b, 0.0, 1.0), BPower);
-    return clamp(color, 0.0, 1.0);
-}
-
-float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
+float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd = 0)
 {
     float3 hsv = RgbToHsv(color + colorAdd);
     hsv.z = RgbToHsv(color).z;
     return HsvToRgb(hsv);
+}
+
+float3 RGBAdjustment(float3 color, float ColorSaturation)
+{
+    float luminance = 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
+    float3 luminanceColor = float3(luminance, luminance, luminance);
+    float3 finalColor = lerp(luminanceColor, color, ColorSaturation);
+    return finalColor;
 }
 
 Light GetCharacterMainLightStruct(float4 shadowCoord)
@@ -449,7 +449,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     _HairColorMap, _HairColorMapColor,
     _UpperBodyColorMap, _UpperBodyColorMapColor,
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
     
@@ -741,7 +741,7 @@ bool isFrontFace            : SV_IsFrontFace)
     _HairColorMap, _HairColorMapColor,
     _UpperBodyColorMap, _UpperBodyColorMapColor,
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
 
@@ -766,7 +766,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     _HairColorMap, _HairColorMapColor,
     _UpperBodyColorMap, _UpperBodyColorMapColor,
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
 
@@ -793,7 +793,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     _HairColorMap, _HairColorMapColor,
     _UpperBodyColorMap, _UpperBodyColorMapColor,
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
 
@@ -820,7 +820,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     _HairColorMap, _HairColorMapColor,
     _UpperBodyColorMap, _UpperBodyColorMapColor,
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _BaseColorRPower, _BaseColorGPower, _BaseColorBPower);
+    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
 
