@@ -414,9 +414,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //获取主光源颜色
     float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
     #if _AUTO_Brightness_ON
-        if (LightColor.r <= 1 || LightColor.g <= 1 || LightColor.b <= 1)
+        if (LightColor.r <= 1 || LightColor.g <= 1 || LightColor.b <= 1) //仅限SDR
         {
-            LightColor = clamp((1 / LightColor), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _AutoBrightnessOffset;
+            LightColor = clamp(pow(LightColor, 0.5), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _AutoBrightnessOffset;
         }
         else
         {
