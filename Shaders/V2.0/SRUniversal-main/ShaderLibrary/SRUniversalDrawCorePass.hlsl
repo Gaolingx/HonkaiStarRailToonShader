@@ -123,6 +123,17 @@ float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
     return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
 }
 
+half3 GrayColor(half3 color)
+{
+    float gray = dot(color, half3(0.3, 0.59, 0.11));
+    return gray.xxx;
+}
+
+half3 CalculateGI(float3 baseColor, float diffuseThreshold, half3 sh, float intensity, float mainColorLerp)
+{
+    return intensity * lerp(f3one, baseColor, mainColorLerp) * lerp(GrayColor(sh), sh, mainColorLerp) * diffuseThreshold;
+}
+
 float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFactor)
 {
     OriginalColor = clamp(OriginalColor, 0.0, 1.0);
@@ -484,10 +495,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
-    //lightmap的R通道是AO，也就是静态阴影，根据AO，来影响环境光照
-    float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
+    float3 indirectLightColor = 0;
+    //float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
+    indirectLightColor = CalculateGI(baseColor, diffuseThreshold, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
-        
+        //lightmap的R通道是AO，也就是静态阴影，根据AO，来影响环境光照
         indirectLightColor *= lerp(1, specularIntensity, _IndirectLightOcclusionUsage); // 加个 Ambient Occlusion
     #elif _AREA_FACE
         indirectLightColor *= lerp(1, lerp(faceMap.g, 1, step(faceMap.r, 0.5)), _IndirectLightOcclusionUsage);
