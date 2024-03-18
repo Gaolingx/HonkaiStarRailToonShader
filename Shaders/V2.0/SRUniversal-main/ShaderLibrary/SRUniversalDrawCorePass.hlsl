@@ -123,15 +123,9 @@ float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
     return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
 }
 
-half3 GrayColor(half3 color)
-{
-    float gray = dot(color, half3(0.3, 0.59, 0.11));
-    return gray.xxx;
-}
-
 half3 CalculateGI(float3 baseColor, float diffuseThreshold, half3 sh, float intensity, float mainColorLerp)
 {
-    return intensity * lerp(f3one, baseColor, mainColorLerp) * lerp(GrayColor(sh), sh, mainColorLerp) * diffuseThreshold;
+    return intensity * lerp(f3one, baseColor, mainColorLerp) * lerp(desaturation(sh), sh, mainColorLerp) * diffuseThreshold;
 }
 
 float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFactor)
