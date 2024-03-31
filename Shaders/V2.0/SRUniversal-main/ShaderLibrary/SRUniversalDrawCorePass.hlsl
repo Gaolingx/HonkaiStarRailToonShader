@@ -328,12 +328,6 @@ float4 lightMap)
     return FinalRimColor;
 }
 
-float3 fresnelSchlickRoughness(float cosTheta, float3 F0, float roughness)
-{
-    //return F0 + (max(float3(1 ,1, 1) * (1 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
-    return F0 + (max(float3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
-}
-
 struct SpecularData
 {
     half3 color;
@@ -357,8 +351,7 @@ half3 specColor, float shininess, float roughness, float intensity, float diffus
     float stepPhong = smoothstep(threshold - roughness, threshold + roughness, blinnPhong);
 
     float3 f0 = lerp(surface.SpecularKsNonMetal, surface.color, metallic);
-    //float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - saturate(dot(viewDirWS, halfDirWS)), 5.0);
-    float3 fresnel = fresnelSchlickRoughness(HoV, f0, roughness);
+    float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - HoV, 5.0);
 
     half3 lightColor = light.color * light.shadowAttenuation;
     half3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, surface.SpecularKsMetal, metallic);
