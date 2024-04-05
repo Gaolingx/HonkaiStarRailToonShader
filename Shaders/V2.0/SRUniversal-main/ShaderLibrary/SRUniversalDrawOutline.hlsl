@@ -126,11 +126,9 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
 
 void SRUniversalFragment(
     CharOutlineVaryings input,
-    out float4 colorTarget      : SV_Target0,
-    out float4 bloomTarget      : SV_Target1)
+    out float4 colorTarget      : SV_Target0)
 {
     float4 outputColor = colorFragmentTarget(input);
 
     colorTarget = float4(outputColor.rgb, 1);
-    bloomTarget = 0;
 }

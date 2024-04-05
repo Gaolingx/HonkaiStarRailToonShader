@@ -113,20 +113,18 @@ Shader "Custom/SRUniversal"
         [Header(Rim Lighting)]
         [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)",float) = 1
         _ModelScale("Model Scale (Default 1)", Float) = 1
-        _RimIntensity("Intensity (Front) (Default 0.5)", Range(0, 5)) = 0.5
-        _RimIntensityBackFace("Intensity (Back) (Default 0)", Range(0, 5)) = 0
-        _RimThresholdMin("Rim Threshold Min (Default 0.6)", Float) = 0.6
-        _RimThresholdMax("Rim Threshold Max (Default 0.9)", Float) = 0.9
-        _RimEdgeSoftness("Edge Softness (Default 0.05)", Float) = 0.05
-        _RimWidth0("Width (Default 0.5)", Range(0, 5)) = 0.5
+        _RimIntensity("Intensity (Front Main) (Default 0.5)", Float) = 0.5
+        _RimIntensityBackFace("Intensity (Back Main) (Default 0)", Float) = 0
+        _RimThresholdMin("Threshold Min (Default 0.6)", Float) = 0.6
+        _RimThresholdMax("Threshold Max (Default 0.9)", Float) = 0.9
+        _RimWidth0("Width (Default 0.5)", Float) = 0.5
         _RimColor0("Color (Default white)", Color) = (1.0, 1.0, 1.0, 1.0)
         _RimDark0("Darken Value (Default 0.5)", Range(0, 1)) = 0.5
-        _RimLightMixMainLightColor("Rim light mix mainlight color (Default 0)",Range(0, 1)) = 0
-        _RimLightMixAlbedo("Rim light mix albedo (Default 0)",Range(0, 1)) = 0
+        _RimEdgeSoftness("Edge Softness (Default 0.05)", Float) = 0.05
 
         [Header(Bloom)]
-        _mBloomIntensity0("Intensity", Range(0, 100)) = 1
-        _BloomColor0("Color", Color) = (1, 1, 1, 1)
+        _mmBloomIntensity0("Intensity (Default 0)", Float) = 0
+        _BloomColor0("Color (Default white)", Color) = (1, 1, 1, 1)
 
         [Header(Emission)]
         [Toggle(_EMISSION_ON)] _UseEmission("Use emission (Default NO)",float) = 0
@@ -159,6 +157,8 @@ Shader "Custom/SRUniversal"
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassOp("Stencil pass comparison (Default keep)",Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilFailOp("Stencil fail comparison (Default keep)",Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFailOp("Stencil z fail comparison (Default keep)",Int) = 0
+        _StencilReadMask("Stencil Read Mask (Default 255)",Range(0, 255)) = 255
+        _StencilWriteMask("Stencil Write Mask (Default 255)",Range(0, 255)) = 255
 
         [Header(Draw Overlay)]
         [Toggle(_DRAW_OVERLAY_ON)] _UseDrawOverlay("Use draw overlay (Default NO)",float) = 0
@@ -172,6 +172,11 @@ Shader "Custom/SRUniversal"
     SubShader
     {
         LOD 100
+        Tags
+        {
+            "RenderPipeline" = "UniversalPipeline"
+            "UniversalMaterialType" = "ComplexLit"
+        }
 
         HLSLINCLUDE
         #pragma shader_feature_local _AREA_FACE
@@ -200,7 +205,6 @@ Shader "Custom/SRUniversal"
             Name "CharDrawCore"
             Tags
             {
-                "RenderPipeline" = "UniversalPipeline"
                 "RenderType" = "Opaque"
                 "LightMode" = "HSRForward2"
             }
@@ -209,6 +213,8 @@ Shader "Custom/SRUniversal"
                 Ref [_StencilRef]
                 Comp [_StencilComp]
                 Pass [_StencilPassOp]
+                ReadMask [_StencilReadMask]
+                WriteMask [_StencilWriteMask]
                 Fail [_StencilFailOp]
                 ZFail [_StencilZFailOp]
             }
@@ -223,6 +229,7 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
 
             #pragma vertex SRUniversalVertex
             #pragma fragment SRUniversalFragment
@@ -237,7 +244,6 @@ Shader "Custom/SRUniversal"
             Name "CharDrawOverlay"
             Tags
             {
-                "RenderPipeline" = "UniversalPipeline"
                 "RenderType" = "Opaque"
                 "LightMode" = "HSRForward3"
             }
@@ -257,6 +263,7 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
 
             #pragma vertex SRUniversalVertex
             #pragma fragment SRUniversalFragment
@@ -288,7 +295,6 @@ Shader "Custom/SRUniversal"
             Name "CharDrawOutline"
             Tags 
             {
-                "RenderPipeline" = "UniversalPipeline"
                 "RenderType" = "Opaque"
                 "LightMode" = "HSROutline"
 
@@ -459,5 +465,5 @@ Shader "Custom/SRUniversal"
         }
 
     }
-    FallBack "Hidden/Universal Render Pipeline/FallbackError"
+    Fallback Off
 }

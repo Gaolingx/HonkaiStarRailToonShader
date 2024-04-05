@@ -56,11 +56,13 @@ CBUFFER_START(UnityPerMaterial)
     float _EmissionThreshold;
     float _EmissionIntensity;
 
-    float _mBloomIntensity0;
+    float _mmBloomIntensity0;
     float4 _BloomColor0;
 
     float _RimIntensity;
+    float _RimIntensityAdditionalLight;
     float _RimIntensityBackFace;
+    float _RimIntensityBackFaceAdditionalLight;
     float _RimThresholdMin;
     float _RimThresholdMax;
     float _RimEdgeSoftness;
@@ -99,7 +101,7 @@ float4 BaseHairOpaqueFragment(
     DoAlphaClip(texColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(i.positionHCS, _DitherAlpha);
 
-    Light light = GetCharacterMainLight(i.shadowCoord);
+    Light light = GetCharacterMainLight(i.shadowCoord, i.positionWS);
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
 
     DiffuseData diffuseData;
@@ -115,17 +117,20 @@ float4 BaseHairOpaqueFragment(
     specularData.intensity = _SpecularIntensity0;
     specularData.metallic = 0;
 
+    RimLightMaskData rimLightMaskData;
+    rimLightMaskData.color = _RimColor0.rgb;
+    rimLightMaskData.width = _RimWidth0;
+    rimLightMaskData.edgeSoftness = _RimEdgeSoftness;
+    rimLightMaskData.thresholdMin = _RimThresholdMin;
+    rimLightMaskData.thresholdMax = _RimThresholdMax;
+    rimLightMaskData.modelScale = _ModelScale;
+    rimLightMaskData.ditherAlpha = _DitherAlpha;
+    rimLightMaskData.NoV = dirWS.NoV;
+
     RimLightData rimLightData;
-    rimLightData.color = _RimColor0.rgb;
-    rimLightData.width = _RimWidth0;
-    rimLightData.edgeSoftness = _RimEdgeSoftness;
-    rimLightData.thresholdMin = _RimThresholdMin;
-    rimLightData.thresholdMax = _RimThresholdMax;
     rimLightData.darkenValue = _RimDark0;
     rimLightData.intensityFrontFace = _RimIntensity;
     rimLightData.intensityBackFace = _RimIntensityBackFace;
-    rimLightData.modelScale = _ModelScale;
-    rimLightData.ditherAlpha = _DitherAlpha;
 
     EmissionData emissionData;
     emissionData.color = _EmissionColor.rgb;
@@ -133,23 +138,19 @@ float4 BaseHairOpaqueFragment(
     emissionData.threshold = _EmissionThreshold;
     emissionData.intensity = _EmissionIntensity;
 
-    float3 diffuse = GetRampDiffuse(diffuseData, i.color, texColor.rgb, light.color, lightMap,
-        TEXTURE2D_ARGS(_RampMapCool, sampler_RampMapCool), TEXTURE2D_ARGS(_RampMapWarm, sampler_RampMapWarm),
-        light.shadowAttenuation);
-    float3 specular = GetSpecular(specularData, texColor.rgb, light.color, lightMap, light.shadowAttenuation);
-    float3 rimLight = GetRimLight(rimLightData, i.positionHCS, dirWS.N, isFrontFace, lightMap);
+    float3 diffuse = GetRampDiffuse(diffuseData, light, i.color, texColor.rgb, lightMap,
+        TEXTURE2D_ARGS(_RampMapCool, sampler_RampMapCool), TEXTURE2D_ARGS(_RampMapWarm, sampler_RampMapWarm));
+    float3 specular = GetSpecular(specularData, light, texColor.rgb, lightMap);
+    float3 rimLightMask = GetRimLightMask(rimLightMaskData, i.positionHCS, dirWS.N, lightMap);
+    float3 rimLight = GetRimLight(rimLightData, rimLightMask, dirWS.NoL, light, isFrontFace);
     float3 emission = GetEmission(emissionData, texColor.rgb);
-
-    float3 diffuseAdd = 0;
-    float3 specularAdd = 0;
 
     #if defined(_ADDITIONAL_LIGHTS)
         CHAR_LIGHT_LOOP_BEGIN(i.positionWS, i.positionHCS)
-            Light lightAdd = GetAdditionalLight(lightIndex, i.positionWS);
+            Light lightAdd = GetCharacterAdditionalLight(lightIndex, i.positionWS);
             Directions dirWSAdd = GetWorldSpaceDirections(lightAdd, i.positionWS, i.normalWS);
-            float attenuationAdd = saturate(lightAdd.distanceAttenuation);
 
-            diffuseAdd += texColor.rgb * lightAdd.color * attenuationAdd;
+            diffuse = CombineColorPreserveLuminance(diffuse, GetAdditionalLightDiffuse(texColor.rgb, lightAdd));
 
             SpecularData specularDataAdd;
             specularDataAdd.color = _SpecularColor0.rgb;
@@ -158,24 +159,29 @@ float4 BaseHairOpaqueFragment(
             specularDataAdd.edgeSoftness = _SpecularEdgeSoftness0;
             specularDataAdd.intensity = _SpecularIntensity0;
             specularDataAdd.metallic = 0;
-            specularAdd += GetSpecular(specularDataAdd, texColor.rgb, lightAdd.color, lightMap, 1) * attenuationAdd;
+            specular += GetSpecular(specularDataAdd, lightAdd, texColor.rgb, lightMap);
+
+            RimLightData rimLightDataAdd;
+            rimLightDataAdd.darkenValue = 0;
+            rimLightDataAdd.intensityFrontFace = _RimIntensityAdditionalLight;
+            rimLightDataAdd.intensityBackFace = _RimIntensityBackFaceAdditionalLight;
+            rimLight += GetRimLight(rimLightDataAdd, rimLightMask, dirWSAdd.NoL, lightAdd, isFrontFace);
         CHAR_LIGHT_LOOP_END
     #endif
 
     // Output
-    return float4(CombineColorPreserveLuminance(diffuse, diffuseAdd) + specular + specularAdd + rimLight + emission, texColor.a);
+    return float4(diffuse + specular + rimLight + emission, texColor.a);
 }
 
 void HairOpaqueFragment(
     CharCoreVaryings i,
     FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC,
-    out float4 colorTarget      : SV_Target0,
-    out float4 bloomTarget      : SV_Target1)
+    out float4 colorTarget      : SV_Target0)
 {
     float4 hairColor = BaseHairOpaqueFragment(i, isFrontFace);
 
     colorTarget = float4(hairColor.rgb, 1);
-    bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
+    colorTarget.rgb = MixBloomColor(colorTarget.rgb, _BloomColor0.rgb, _mmBloomIntensity0);
 
     // Fog
     real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);
@@ -185,8 +191,7 @@ void HairOpaqueFragment(
 void HairFakeTransparentFragment(
     CharCoreVaryings i,
     FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC,
-    out float4 colorTarget      : SV_Target0,
-    out float4 bloomTarget      : SV_Target1)
+    out float4 colorTarget      : SV_Target0)
 {
     // 手动做一次深度测试，保证只有最上面一层头发和眼睛做 alpha 混合。这样看上去更加通透
     float sceneDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(i.positionHCS.xy - 0.5));
@@ -212,7 +217,7 @@ void HairFakeTransparentFragment(
 
     // Output
     colorTarget = float4(hairColor.rgb, max(max(alpha1, alpha2), _HairBlendAlpha));
-    bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
+    colorTarget.rgb = MixBloomColor(colorTarget.rgb, _BloomColor0.rgb, _mmBloomIntensity0);
 
     // Fog
     real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);

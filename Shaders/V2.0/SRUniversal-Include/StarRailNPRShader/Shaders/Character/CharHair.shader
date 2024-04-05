@@ -60,18 +60,20 @@ Shader "Honkai Star Rail/Character/Hair"
         _EmissionIntensity("Intensity", Float) = 0
 
         [HeaderFoldout(Bloom)]
-        _mBloomIntensity0("Intensity", Range(0, 100)) = 1
+        _mmBloomIntensity0("Intensity", Float) = 0
         _BloomColor0("Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Rim Light)]
-        _RimIntensity("Intensity (Front)", Range(0, 1)) = 0.5
-        _RimIntensityBackFace("Intensity (Back)", Range(0, 1)) = 0
+        _RimIntensity("Intensity (Front Main)", Float) = 0.5
+        _RimIntensityAdditionalLight("Intensity (Front Additional)", Float) = 0.5
+        _RimIntensityBackFace("Intensity (Back Main)", Float) = 0
+        _RimIntensityBackFaceAdditionalLight("Intensity (Back Additional)", Float) = 0
         _RimThresholdMin("Threshold Min", Float) = 0.6
         _RimThresholdMax("Threshold Max", Float) = 0.9
-        _RimEdgeSoftness("Edge Softness", Float) = 0.05
-        _RimWidth0("Width", Range(0, 1)) = 0.5
+        _RimWidth0("Width", Float) = 0.5
         _RimColor0("Color", Color) = (1.0, 1.0, 1.0, 1.0)
         _RimDark0("Darken Value", Range(0, 1)) = 0.5
+        _RimEdgeSoftness("Edge Softness", Float) = 0.05
 
         [HeaderFoldout(Outline)]
         [KeywordEnum(Tangent, Normal)] _OutlineNormal("Normal Source", Float) = 0
@@ -97,7 +99,7 @@ Shader "Honkai Star Rail/Character/Hair"
         {
             "RenderPipeline" = "UniversalPipeline"
             "RenderType" = "Opaque"
-            "UniversalMaterialType" = "Lit"
+            "UniversalMaterialType" = "ComplexLit" // Packages/com.unity.render-pipelines.universal/Runtime/Passes/GBufferPass.cs: Fill GBuffer, but skip lighting pass for ComplexLit
             "Queue" = "Geometry+20"  // 必须在脸和眼睛之后绘制
         }
 
@@ -125,10 +127,8 @@ Shader "Honkai Star Rail/Character/Hair"
             ZWrite On
 
             Blend 0 One Zero, [_SrcBlendAlpha] [_DstBlendAlpha]
-            Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -143,8 +143,9 @@ Shader "Honkai Star Rail/Character/Hair"
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
             #pragma multi_compile _ _FORWARD_PLUS
 
             #include "CharHairCore.hlsl"
@@ -180,10 +181,8 @@ Shader "Honkai Star Rail/Character/Hair"
             ZWrite On
 
             Blend 0 SrcAlpha OneMinusSrcAlpha, [_SrcBlendAlpha] [_DstBlendAlpha]
-            Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -198,8 +197,9 @@ Shader "Honkai Star Rail/Character/Hair"
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
             #pragma multi_compile _ _FORWARD_PLUS
 
             #include "CharHairCore.hlsl"
@@ -231,7 +231,6 @@ Shader "Honkai Star Rail/Character/Hair"
             ZWrite On
 
             ColorMask RGB 0
-            ColorMask 0 1
 
             HLSLPROGRAM
 

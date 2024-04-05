@@ -77,7 +77,7 @@ float3 desaturation(float3 color)
 float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd = 0)
 {
     float3 hsv = RgbToHsv(color + colorAdd);
-    hsv.z = RgbToHsv(color).z;
+    hsv.z = max(RgbToHsv(color).z, RgbToHsv(colorAdd).z);
     return HsvToRgb(hsv);
 }
 
@@ -89,7 +89,7 @@ float3 RGBAdjustment(float3 color, float ColorSaturation)
     return finalColor;
 }
 
-Light GetCharacterMainLightStruct(float4 shadowCoord)
+Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
 {
     Light light = GetMainLight();
 
@@ -101,6 +101,16 @@ Light GetCharacterMainLightStruct(float4 shadowCoord)
         // Medium 和 High 采样数多，过渡的区间大，在角色身上更容易出现 Perspective aliasing
         shadowSamplingData.softShadowQuality = SOFT_SHADOW_QUALITY_LOW;
         light.shadowAttenuation = SampleShadowmap(TEXTURE2D_ARGS(_MainLightShadowmapTexture, sampler_LinearClampCompare), shadowCoord, shadowSamplingData, shadowParams, false);
+        light.shadowAttenuation = lerp(light.shadowAttenuation, 1, GetMainLightShadowFade(positionWS));
+    #endif
+
+    #ifdef _LIGHT_LAYERS
+        if (!IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
+        {
+            // 不在指定的light layer，则将衰减强度设置为0
+            light.distanceAttenuation = 0;
+            light.shadowAttenuation = 0;
+        }
     #endif
 
     return light;
@@ -267,31 +277,26 @@ float GetLinearEyeDepthAnyProjection(float4 svPosition)
     return GetLinearEyeDepthAnyProjection(svPosition.z);
 }
 
-struct RimLightData
+struct RimLightMaskData
 {
-    float3 rimlightcolor;
-    float rimlightwidth;
+    float3 color;
+    float width;
     float edgeSoftness;
     float thresholdMin;
     float thresholdMax;
-    float darkenValue;
-    float intensityFrontFace;
-    float intensityBackFace;
     float modelScale;
-    float3 lightColor;
-    float rimLightMixMainLightColor;
+    float NoV;
 };
 
-float3 GetRimLight(
-RimLightData rimLightData,
-float4 svPosition,
-float3 normalWS,
-bool isFrontFace,
-float4 lightMap)
+float3 GetRimLightMask(
+    RimLightMaskData rlmData,
+    float4 svPosition,
+    float3 normalWS,
+    float4 lightMap)
 {
-    float rimWidth = rimLightData.rimlightwidth / 2000.0; // rimWidth 表示的是屏幕上像素的偏移量，和 modelScale 无关
-    float rimThresholdMin = rimLightData.thresholdMin * rimLightData.modelScale * 10.0;
-    float rimThresholdMax = rimLightData.thresholdMax * rimLightData.modelScale * 10.0;
+    float rimWidth = rlmData.width / 2000.0; // rimWidth 表示的是屏幕上像素的偏移量，和 modelScale 无关
+    float rimThresholdMin = rlmData.thresholdMin * rlmData.modelScale * 10.0;
+    float rimThresholdMax = rlmData.thresholdMax * rlmData.modelScale * 10.0;
 
     rimWidth *= lightMap.r; // 有些地方不要边缘光
     rimWidth *= _ScaledScreenParams.y; // 在不同分辨率下看起来等宽
@@ -310,7 +315,7 @@ float4 lightMap)
     }
 
     float depth = GetLinearEyeDepthAnyProjection(svPosition);
-    rimWidth *= 10.0 * rsqrt(depth / rimLightData.modelScale); // 近大远小
+    rimWidth *= 10.0 * rsqrt(depth / rlmData.modelScale); // 近大远小
 
     float3 normalVS = TransformWorldToViewNormal(normalWS);
     float2 indexOffset = float2(sign(normalVS.x), 0) * rimWidth; // 只横向偏移
@@ -318,14 +323,26 @@ float4 lightMap)
     float offsetDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(index));
 
     float depthDelta = (offsetDepth - depth) * 50; // 只有 depth 小于 offsetDepth 的时候再画
-    float intensity = rimLightData.darkenValue * smoothstep(-rimLightData.edgeSoftness, 0, depthDelta - rimThresholdMin);
-    intensity = lerp(intensity, 1, smoothstep(0, rimLightData.edgeSoftness, depthDelta - rimThresholdMax));
-    intensity *= lerp(rimLightData.intensityBackFace, rimLightData.intensityFrontFace, isFrontFace);
+    float intensity = smoothstep(rimThresholdMin, rimThresholdMax, depthDelta);
 
-    float3 FinalRimColor;
-    FinalRimColor = lerp(rimLightData.rimlightcolor, CombineColorPreserveLuminance(rimLightData.lightColor, 0), rimLightData.rimLightMixMainLightColor) * intensity;
+    // 用于柔化边缘光，edgeSoftness 越大，越柔和
+    float fresnel = pow(clamp(1 - rlmData.NoV, 0.01, 1), max(rlmData.edgeSoftness, 0.01));
 
-    return FinalRimColor;
+    return rlmData.color * (intensity * fresnel);
+}
+
+struct RimLightData
+{
+    float darkenValue;
+    float intensityFrontFace;
+    float intensityBackFace;
+};
+
+float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light, bool isFrontFace)
+{
+    float attenuation = saturate(NoL * light.shadowAttenuation * light.distanceAttenuation);
+    float intensity = lerp(rimData.intensityBackFace, rimData.intensityFrontFace, isFrontFace);
+    return rimMask * light.color * (lerp(rimData.darkenValue, 1, attenuation) * intensity);
 }
 
 struct SpecularData
@@ -408,7 +425,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
 
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
-    Light mainLight = GetCharacterMainLightStruct(shadowCoord);
+    Light mainLight = GetCharacterMainLightStruct(shadowCoord, positionWS);
     //获取主光源颜色
     float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
     #if _AUTO_Brightness_ON
@@ -634,22 +651,28 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #endif
     //边缘光部分
     float3 rimLightColor;
+    float3 rimLightMask;
+    float rimNoV = dot(normalize(normalWS), normalize(GetWorldSpaceViewDir(positionWS)));
+    float rimNoL = dot(normalize(normalWS), normalize(mainLight.direction));
+    float rimN = normalize(normalWS);
     #if _RIM_LIGHTING_ON
         {
+            RimLightMaskData rimLightMaskData;
+            rimLightMaskData.color = _RimColor0.rgb;
+            rimLightMaskData.width = _RimWidth0;
+            rimLightMaskData.edgeSoftness = _RimEdgeSoftness;
+            rimLightMaskData.thresholdMin = _RimThresholdMin;
+            rimLightMaskData.thresholdMax = _RimThresholdMax;
+            rimLightMaskData.modelScale = _ModelScale;
+            rimLightMaskData.NoV = rimNoV;
+        
             RimLightData rimLightData;
-            rimLightData.rimlightcolor = _RimColor0.rgb;
-            rimLightData.rimlightwidth = _RimWidth0;
-            rimLightData.edgeSoftness = _RimEdgeSoftness;
-            rimLightData.thresholdMin = _RimThresholdMin;
-            rimLightData.thresholdMax = _RimThresholdMax;
             rimLightData.darkenValue = _RimDark0;
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
-            rimLightData.modelScale = _ModelScale;
-            rimLightData.lightColor = mainLightColor.rgb;
-            rimLightData.rimLightMixMainLightColor = _RimLightMixMainLightColor;
 
-            rimLightColor = GetRimLight(rimLightData, input.positionCS, normalize(normalWS), isFrontFace, lightMap);
+            rimLightMask = GetRimLightMask(rimLightMaskData, input.positionCS, rimN, lightMap);
+            rimLightColor = GetRimLight(rimLightData, rimLightMask, rimNoL, mainLight, isFrontFace);
         }
     #else
         rimLightColor = 0;
@@ -693,7 +716,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     albedo += FinalDiffuse;
     albedo += specularColor;
     albedo *= stockingsEffect;
-    albedo += rimLightColor * lerp(1, albedo, _RimLightMixAlbedo);
+    albedo += rimLightColor;
     albedo += emissionColor;
     albedo = lerp(albedo, fakeOutlineColor, fakeOutlineEffect);
 
@@ -716,13 +739,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 void SRUniversalFragment(
 CharCoreVaryings input,
 bool isFrontFace            : SV_IsFrontFace,
-out float4 colorTarget      : SV_Target0,
-out float4 bloomTarget      : SV_Target1)
+out float4 colorTarget      : SV_Target0)
 {
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
-    colorTarget = float4(outputColor.rgba);
-    bloomTarget = EncodeBloomColor(_BloomColor0.rgb, _mBloomIntensity0);
+    colorTarget.rgb = MixBloomColor(outputColor.rgb, _BloomColor0.rgb, _mmBloomIntensity0);
 }
 
 CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)

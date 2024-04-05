@@ -181,8 +181,6 @@ float _RimEdgeSoftness;
 float _RimWidth0;
 float4 _RimColor0;
 float _RimDark0;
-float _RimLightMixMainLightColor;
-float _RimLightMixAlbedo;
 
 // Emission
 float _EmissionMixBaseColor;
@@ -201,7 +199,7 @@ float _OutlineGamma;
 
 
 // Bloom
-float _mBloomIntensity0;
+float _mmBloomIntensity0;
 float4 _BloomColor0;
 
 CBUFFER_END

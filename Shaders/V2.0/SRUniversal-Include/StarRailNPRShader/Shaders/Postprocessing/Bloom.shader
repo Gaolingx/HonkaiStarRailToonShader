@@ -47,7 +47,6 @@ Shader "Hidden/Honkai Star Rail/Post Processing/Bloom"
         #include "Packages/com.unity.render-pipelines.core/Runtime/Utilities/Blit.hlsl"
         #include_with_pragmas "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRenderingKeywords.hlsl"
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/FoveatedRendering.hlsl"
-        #include "../Includes/HSRGBuffer.hlsl"
         #include "../Character/Shared/CharRenderingHelpers.hlsl"
 
         float4 _BlitTexture_TexelSize;
@@ -101,8 +100,7 @@ Shader "Hidden/Honkai Star Rail/Post Processing/Bloom"
 #endif
 
             float3 color = SAMPLE_TEXTURE2D_X(_BlitTexture, sampler_LinearClamp, uv).rgb;
-            float4 bloom = HSRSampleGBuffer0(uv);
-            color = max(0, color - _BloomThreshold.rrr) * DecodeBloomColor(bloom);
+            color = max(0, color - _BloomThreshold.rrr);
             return EncodeHDR(color);
         }
 
@@ -238,6 +236,30 @@ Shader "Hidden/Honkai Star Rail/Post Processing/Bloom"
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment FragCombine
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "Bloom Blit Character Color"
+
+            // 角色的 Stencil
+            Stencil
+            {
+                Ref 1
+                ReadMask 1
+                Comp Equal
+                Pass Keep
+                Fail Keep
+            }
+
+            HLSLPROGRAM
+            #pragma vertex Vert
+            // #pragma fragment FragNearest
+
+            // https://docs.unity3d.com/Manual/SL-SamplerStates.html
+            // 和 PostProcessPass 中声明的 RT 保持一致，不然 OpenGL ES 上效果不一致
+            #pragma fragment FragBilinear
             ENDHLSL
         }
     }

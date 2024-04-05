@@ -118,14 +118,14 @@ Shader "Honkai Star Rail/Character/Body"
 
         [HeaderFoldout(Bloom)]
         [HSRMaterialIDFoldout] _BloomIntensity("Intensity", Float) = 0
-        [HSRMaterialIDProperty(_BloomIntensity, 0)] _mBloomIntensity0("Bloom Intensity", Range(0, 100)) = 1
-        [HSRMaterialIDProperty(_BloomIntensity, 31)] _mBloomIntensity1("Bloom Intensity", Range(0, 100)) = 1
-        [HSRMaterialIDProperty(_BloomIntensity, 63)] _mBloomIntensity2("Bloom Intensity", Range(0, 100)) = 1
-        [HSRMaterialIDProperty(_BloomIntensity, 95)] _mBloomIntensity3("Bloom Intensity", Range(0, 100)) = 1
-        [HSRMaterialIDProperty(_BloomIntensity, 127)] _mBloomIntensity4("Bloom Intensity", Range(0, 100)) = 1
-        [HSRMaterialIDProperty(_BloomIntensity, 159)] _mBloomIntensity5("Bloom Intensity", Range(0, 100)) = 1
-        [HSRMaterialIDProperty(_BloomIntensity, 192)] _mBloomIntensity6("Bloom Intensity", Range(0, 100)) = 1
-        [HSRMaterialIDProperty(_BloomIntensity, 223)] _mBloomIntensity7("Bloom Intensity", Range(0, 100)) = 1
+        [HSRMaterialIDProperty(_BloomIntensity, 0)] _mmBloomIntensity0("Bloom Intensity", Float) = 0
+        [HSRMaterialIDProperty(_BloomIntensity, 31)] _mmBloomIntensity1("Bloom Intensity", Float) = 0
+        [HSRMaterialIDProperty(_BloomIntensity, 63)] _mmBloomIntensity2("Bloom Intensity", Float) = 0
+        [HSRMaterialIDProperty(_BloomIntensity, 95)] _mmBloomIntensity3("Bloom Intensity", Float) = 0
+        [HSRMaterialIDProperty(_BloomIntensity, 127)] _mmBloomIntensity4("Bloom Intensity", Float) = 0
+        [HSRMaterialIDProperty(_BloomIntensity, 159)] _mmBloomIntensity5("Bloom Intensity", Float) = 0
+        [HSRMaterialIDProperty(_BloomIntensity, 192)] _mmBloomIntensity6("Bloom Intensity", Float) = 0
+        [HSRMaterialIDProperty(_BloomIntensity, 223)] _mmBloomIntensity7("Bloom Intensity", Float) = 0
         [HSRMaterialIDFoldout] _BloomColor("Color", Float) = 0
         [HSRMaterialIDProperty(_BloomColor, 0)] _BloomColor0("Bloom Color", Color) = (1, 1, 1, 1)
         [HSRMaterialIDProperty(_BloomColor, 31)] _BloomColor1("Bloom Color", Color) = (1, 1, 1, 1)
@@ -137,20 +137,21 @@ Shader "Honkai Star Rail/Character/Body"
         [HSRMaterialIDProperty(_BloomColor, 223)] _BloomColor7("Bloom Color", Color) = (1, 1, 1, 1)
 
         [HeaderFoldout(Rim Light)]
-        _RimIntensity("Intensity (Front)", Range(0, 1)) = 0.5
-        _RimIntensityBackFace("Intensity (Back)", Range(0, 1)) = 0
+        _RimIntensity("Intensity (Front Main)", Float) = 0.5
+        _RimIntensityAdditionalLight("Intensity (Front Additional)", Float) = 0.5
+        _RimIntensityBackFace("Intensity (Back Main)", Float) = 0
+        _RimIntensityBackFaceAdditionalLight("Intensity (Back Additional)", Float) = 0
         _RimThresholdMin("Threshold Min", Float) = 0.6
         _RimThresholdMax("Threshold Max", Float) = 0.9
-        _RimEdgeSoftness("Edge Softness", Float) = 0.05
         [HSRMaterialIDFoldout] _RimWidth("Width", Float) = 0
-        [HSRMaterialIDProperty(_RimWidth, 0)] _RimWidth0("Rim Width", Range(0, 1)) = 0.3
-        [HSRMaterialIDProperty(_RimWidth, 31)] _RimWidth1("Rim Width", Range(0, 1)) = 0.3
-        [HSRMaterialIDProperty(_RimWidth, 63)] _RimWidth2("Rim Width", Range(0, 1)) = 0.3
-        [HSRMaterialIDProperty(_RimWidth, 95)] _RimWidth3("Rim Width", Range(0, 1)) = 0.3
-        [HSRMaterialIDProperty(_RimWidth, 127)] _RimWidth4("Rim Width", Range(0, 1)) = 0.3
-        [HSRMaterialIDProperty(_RimWidth, 159)] _RimWidth5("Rim Width", Range(0, 1)) = 0.3
-        [HSRMaterialIDProperty(_RimWidth, 192)] _RimWidth6("Rim Width", Range(0, 1)) = 0.3
-        [HSRMaterialIDProperty(_RimWidth, 223)] _RimWidth7("Rim Width", Range(0, 1)) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 0)] _RimWidth0("Rim Width", Float) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 31)] _RimWidth1("Rim Width", Float) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 63)] _RimWidth2("Rim Width", Float) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 95)] _RimWidth3("Rim Width", Float) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 127)] _RimWidth4("Rim Width", Float) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 159)] _RimWidth5("Rim Width", Float) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 192)] _RimWidth6("Rim Width", Float) = 0.3
+        [HSRMaterialIDProperty(_RimWidth, 223)] _RimWidth7("Rim Width", Float) = 0.3
         [HSRMaterialIDFoldout] _RimColor("Color", Float) = 0
         [HSRMaterialIDProperty(_RimColor, 0)] _RimColor0("Rim Color", Color) = (1.0, 1.0, 1.0, 1.0)
         [HSRMaterialIDProperty(_RimColor, 31)] _RimColor1("Rim Color", Color) = (1.0, 1.0, 1.0, 1.0)
@@ -169,6 +170,15 @@ Shader "Honkai Star Rail/Character/Body"
         [HSRMaterialIDProperty(_RimDark, 159)] _RimDark5("Rim Darken Value", Range(0, 1)) = 0.5
         [HSRMaterialIDProperty(_RimDark, 192)] _RimDark6("Rim Darken Value", Range(0, 1)) = 0.5
         [HSRMaterialIDProperty(_RimDark, 223)] _RimDark7("Rim Darken Value", Range(0, 1)) = 0.5
+        [HSRMaterialIDFoldout] _RimEdgeSoftness("Edge Softness", Float) = 0
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 0)] _RimEdgeSoftness0("Rim Edge Softness", Float) = 0.05
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 31)] _RimEdgeSoftness1("Rim Edge Softness", Float) = 0.05
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 63)] _RimEdgeSoftness2("Rim Edge Softness", Float) = 0.05
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 95)] _RimEdgeSoftness3("Rim Edge Softness", Float) = 0.05
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 127)] _RimEdgeSoftness4("Rim Edge Softness", Float) = 0.05
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 159)] _RimEdgeSoftness5("Rim Edge Softness", Float) = 0.05
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 192)] _RimEdgeSoftness6("Rim Edge Softness", Float) = 0.05
+        [HSRMaterialIDProperty(_RimEdgeSoftness, 223)] _RimEdgeSoftness7("Rim Edge Softness", Float) = 0.05
 
         [HeaderFoldout(Outline)]
         [KeywordEnum(Tangent, Normal)] _OutlineNormal("Normal Source", Float) = 0
@@ -194,7 +204,7 @@ Shader "Honkai Star Rail/Character/Body"
         {
             "RenderPipeline" = "UniversalPipeline"
             "RenderType" = "Opaque"
-            "UniversalMaterialType" = "Lit"
+            "UniversalMaterialType" = "ComplexLit" // Packages/com.unity.render-pipelines.universal/Runtime/Passes/GBufferPass.cs: Fill GBuffer, but skip lighting pass for ComplexLit
             "Queue" = "Geometry+30"  // 身体默认 +30，放在最后渲染
         }
 
@@ -222,10 +232,8 @@ Shader "Honkai Star Rail/Character/Body"
             ZWrite On
 
             Blend 0 [_SrcBlendColor] [_DstBlendColor], [_SrcBlendAlpha] [_DstBlendAlpha]
-            Blend 1 One Zero
 
             ColorMask RGBA 0
-            ColorMask RGBA 1
 
             HLSLPROGRAM
 
@@ -241,8 +249,9 @@ Shader "Honkai Star Rail/Character/Body"
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
             #pragma multi_compile _ _FORWARD_PLUS
 
             #include "CharBodyCore.hlsl"
@@ -274,10 +283,8 @@ Shader "Honkai Star Rail/Character/Body"
             ZWrite On
 
             Blend 0 [_SrcBlendColor] [_DstBlendColor], [_SrcBlendAlpha] [_DstBlendAlpha]
-            Blend 1 Zero Zero
 
             ColorMask RGBA 0
-            ColorMask 0 1
 
             HLSLPROGRAM
 
