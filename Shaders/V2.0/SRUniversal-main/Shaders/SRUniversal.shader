@@ -69,6 +69,9 @@ Shader "Custom/SRUniversal"
         _ShadowRampOffset("Shadow ramp offset (Default 0.75)",Range(0,1)) = 0.75
         _ShadowBoost("Shadow Boost (Default 1)", Range(0.0, 1.0)) = 1.0
 
+        [Header(Additional Lighting)]
+        [Toggle(_AdditionalLighting_ON)] _UseAdditionalLighting("Use Additional Lighting (Default NO)", float) = 0
+
         [Header(Face)]
         [NoScaleOffset] _FaceMap("Face map (Default black)",2D) = "black" {}
         [NoScaleOffset] _ExpressionMap("Expression Map (Default white)", 2D) = "white" {}
@@ -197,6 +200,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _DRAW_OVERLAY_ON
         #pragma shader_feature_local _EMISSION_ON
+        #pragma shader_feature_local _AdditionalLighting_ON
 
         ENDHLSL
 
@@ -229,6 +233,7 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile _ _LIGHT_LAYERS
 
             #pragma vertex SRUniversalVertex
@@ -263,6 +268,7 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile _ _LIGHT_LAYERS
 
             #pragma vertex SRUniversalVertex

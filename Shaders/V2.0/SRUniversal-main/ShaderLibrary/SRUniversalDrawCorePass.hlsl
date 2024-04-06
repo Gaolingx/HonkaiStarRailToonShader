@@ -74,7 +74,7 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd = 0)
+float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
 {
     float3 hsv = RgbToHsv(color + colorAdd);
     hsv.z = max(RgbToHsv(color).z, RgbToHsv(colorAdd).z);
@@ -107,7 +107,7 @@ Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
     #ifdef _LIGHT_LAYERS
         if (!IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
         {
-            // 不在指定的light layer，则将衰减强度设置为0
+            // 偷个懒，直接把强度改成 0
             light.distanceAttenuation = 0;
             light.shadowAttenuation = 0;
         }
@@ -115,6 +115,57 @@ Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
 
     return light;
 }
+
+float3 GetAdditionalLightDiffuse(float3 baseColor, Light light)
+{
+    float attenuation = light.shadowAttenuation * saturate(light.distanceAttenuation);
+    return baseColor * light.color * attenuation;
+}
+
+Light GetCharacterAdditionalLight(uint lightIndex, float3 positionWS)
+{
+    Light light = GetAdditionalLight(lightIndex, positionWS);
+    // light.distanceAttenuation = saturate(light.distanceAttenuation);
+
+    #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
+        light.shadowAttenuation = AdditionalLightRealtimeShadow(lightIndex, positionWS, light.direction);
+        light.shadowAttenuation = lerp(light.shadowAttenuation, 1, GetAdditionalLightShadowFade(positionWS));
+    #endif
+
+    #ifdef _LIGHT_LAYERS
+        if (!IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
+        {
+            // 偷个懒，直接把强度改成 0
+            light.distanceAttenuation = 0;
+            light.shadowAttenuation = 0;
+        }
+    #endif
+
+    return light;
+}
+
+#if USE_FORWARD_PLUS
+    // Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl
+    struct ForwardPlusDummyInputData
+    {
+        float3 positionWS;
+        float2 normalizedScreenSpaceUV;
+    };
+
+    #define CHAR_LIGHT_LOOP_BEGIN(posWS, posHCS) { \
+        uint pixelLightCount = GetAdditionalLightsCount(); \
+        ForwardPlusDummyInputData inputData; \
+        inputData.positionWS = posWS; \
+        inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(posHCS); \
+        LIGHT_LOOP_BEGIN(pixelLightCount)
+#else
+    #define CHAR_LIGHT_LOOP_BEGIN(posWS, posHCS) { \
+        uint pixelLightCount = GetAdditionalLightsCount(); \
+        LIGHT_LOOP_BEGIN(pixelLightCount)
+#endif
+
+#define CHAR_LIGHT_LOOP_END } LIGHT_LOOP_END
+
 
 float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor)
 {
@@ -586,6 +637,14 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     rampColor = lerp(f3one, rampColor, _ShadowBoost);
     float3 FinalDiffuse = mainLightColor * baseColor * rampColor;
 
+    #if defined(_ADDITIONAL_LIGHTS)
+        #if _AdditionalLighting_ON
+            CHAR_LIGHT_LOOP_BEGIN(positionWS, input.positionCS)
+                Light lightAdd = GetCharacterAdditionalLight(lightIndex, positionWS);
+                FinalDiffuse = CombineColorPreserveLuminance(FinalDiffuse, GetAdditionalLightDiffuse(baseColor.rgb, lightAdd));
+            CHAR_LIGHT_LOOP_END
+        #endif
+    #endif
 
     //高光
     half3 specularColor = 0;
