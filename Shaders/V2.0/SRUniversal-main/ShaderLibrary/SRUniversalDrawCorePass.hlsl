@@ -803,6 +803,7 @@ out float4 colorTarget      : SV_Target0)
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
     colorTarget.rgb = MixBloomColor(outputColor.rgb, _BloomColor0.rgb, _mmBloomIntensity0);
+    colorTarget.a = outputColor.a;
 }
 
 CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)
