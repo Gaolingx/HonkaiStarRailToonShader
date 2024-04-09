@@ -153,7 +153,7 @@ Shader "Custom/SRUniversal"
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode (Default Back)", Float) = 2
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColor ("Core pass src blend mode color (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor ("Core pass dst blend mode color (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha ("Core pass src blend mode alpha (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha ("Core pass src blend mode alpha (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha ("Core pass dst blend mode alpha (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("BlendOp (Default Add)", Float) = 0
         [Enum(Off,0, On,1)] _ZWrite("ZWrite (Default On)",Float) = 1
@@ -169,7 +169,7 @@ Shader "Custom/SRUniversal"
         [Toggle(_DRAW_OVERLAY_ON)] _UseDrawOverlay("Use draw overlay (Default NO)",float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColorOverlay("Overlay pass src blend mode color (Default One)",Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColorOverlay("Overlay pass dst blend mode color (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay pass src blend mode alpha (Default Zero)",Float) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay pass src blend mode alpha (Default One)",Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlphaOverlay("Overlay pass dst blend mode alpha (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpOverlay("Overlay pass blend operation (Default Add)", Float) = 0
         _StencilRefOverlay ("Overlay pass stencil reference (Default 0)", Range(0,255)) = 0
