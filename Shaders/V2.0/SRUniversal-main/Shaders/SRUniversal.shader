@@ -151,29 +151,34 @@ Shader "Custom/SRUniversal"
 
         [Header(Surface Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode (Default Back)", Float) = 2
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColor ("Core pass src blend mode color (Default One)", Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor ("Core pass dst blend mode color (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha ("Core pass src blend mode alpha (Default One)", Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha ("Core pass dst blend mode alpha (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColor ("Core Pass src blend mode color (Default One)", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor ("Core Pass dst blend mode color (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha ("Core Pass src blend mode alpha (Default One)", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha ("Core Pass dst blend mode alpha (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("BlendOp (Default Add)", Float) = 0
         [Enum(Off,0, On,1)] _ZWrite("ZWrite (Default On)",Float) = 1
         _StencilRef ("Stencil reference (Default 0)",Range(0,255)) = 0
+        _StencilReadMask("Stencil Read Mask (Default 255)",Range(0, 255)) = 255
+        _StencilWriteMask("Stencil Write Mask (Default 255)",Range(0, 255)) = 255
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil comparison (Default disabled)",Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassOp("Stencil pass comparison (Default keep)",Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilFailOp("Stencil fail comparison (Default keep)",Int) = 0
         [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFailOp("Stencil z fail comparison (Default keep)",Int) = 0
-        _StencilReadMask("Stencil Read Mask (Default 255)",Range(0, 255)) = 255
-        _StencilWriteMask("Stencil Write Mask (Default 255)",Range(0, 255)) = 255
 
         [Header(Draw Overlay)]
         [Toggle(_DRAW_OVERLAY_ON)] _UseDrawOverlay("Use draw overlay (Default NO)",float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColorOverlay("Overlay pass src blend mode color (Default One)",Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColorOverlay("Overlay pass dst blend mode color (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay pass src blend mode alpha (Default One)",Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlphaOverlay("Overlay pass dst blend mode alpha (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpOverlay("Overlay pass blend operation (Default Add)", Float) = 0
-        _StencilRefOverlay ("Overlay pass stencil reference (Default 0)", Range(0,255)) = 0
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay pass stencil comparison (Default disabled)",Int) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColorOverlay("Overlay Pass src blend mode color (Default One)",Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColorOverlay("Overlay Pass dst blend mode color (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay Pass src blend mode alpha (Default One)",Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlphaOverlay("Overlay Pass dst blend mode alpha (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpOverlay("Overlay Pass blend operation (Default Add)", Float) = 0
+        _StencilRefOverlay ("Overlay Pass stencil reference (Default 0)", Range(0,255)) = 0
+        _StencilReadMaskOverlay("Overlay Pass stencil Read Mask (Default 255)",Range(0, 255)) = 255
+        _StencilWriteMaskOverlay("Overlay Pass stencil Write Mask (Default 255)",Range(0, 255)) = 255
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay Pass stencil comparison (Default disabled)",Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassOpOverlay("Overlay Pass stencil pass comparison (Default keep)",Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilFailOpOverlay("Overlay Pass stencil fail comparison (Default keep)",Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFailOpOverlay("Overlay Pass stencil z fail comparison (Default keep)",Int) = 0
 
     }
     SubShader
@@ -219,10 +224,10 @@ Shader "Custom/SRUniversal"
             Cull[_CullMode]
             Stencil{
                 Ref [_StencilRef]
-                Comp [_StencilComp]
-                Pass [_StencilPassOp]
                 ReadMask [_StencilReadMask]
                 WriteMask [_StencilWriteMask]
+                Comp [_StencilComp]
+                Pass [_StencilPassOp]
                 Fail [_StencilFailOp]
                 ZFail [_StencilZFailOp]
             }
@@ -260,7 +265,12 @@ Shader "Custom/SRUniversal"
             Cull[_CullMode]
             Stencil{
                 Ref [_StencilRefOverlay]
+                ReadMask [_StencilReadMaskOverlay]
+                WriteMask [_StencilWriteMaskOverlay]
                 Comp [_StencilCompOverlay]
+                Pass [_StencilPassOpOverlay]
+                Fail [_StencilFailOpOverlay]
+                ZFail [_StencilZFailOpOverlay]
             }
             Blend [_SrcBlendModeColorOverlay] [_DstBlendModeColorOverlay], [_SrcBlendModeAlphaOverlay] [_DstBlendModeAlphaOverlay]
             BlendOp [_BlendOpOverlay]
