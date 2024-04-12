@@ -173,12 +173,7 @@ Shader "Custom/SRUniversal"
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlphaOverlay("Overlay Pass dst blend mode alpha (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpOverlay("Overlay Pass blend operation (Default Add)", Float) = 0
         _StencilRefOverlay ("Overlay Pass stencil reference (Default 0)", Range(0,255)) = 0
-        _StencilReadMaskOverlay("Overlay Pass stencil Read Mask (Default 255)",Range(0, 255)) = 255
-        _StencilWriteMaskOverlay("Overlay Pass stencil Write Mask (Default 255)",Range(0, 255)) = 255
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay Pass stencil comparison (Default disabled)",Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassOpOverlay("Overlay Pass stencil pass comparison (Default keep)",Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilFailOpOverlay("Overlay Pass stencil fail comparison (Default keep)",Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFailOpOverlay("Overlay Pass stencil z fail comparison (Default keep)",Int) = 0
 
     }
     SubShader
@@ -265,12 +260,7 @@ Shader "Custom/SRUniversal"
             Cull[_CullMode]
             Stencil{
                 Ref [_StencilRefOverlay]
-                ReadMask [_StencilReadMaskOverlay]
-                WriteMask [_StencilWriteMaskOverlay]
                 Comp [_StencilCompOverlay]
-                Pass [_StencilPassOpOverlay]
-                Fail [_StencilFailOpOverlay]
-                ZFail [_StencilZFailOpOverlay]
             }
             Blend [_SrcBlendModeColorOverlay] [_DstBlendModeColorOverlay], [_SrcBlendModeAlphaOverlay] [_DstBlendModeAlphaOverlay]
             BlendOp [_BlendOpOverlay]
