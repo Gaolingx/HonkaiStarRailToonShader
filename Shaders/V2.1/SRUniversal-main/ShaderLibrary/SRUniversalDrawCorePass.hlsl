@@ -607,11 +607,13 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     coolRampCol = RC.coolRampCol;
     warmRampCol = RC.warmRampCol;
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
+    float DayTime = 0;
     #if _DayTime_MANUAL_ON
-        float DayTime = _DayTime;
+        DayTime = _DayTime;
     #else
-        float DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
+        DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
     #endif
+    
     float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime);
     rampColor = lerp(f3one, rampColor, _ShadowBoost);
     float3 FinalDiffuse = mainLightColor * baseColor * rampColor;

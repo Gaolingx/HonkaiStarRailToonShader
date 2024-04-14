@@ -179,7 +179,7 @@ half4 SampleLUTMap(int materialId, int renderType)
     return _LUTMap.Load(int3(materialId, renderType, 0));
 }
 
-half3 GetOutlineColor(half materialId, half3 mainColor)
+half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 {
     half3 color;
     #if _USE_RAMP_COLOR_ON
@@ -188,7 +188,7 @@ half3 GetOutlineColor(half materialId, half3 mainColor)
         #else
             half3 coolColor = SampleCoolRampMap(float2(0, GetRampV(materialId))).rgb;
             half3 warmColor = SampleWarmRampMap(float2(0, GetRampV(materialId))).rgb;
-            color = mainColor * LerpRampColor(coolColor, warmColor, _DayTime);
+            color = mainColor * LerpRampColor(coolColor, warmColor, DayTime);
         #endif
     #else
         color = _OutlineColor.rgb;
@@ -225,6 +225,10 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
         clip(-1.0);
     #endif
     
+    float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
+    Light mainLight = GetMainLight(shadowCoord);
+    float3 lightDirectionWS = normalize(mainLight.direction);
+
     float4 mainTex = 0;
     float4 lightMap = 0;
     #if _AREA_HAIR
@@ -249,7 +253,14 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
         }
     #endif
 
-    float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb), 1.0);
+    half DayTime = 0;
+    #if _DayTime_MANUAL_ON
+        DayTime = _DayTime;
+    #else
+        DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
+    #endif
+    
+    float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb, DayTime), 1.0);
     FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
 
     return FinalOutlineColor;
