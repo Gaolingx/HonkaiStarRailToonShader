@@ -267,47 +267,35 @@ float4 GetLightMapTex(float2 uv, TEXTURE2D(HairLightMap), TEXTURE2D(UpperBodyLig
     return lightMap;
 }
 
-struct RampRowNumIndex
+half GetRampV(half matId)
 {
-    int rampRowIndex;
-    int rampRowNum;
-};
-
-RampRowNumIndex GetRampRowNumIndex(int rampRowIndex, int rampRowNum, float materialId)
-{
-    RampRowNumIndex R;
-    //头发的Ramp贴图只有一行，因此不用计算
-    #if _AREA_HAIR
-        rampRowIndex = 1;
-        rampRowNum = 1;
-        //上下衣的Ramp贴图有8行
-    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
-        int rawIndex = round(materialId * 8.04 + 0.81);
-        //奇数行不变，偶数行先偏移4行，再对8取余
-        rampRowIndex = lerp(fmod((rawIndex + 4), 8), rawIndex, fmod(rawIndex, 2));
-        //身体的Ramp贴图有8行
-        rampRowNum = 8;
-    #elif _AREA_FACE
-        //脸部ramp直接使用皮肤的行号即可
-        rampRowIndex = 1;
-        rampRowNum = 8;
-    #endif
-    R.rampRowIndex = rampRowIndex;
-    R.rampRowNum = rampRowNum;
-    return R;
+    return 0.0625 + 0.125 * lerp(lerp(lerp(lerp(lerp(lerp(lerp(
+        _RampV0,
+        _RampV1, step(0.125, matId)),
+        _RampV2, step(0.250, matId)),
+        _RampV3, step(0.375, matId)),
+        _RampV4, step(0.500, matId)),
+        _RampV5, step(0.625, matId)),
+        _RampV6, step(0.750, matId)),
+        _RampV7, step(0.875, matId));
 }
 
-float2 GetRampUV(float mainLightShadow, float ShadowRampOffset, int rampRowIndex, int rampRowNum)
+half GetRampLineIndex(half matId)
 {
-    //RampUV计算
-    //根据NdotL计算UV的u，由于ramp贴图的变化主要集中在3/4的地方，把uv乘以0.25然后加上0.75
-    //这里_ShadowRampOffset=0.75
-    float rampUVx = mainLightShadow * (1 - ShadowRampOffset) + ShadowRampOffset;
-    //计算uv的v
-    float rampUVy = (2 * rampRowIndex - 1) * (1.0 / (rampRowNum * 2));
+    return lerp(lerp(lerp(lerp(lerp(lerp(lerp(
+        _RampV0,
+        _RampV1, step(0.125, matId)),
+        _RampV2, step(0.250, matId)),
+        _RampV3, step(0.375, matId)),
+        _RampV4, step(0.500, matId)),
+        _RampV5, step(0.625, matId)),
+        _RampV6, step(0.750, matId)),
+        _RampV7, step(0.875, matId));
+}
 
-    float2 rampUV = float2(rampUVx, rampUVy);
-    return rampUV;
+half GetMetalIndex()
+{
+    return _RampV4;
 }
 
 float GetLinearEyeDepthAnyProjection(float depth)
@@ -404,7 +392,6 @@ struct SpecularData
     half materialId;
     half SpecularKsNonMetal;
     half SpecularKsMetal;
-    half MetalSpecularMetallic;
 };
 
 half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
@@ -428,13 +415,12 @@ half3 specColor, float shininess, float roughness, float intensity, float diffus
 }
 
 half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
-half3 specColor, float shininess, float roughness, float intensity, float diffuseFac)
+    half3 specColor, float shininess, float roughness, float intensity, float diffuseFac)
 {
-    half3 FinalSpecularColor = 0;
-    float metallic = saturate((abs(surface.materialId - surface.MetalSpecularMetallic) - 0.1) / (0 - 0.1));
-    FinalSpecularColor = CalculateSpecular(surface, light, viewDirWS, normalWS, specColor, shininess, roughness, intensity, diffuseFac, metallic);
-    return FinalSpecularColor;
+    float metallic = step(abs(GetRampLineIndex(surface.materialId) - GetMetalIndex()), 0.001);
+    return CalculateSpecular(surface, light, viewDirWS, normalWS, specColor, shininess, roughness, intensity, diffuseFac, metallic);
 }
+
 
 void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
 {
@@ -496,7 +482,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 lightDirectionWS = normalize(mainLight.direction);
 
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
-    #if _NORMAL_MAP_ON
+    #if _USE_NORMAL_MAP
         float3x3 tangentToWorld = float3x3(input.tangentWS, input.bitangentWS, input.normalWS);
         float4 normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv);
         float3 normalTS = UnpackNormal(normalMap);
@@ -579,11 +565,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             //应用AO
             mainLightShadow *= lerp(1, specularIntensity, _LerpAOIntensity);
             mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
-
-            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);
-            rampRowIndex = RRNI.rampRowIndex;
-            rampRowNum = RRNI.rampRowNum;
-
         }
     #elif _AREA_FACE
         {
@@ -607,18 +588,16 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
             mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
             mainLightShadow *= mainLight.shadowAttenuation;
-
-            RampRowNumIndex RRNI = GetRampRowNumIndex(rampRowIndex, rampRowNum, materialId);
-            rampRowIndex = RRNI.rampRowIndex;
-            rampRowNum = RRNI.rampRowNum;
         }
     #endif
 
+    float diffuseFac = mainLightShadow;
     float3 coolRampCol = 1;
     float3 warmRampCol = 1;
     float2 rampUV;
 
-    rampUV = GetRampUV(mainLightShadow, _ShadowRampOffset, rampRowIndex, rampRowNum);
+    float rampU = diffuseFac * (1 - _ShadowRampOffset) + _ShadowRampOffset;
+    rampUV = float2(rampU, GetRampV(materialId));
 
     //Ramp Color
     RampColor RC = RampColorConstruct(rampUV, _HairCoolRamp, _HairCoolRampColor, _HairCoolRampColorMixFactor,
@@ -649,7 +628,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //高光
     half3 specularColor = 0;
     half3 viewDirWS = normalize(GetWorldSpaceViewDir(positionWS));
-    float diffuseFac = mainLightShadow;
 
     #if _SPECULAR_ON
         #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
@@ -661,7 +639,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 specularData.materialId = materialId;
                 specularData.SpecularKsNonMetal = _SpecularKsNonMetal;
                 specularData.SpecularKsMetal = _SpecularKsMetal;
-                specularData.MetalSpecularMetallic = _MetalSpecularMetallic;
+                //specularData.MetalSpecularMetallic = _MetalSpecularMetallic;
 
                 specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirWS, positionWS, _SpecularColor, _SpecularShininess, _SpecularRoughness, _SpecularIntensity, diffuseFac);
 

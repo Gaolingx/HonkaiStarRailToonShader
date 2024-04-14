@@ -45,8 +45,19 @@ Shader "Custom/SRUniversal"
         _DayTime("Day Time value (Default 12)",Range(0,24)) = 12
 
         [Header(Normal)]
-        [Toggle(_NORMAL_MAP_ON)] _UseNormalMap("Use Normal Map (Default NO)", float) = 0
+        [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", float) = 0
         [Normal] _NormalMap("Normal Map", 2D) = "bump" {}
+
+        [Header(Ramp Settings)][Space]
+        [Toggle(_CUSTOM_RAMP_MAPPING)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
+        [IntRange] _RampV0("Ramp Line of Mat0 (Default 0)", Range(0, 7)) = 0
+        [IntRange] _RampV1("Ramp Line of Mat1 (Default 1)", Range(0, 7)) = 1
+    	[IntRange] _RampV2("Ramp Line of Mat2 (Default 2)", Range(0, 7)) = 2
+    	[IntRange] _RampV3("Ramp Line of Mat3 (Default 3)", Range(0, 7)) = 3
+    	[IntRange] _RampV4("Ramp Line of Mat4 (Default 4)", Range(0, 7)) = 4
+    	[IntRange] _RampV5("Ramp Line of Mat5 (Default 5)", Range(0, 7)) = 5
+    	[IntRange] _RampV6("Ramp Line of Mat6 (Default 6)", Range(0, 7)) = 6
+    	[IntRange] _RampV7("Ramp Line of Mat7 (Default 7)", Range(0, 7)) = 7
 
         [Header(Indirect Lighting)]
         _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)",Range(0,1)) = 0
@@ -137,15 +148,13 @@ Shader "Custom/SRUniversal"
 
         [Header(Outline)]
         [Toggle(_OUTLINE_ON)] _UseOutline("Use outline (Default YES)", float ) = 1
-        [ToggleUI]_IsFace("Is Face? (please turn on if this is a face material)", Float) = 0
-        _OutlineZOffset("_OutlineZOffset (View Space)", Range(0,1)) = 0.0001
-        [NoScaleOffset]_OutlineZOffsetMaskTex("_OutlineZOffsetMask (black is apply ZOffset)", 2D) = "black" {}
-        _OutlineZOffsetMaskRemapStart("_OutlineZOffsetMaskRemapStart", Range(0,1)) = 0
-        _OutlineZOffsetMaskRemapEnd("_OutlineZOffsetMaskRemapEnd", Range(0,1)) = 1
+        [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
+        [Toggle(_IS_FACE)] _IsFaceOutlineMode("Is face outline (Default NO)", float ) = 0
+        _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
+        _OutlineWidthMin("Outline Width Min (SS)(pixel)", Range(0, 10)) = 2
+        _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
         [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", float ) = 1
         _OutlineColor("OutlineColor (Without Ramp Texture)", Color) = (0.5, 0.5, 0.5, 1)
-        [Toggle(_OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL)] _OutlineUseVertexColorSmoothNormal("Use vertex color smooth normal (Default NO)", float) = 0
-        _OutlineWidth("Outline width (Default 1)", Range(0,10)) = 1
         _OutlineGamma("Outline gamma (Default 16)", Range(1,255)) = 16
         [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", float ) = 1
 
@@ -193,13 +202,16 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local_fragment _UseAlphaClipping
         #pragma shader_feature_local _DayTime_MANUAL_ON
         #pragma shader_feature_local _AUTO_Brightness_ON
-        #pragma shader_feature_local_fragment _NORMAL_MAP_ON
+        #pragma shader_feature_local_fragment _USE_NORMAL_MAP
+        #pragma shader_feature _CUSTOM_RAMP_MAPPING
         #pragma shader_feature_local _Expression_ON
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
         #pragma shader_feature_local _OUTLINE_ON
+        #pragma shader_feature_local _IS_FACE
         #pragma shader_feature_local _FAKE_OUTLINE_ON
+        #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
         #pragma shader_feature_local _USE_RAMP_COLOR_ON
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _DRAW_OVERLAY_ON
@@ -327,12 +339,9 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile_fog
             // ---------------------------------------------------------------------------------------------
 
-            #pragma vertex SRUniversalVertex
-            #pragma fragment SRUniversalFragment
-
-            // because this is an Outline pass, define "ToonShaderIsOutline" to inject outline related code into both VertexShaderWork() and ShadeFinalColor()
-            #define ToonShaderIsOutline
-
+            #pragma vertex CharacterOutlinePassVertex
+            #pragma fragment CharacterOutlinePassFragment
+            
             #if _OUTLINE_ON
 
                 // all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
@@ -344,11 +353,11 @@ Shader "Custom/SRUniversal"
                 {
                     float4 positionCS : SV_POSITION;
                 };
-                Varyings SRUniversalVertex(Attributes input)
+                Varyings CharacterOutlinePassVertex(Attributes input)
                 {
                     return (Varyings)0;
                 }
-                float4 SRUniversalFragment(Varyings input) : SV_TARGET
+                float4 CharacterOutlinePassFragment(Varyings input) : SV_TARGET
                 {
                     return 0;
                 }
