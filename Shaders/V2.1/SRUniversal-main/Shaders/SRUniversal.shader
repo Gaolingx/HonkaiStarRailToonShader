@@ -147,15 +147,25 @@ Shader "Custom/SRUniversal"
         _EmissionIntensity("Emission intensity (Default 1)", Range(0,100)) = 1
 
         [Header(Outline)]
-        [Toggle(_OUTLINE_ON)] _UseOutline("Use outline (Default YES)", float ) = 1
+        [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
+        [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", float ) = 1
+        _OutlineColor("OutlineColor (Without Ramp Texture)", Color) = (0.5, 0.5, 0.5, 1)
+        [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map", Float) = 0
+        _LUTMap("LUT Map", 2D) = "black" {}
         [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         [Toggle(_IS_FACE)] _IsFaceOutlineMode("Is face outline (Default NO)", float ) = 0
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
+        _OutlineColor0("Outline Color 0", Color) = (0, 0, 0, 1)
+        _OutlineColor1("Outline Color 1", Color) = (0, 0, 0, 1)
+        _OutlineColor2("Outline Color 2", Color) = (0, 0, 0, 1)
+        _OutlineColor3("Outline Color 3", Color) = (0, 0, 0, 1)
+        _OutlineColor4("Outline Color 4", Color) = (0, 0, 0, 1)
+        _OutlineColor5("Outline Color 5", Color) = (0, 0, 0, 1)
+        _OutlineColor6("Outline Color 6", Color) = (0, 0, 0, 1)
+        _OutlineColor7("Outline Color 7", Color) = (0, 0, 0, 1)
         _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
         _OutlineWidthMin("Outline Width Min (SS)(pixel)", Range(0, 10)) = 2
         _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
-        [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", float ) = 1
-        _OutlineColor("OutlineColor (Without Ramp Texture)", Color) = (0.5, 0.5, 0.5, 1)
-        _OutlineGamma("Outline gamma (Default 16)", Range(1,255)) = 16
         [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", float ) = 1
 
         [Header(Surface Options)]
@@ -208,10 +218,11 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
-        #pragma shader_feature_local _OUTLINE_ON
         #pragma shader_feature_local _IS_FACE
         #pragma shader_feature_local _FAKE_OUTLINE_ON
+        #pragma shader_feature _USE_LUT_MAP
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
+        #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_OVERLAY
         #pragma shader_feature_local _USE_RAMP_COLOR_ON
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _DRAW_OVERLAY_ON
@@ -339,29 +350,13 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile_fog
             // ---------------------------------------------------------------------------------------------
 
+            #pragma shader_feature _ENABLE_OUTLINE
+            
             #pragma vertex CharacterOutlinePassVertex
             #pragma fragment CharacterOutlinePassFragment
-            
-            #if _OUTLINE_ON
 
-                // all shader logic written inside this .hlsl, remember to write all #define BEFORE writing #include
-                #include "../ShaderLibrary/SRUniversalInput.hlsl"
-                #include "../ShaderLibrary/SRUniversalDrawOutline.hlsl"
-            #else
-                struct Attributes {};
-                struct Varyings
-                {
-                    float4 positionCS : SV_POSITION;
-                };
-                Varyings CharacterOutlinePassVertex(Attributes input)
-                {
-                    return (Varyings)0;
-                }
-                float4 CharacterOutlinePassFragment(Varyings input) : SV_TARGET
-                {
-                    return 0;
-                }
-            #endif
+            #include "../ShaderLibrary/SRUniversalInput.hlsl"
+            #include "../ShaderLibrary/SRUniversalDrawOutline.hlsl"
 
             ENDHLSL
         }

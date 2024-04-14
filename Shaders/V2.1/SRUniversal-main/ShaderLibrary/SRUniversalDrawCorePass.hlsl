@@ -744,7 +744,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             #else
                 OutlineRamp = _OutlineColor.rgb;
             #endif
-            fakeOutlineColor = pow(OutlineRamp, _OutlineGamma);
+            fakeOutlineColor = OutlineRamp;
         }
     #endif
 

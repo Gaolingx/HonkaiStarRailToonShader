@@ -10,7 +10,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 // all sampler2D don't need to put inside CBUFFER 
-sampler2D _OutlineZOffsetMaskTex;
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);
@@ -52,6 +51,9 @@ TEXTURE2D(_UpperBodyStockings);
 SAMPLER(sampler_UpperBodyStockings);
 TEXTURE2D(_LowerBodyStockings);
 SAMPLER(sampler_LowerBodyStockings);
+
+TEXTURE2D(_LUTMap);
+SAMPLER(sampler_LUTMap);
 
 // put all your uniforms(usually things inside .shader file's properties{}) inside this CBUFFER, in order to make SRP batcher compatible
 // see -> https://blogs.unity3d.com/2019/02/28/srp-batcher-speed-up-your-rendering/
@@ -196,7 +198,6 @@ float4 _OutlineColor7;
 float _OutlineWidth;
 float _OutlineWidthMin;
 float _OutlineWidthMax;
-float _OutlineGamma;
 
 
 // Bloom

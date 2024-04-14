@@ -71,13 +71,6 @@ float3 ExtendOutline(float3 positionWS, float3 smoothNormalWS, float width, floa
     return positionWS + smoothNormalWS * offsetLen;
 }
 
-void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
-{
-#if _UseAlphaClipping
-    clip(alpha - alphaTestThreshold);
-#endif
-}
-
 CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 {
     VertexPositionInputs vertexPositionInput = GetVertexPositionInputs(input.positionOS);
@@ -122,51 +115,141 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     return output;
 }
 
-float4 colorFragmentTarget(inout CharOutlineVaryings input)
+half GetRampV(half matId)
 {
-    float3 coolRamp = 0;
-    float3 warmRamp = 0;
+    return 0.0625 + 0.125 * lerp(lerp(lerp(lerp(lerp(lerp(lerp(
+        _RampV0,
+        _RampV1, step(0.125, matId)),
+        _RampV2, step(0.250, matId)),
+        _RampV3, step(0.375, matId)),
+        _RampV4, step(0.500, matId)),
+        _RampV5, step(0.625, matId)),
+        _RampV6, step(0.750, matId)),
+        _RampV7, step(0.875, matId));
+}
+
+half GetRampLineIndex(half matId)
+{
+    return lerp(lerp(lerp(lerp(lerp(lerp(lerp(
+        _RampV0,
+        _RampV1, step(0.125, matId)),
+        _RampV2, step(0.250, matId)),
+        _RampV3, step(0.375, matId)),
+        _RampV4, step(0.500, matId)),
+        _RampV5, step(0.625, matId)),
+        _RampV6, step(0.750, matId)),
+        _RampV7, step(0.875, matId));
+}
+
+half3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
+{
+    return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
+}
+
+half4 SampleCoolRampMap(float2 uv)
+{
+    half4 color = 0;
+    #if _AREA_HAIR
+        color = SAMPLE_TEXTURE2D(_HairCoolRamp, sampler_HairCoolRamp, uv);
+    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
+        color = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, uv);
+    #elif _AREA_FACE
+        color = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, uv);
+    #endif
+
+    return color;
+}
+
+half4 SampleWarmRampMap(float2 uv)
+{
+    half4 color = 0;
+    #if _AREA_HAIR
+        color = SAMPLE_TEXTURE2D(_HairWarmRamp, sampler_HairWarmRamp, uv);
+    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
+        color = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, uv);
+    #elif _AREA_FACE
+        color = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, uv);
+    #endif
+
+    return color;
+}
+
+half4 SampleLUTMap(int materialId, int renderType)
+{
+    return _LUTMap.Load(int3(materialId, renderType, 0));
+}
+
+half3 GetOutlineColor(half materialId, half3 mainColor)
+{
+    half3 color;
+    #if _USE_RAMP_COLOR_ON
+        #if _USE_LUT_MAP
+            color = SampleLUTMap((int)GetRampLineIndex(materialId), 3).rgb;
+        #else
+            half3 coolColor = SampleCoolRampMap(float2(0, GetRampV(materialId))).rgb;
+            half3 warmColor = SampleWarmRampMap(float2(0, GetRampV(materialId))).rgb;
+            color = mainColor * LerpRampColor(coolColor, warmColor, _DayTime);
+        #endif
+    #else
+        color = _OutlineColor.rgb;
+    #endif
+
+    const float4 overlayColors[8] = {
+        _OutlineColor0,
+        _OutlineColor1,
+        _OutlineColor2,
+        _OutlineColor3,
+        _OutlineColor4,
+        _OutlineColor5,
+        _OutlineColor6,
+        _OutlineColor7,
+    };
+    
+    half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+
+    #ifdef _CUSTOMOUTLINEVARENUM_DISABLE
+        return color;
+    #elif _CUSTOMOUTLINEVARENUM_MULTIPLY
+        return color * overlayColor;
+    #elif _CUSTOMOUTLINEVARENUM_OVERLAY
+        return overlayColor;
+    #else
+        return color;
+    #endif
+}
+
+
+float4 colorFragmentTarget(inout CharOutlineVaryings input) 
+{
+    #ifndef _ENABLE_OUTLINE
+        clip(-1.0);
+    #endif
+    
+    float4 mainTex = 0;
+    float4 lightMap = 0;
     #if _AREA_HAIR
         {
-            float2 outlineUV = float2(0, 0.5);
-            coolRamp = SAMPLE_TEXTURE2D(_HairCoolRamp, sampler_HairCoolRamp, outlineUV).rgb;
-            warmRamp = SAMPLE_TEXTURE2D(_HairWarmRamp, sampler_HairWarmRamp, outlineUV).rgb;
+            mainTex = SAMPLE_TEXTURE2D(_HairColorMap, sampler_HairColorMap, input.baseUV);
+            lightMap = SAMPLE_TEXTURE2D(_HairLightMap, sampler_HairLightMap, input.baseUV);
         }
     #elif _AREA_UPPERBODY || _AREA_LOWERBODY
         {
-            float4 lightMap = 0;
             #if _AREA_UPPERBODY
+                mainTex = SAMPLE_TEXTURE2D(_UpperBodyColorMap, sampler_UpperBodyColorMap, input.baseUV);
                 lightMap = SAMPLE_TEXTURE2D(_UpperBodyLightMap, sampler_UpperBodyLightMap, input.baseUV);
             #elif _AREA_LOWERBODY
+                mainTex = SAMPLE_TEXTURE2D(_LowerBodyColorMap, sampler_LowerBodyColorMap, input.baseUV);
                 lightMap = SAMPLE_TEXTURE2D(_LowerBodyLightMap, sampler_LowerBodyLightMap, input.baseUV);
             #endif
-            float materialEnum = lightMap.a;
-            float materialEnumOffset = materialEnum + 0.0425;
-            float outlineUVy = lerp(materialEnumOffset, materialEnumOffset + 0.5 > 1 ? materialEnumOffset + 0.5 - 1 : materialEnumOffset + 0.5, fmod((round(materialEnumOffset/0.0625) - 1)/2, 2));
-            float2 outlineUV = float2(0, outlineUVy);
-            coolRamp = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, outlineUV).rgb;
-            warmRamp = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, outlineUV).rgb;
         }
     #elif _AREA_FACE
         {
-            float2 outlineUV = float2(0, 0.0625);
-            coolRamp = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, outlineUV).rgb;
-            warmRamp = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, outlineUV).rgb;
+            mainTex = SAMPLE_TEXTURE2D(_FaceColorMap, sampler_FaceColorMap, input.baseUV);
+            lightMap = float4(1, 1, 1, 1);
         }
     #endif
 
-    float3 OutlineRamp = lerp(coolRamp, warmRamp, 0.5);
-    float3 OutlineAlbedo = 0; 
-    #if _USE_RAMP_COLOR_ON
-        OutlineAlbedo += pow(saturate(OutlineRamp), _OutlineGamma);
-    #else
-        OutlineAlbedo += pow(_OutlineColor, _OutlineGamma);
-    #endif
-
-    float alpha = _Alpha;
-
-    float4 FinalOutlineColor = float4(OutlineAlbedo, alpha);
-    DoClipTestToTargetAlphaValue(FinalOutlineColor.a, _AlphaClip);
+    float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb), 1.0);
     FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
 
     return FinalOutlineColor;
