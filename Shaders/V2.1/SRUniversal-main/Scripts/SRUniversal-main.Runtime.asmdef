@@ -1,3 +1,18 @@
 {
-	"name": "SRUniversal-main"
+    "name": "SRUniversal-main",
+    "rootNamespace": "",
+    "references": [
+        "GUID:6a57a02e00e601a45b8e15e0652b5700",
+        "GUID:276873b7944451a4fb1fc436c9eefadc",
+        "GUID:df380645f10b7bc4b97d4f5eb6303d95"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

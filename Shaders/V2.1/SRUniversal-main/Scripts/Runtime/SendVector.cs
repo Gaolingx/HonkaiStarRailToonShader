@@ -49,7 +49,7 @@ public class SendVector : MonoBehaviour
 
     private void OnValidate()
     {
-        needSend = HeadRightReference != null && HeadRightReference != null && HeadForwardReference != null;
+        needSend = HeadReference != null && HeadRightReference != null && HeadForwardReference != null;
     }
 
     private void LateUpdate()
