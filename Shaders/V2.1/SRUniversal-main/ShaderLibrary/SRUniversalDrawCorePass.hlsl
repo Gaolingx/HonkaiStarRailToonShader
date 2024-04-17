@@ -689,11 +689,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         stockingsEffect = 1;
     #endif
     //边缘光部分
-    float3 rimLightColor;
+    float3 rimLightColor = 0;
     float3 rimLightMask;
     float rimNoV = dot(normalize(normalWS), normalize(GetWorldSpaceViewDir(positionWS)));
     float rimNoL = dot(normalize(normalWS), normalize(mainLight.direction));
-    float rimN = normalize(normalWS);
+
     #if _RIM_LIGHTING_ON
         {
             RimLightMaskData rimLightMaskData;
@@ -710,11 +710,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
 
-            rimLightMask = GetRimLightMask(rimLightMaskData, input.positionCS, rimN, lightMap);
+            rimLightMask = GetRimLightMask(rimLightMaskData, input.positionCS, normalWS, lightMap);
             rimLightColor = GetRimLight(rimLightData, rimLightMask, rimNoL, mainLight, isFrontFace);
         }
-    #else
-        rimLightColor = 0;
     #endif
 
     float3 emissionColor = 0;
