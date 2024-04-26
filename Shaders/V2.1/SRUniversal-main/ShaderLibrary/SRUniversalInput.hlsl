@@ -211,6 +211,38 @@ float _RimDark7;
 float _RimEdgeSoftness7;
 
 
+// RimShadow
+float _RimShadowCt;
+float _RimShadowIntensity;
+float4 _RimShadowOffset;
+float4 _RimShadowColor;
+float4 _RimShadowColor0;
+float4 _RimShadowColor1;
+float4 _RimShadowColor2;
+float4 _RimShadowColor3;
+float4 _RimShadowColor4;
+float4 _RimShadowColor5;
+float4 _RimShadowColor6;
+float4 _RimShadowColor7;
+float _RimShadowWidth;
+float _RimShadowWidth0;
+float _RimShadowWidth1;
+float _RimShadowWidth2;
+float _RimShadowWidth3;
+float _RimShadowWidth4;
+float _RimShadowWidth5;
+float _RimShadowWidth6;
+float _RimShadowWidth7;
+float _RimShadowFeather;
+float _RimShadowFeather0;
+float _RimShadowFeather1;
+float _RimShadowFeather2;
+float _RimShadowFeather3;
+float _RimShadowFeather4;
+float _RimShadowFeather5;
+float _RimShadowFeather6;
+float _RimShadowFeather7;
+
 // Emission
 float _EmissionMixBaseColor;
 float3 _EmissionTintColor;

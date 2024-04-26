@@ -127,15 +127,15 @@ Shader "Custom/SRUniversal"
         [Header(Rim Lighting)]
         [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)",float) = 1
         _ModelScale("Model Scale (Default 1)", Float) = 1
-        _RimIntensity("Intensity (Front Main) (Default 0.5)", Float) = 0.5
-        _RimIntensityBackFace("Intensity (Back Main) (Default 0)", Float) = 0
-        _RimThresholdMin("Threshold Min (Default 0.6)", Float) = 0.6
-        _RimThresholdMax("Threshold Max (Default 0.9)", Float) = 0.9
-        _RimColor("Rim Color", Float) = 1
+        _RimIntensity("Rim Intensity (Front Face)", Float) = 0.5
+        _RimIntensityBackFace("Rim Intensity (Back Face)", Float) = 0
+        _RimThresholdMin("Rim Threshold Min (Default 0.6)", Float) = 0.6
+        _RimThresholdMax("Rim Threshold Max (Default 0.9)", Float) = 0.9
+        _RimColor("Rim Color", Color) = (1, 1, 1, 1)
         _RimWidth("Rim Width", Float) = 1
         _RimDark("Rim Darken Value", Range(0, 1)) = 0.5
         _RimEdgeSoftness("Rim Edge Softness", Float) = 0.05
-        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimVarEnum("Custom Rim Var State", Float) = 0
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimLightVarEnum("Custom Rim Light Var State", Float) = 0
         _RimColor0("Rim Color 0", Color) = (1, 1, 1, 1)
         _RimWidth0("Rim Width 0", Float) = 1
         _RimDark0("Rim Darken Value 0", Range(0, 1)) = 0.5
@@ -168,6 +168,40 @@ Shader "Custom/SRUniversal"
         _RimWidth7("Rim Width 7", Float) = 1
         _RimDark7("Rim Darken Value 7", Range(0, 1)) = 0.5
         _RimEdgeSoftness7("Rim Edge Softness 7", Float) = 0.05
+
+        [Header(Rim Shadow)]
+        [Toggle(_RIM_SHADOW_ON)] _UseRimShadow("Use Rim Shadow (Default YES)",float) = 1
+        _RimShadowCt("Rim Shadow Ct", Float) = 1
+        _RimShadowIntensity("Rim Shadow Intensity", Float) = 1
+        _RimShadowOffset("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
+        _RimShadowColor("Rim Shadow Color", Color) = (1, 1, 1, 1)
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimShadowVarEnum("Custom Rim Shadow Var State", Float) = 0
+        _RimShadowColor0("Rim Shadow Color 0", Color) = (1, 1, 1, 1)
+        _RimShadowColor1("Rim Shadow Color 1", Color) = (1, 1, 1, 1)
+        _RimShadowColor2("Rim Shadow Color 2", Color) = (1, 1, 1, 1)
+        _RimShadowColor3("Rim Shadow Color 3", Color) = (1, 1, 1, 1)
+        _RimShadowColor4("Rim Shadow Color 4", Color) = (1, 1, 1, 1)
+        _RimShadowColor5("Rim Shadow Color 5", Color) = (1, 1, 1, 1)
+        _RimShadowColor6("Rim Shadow Color 6", Color) = (1, 1, 1, 1)
+        _RimShadowColor7("Rim Shadow Color 7", Color) = (1, 1, 1, 1)
+        _RimShadowWidth("Rim Shadow Width", Float) = 0
+        _RimShadowWidth0("Rim Shadow Width 0", Float) = 1
+        _RimShadowWidth1("Rim Shadow Width 1", Float) = 1
+        _RimShadowWidth2("Rim Shadow Width 2", Float) = 1
+        _RimShadowWidth3("Rim Shadow Width 3", Float) = 1
+        _RimShadowWidth4("Rim Shadow Width 4", Float) = 1
+        _RimShadowWidth5("Rim Shadow Width 5", Float) = 1
+        _RimShadowWidth6("Rim Shadow Width 6", Float) = 1
+        _RimShadowWidth7("Rim Shadow Width 7", Float) = 1
+        _RimShadowFeather("Rim Shadow Feather", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather0("Rim Shadow Feather 0", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather1("Rim Shadow Feather 1", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather2("Rim Shadow Feather 2", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather3("Rim Shadow Feather 3", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather4("Rim Shadow Feather 4", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather5("Rim Shadow Feather 5", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather6("Rim Shadow Feather 6", Range(0.01, 0.99)) = 0.01
+        _RimShadowFeather7("Rim Shadow Feather 7", Range(0.01, 0.99)) = 0.01
 
         [Header(Bloom)]
         _mmBloomIntensity0("Intensity (Default 0)", Float) = 0
@@ -251,10 +285,12 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
+        #pragma shader_feature_local _RIM_SHADOW_ON
         #pragma shader_feature_local _IS_FACE
         #pragma shader_feature_local _FAKE_OUTLINE_ON
         #pragma shader_feature _USE_LUT_MAP
-        #pragma shader_feature _CUSTOMRIMVARENUM_DISABLE _CUSTOMRIMVARENUM_MULTIPLY _CUSTOMRIMVARENUM_OVERLAY
+        #pragma shader_feature _CUSTOMRIMLIGHTVARENUM_DISABLE _CUSTOMRIMLIGHTVARENUM_MULTIPLY _CUSTOMRIMLIGHTVARENUM_OVERLAY
+        #pragma shader_feature _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
         #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_OVERLAY
         #pragma shader_feature_local _USE_RAMP_COLOR_ON

@@ -323,11 +323,11 @@ struct RimLightAreaData
     float rimDark;
     float edgeSoftness;
 };
-RimLightAreaData GetRimLightAreaData(half materialId, half3 mainColor, half3 rampColor = 1)
+RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
 {
-    RimLightAreaData colorData;
+    RimLightAreaData rimLightAreaData;
 
-    half3 color = mainColor * rampColor;
+    half3 color = rimLightColor;
     
     const float4 overlayColors[8] = {
         _RimColor0,
@@ -382,55 +382,55 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 mainColor, half3 ram
     float overlayEdgeSoftness = rimEdgeSoftnesses[GetRampLineIndex(materialId)];
 
     float3 finalRimColor = 0;
-    #ifdef _CUSTOMRIMVARENUM_DISABLE
+    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
         finalRimColor = color.rgb;
-    #elif _CUSTOMRIMVARENUM_MULTIPLY
+    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
         finalRimColor = color.rgb * overlayColor;
-    #elif _CUSTOMRIMVARENUM_OVERLAY
+    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
         finalRimColor = overlayColor;
     #else
         finalRimColor = color.rgb;
     #endif
     
     float finalRimWidth = 0;
-    #ifdef _CUSTOMRIMVARENUM_DISABLE
+    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
         finalRimWidth = _RimWidth;
-    #elif _CUSTOMRIMVARENUM_MULTIPLY
+    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
         finalRimWidth = _RimWidth * overlayWidth;
-    #elif _CUSTOMRIMVARENUM_OVERLAY
+    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
         finalRimWidth = overlayWidth;
     #else
         finalRimWidth = _RimWidth;
     #endif
 
     float finalRimDark = 0;
-    #ifdef _CUSTOMRIMVARENUM_DISABLE
+    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
         finalRimDark = _RimDark;
-    #elif _CUSTOMRIMVARENUM_MULTIPLY
+    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
         finalRimDark = _RimDark * overlayDark;
-    #elif _CUSTOMRIMVARENUM_OVERLAY
+    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
         finalRimDark = overlayDark;
     #else
         finalRimDark = _RimDark;
     #endif
 
     float finalRimEdgeSoftness = 0;
-    #ifdef _CUSTOMRIMVARENUM_DISABLE
+    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
         finalRimEdgeSoftness = _RimEdgeSoftness;
-    #elif _CUSTOMRIMVARENUM_MULTIPLY
+    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
         finalRimEdgeSoftness = _RimEdgeSoftness * overlayEdgeSoftness;
-    #elif _CUSTOMRIMVARENUM_OVERLAY
+    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
         finalRimEdgeSoftness = overlayEdgeSoftness;
     #else
         finalRimEdgeSoftness = _RimEdgeSoftness;
     #endif
 
-    colorData.color = finalRimColor.rgb;
-    colorData.width = finalRimWidth;
-    colorData.rimDark = finalRimDark;
-    colorData.edgeSoftness = finalRimEdgeSoftness;
+    rimLightAreaData.color = finalRimColor.rgb;
+    rimLightAreaData.width = finalRimWidth;
+    rimLightAreaData.rimDark = finalRimDark;
+    rimLightAreaData.edgeSoftness = finalRimEdgeSoftness;
 
-    return colorData;
+    return rimLightAreaData;
 }
 
 struct RimLightMaskData
@@ -502,6 +502,117 @@ float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light,
     float attenuation = saturate(NoL * light.shadowAttenuation * light.distanceAttenuation);
     float intensity = lerp(rimData.intensityBackFace, rimData.intensityFrontFace, isFrontFace);
     return rimMask * light.color * (lerp(rimData.darkenValue, 1, attenuation) * intensity);
+}
+
+struct RimShadowAreaData
+{
+    float3 color;
+    float width;
+    float feather;
+};
+RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
+{
+    RimShadowAreaData rimShadowAreaData;
+
+    half3 color = rimShadowColor;
+    
+    const float4 overlayColors[8] = {
+        _RimShadowColor0,
+        _RimShadowColor1,
+        _RimShadowColor2,
+        _RimShadowColor3,
+        _RimShadowColor4,
+        _RimShadowColor5,
+        _RimShadowColor6,
+        _RimShadowColor7,
+    };
+    
+    half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+
+    const float overlayWidths[8] = {
+        _RimShadowWidth0,
+        _RimShadowWidth1,
+        _RimShadowWidth2,
+        _RimShadowWidth3,
+        _RimShadowWidth4,
+        _RimShadowWidth5,
+        _RimShadowWidth6,
+        _RimShadowWidth7,
+    };
+    
+    float overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
+
+    const float rimShadowFeather[8] = {
+        _RimShadowFeather0,
+        _RimShadowFeather1,
+        _RimShadowFeather2,
+        _RimShadowFeather3,
+        _RimShadowFeather4,
+        _RimShadowFeather5,
+        _RimShadowFeather6,
+        _RimShadowFeather7,
+    };
+    
+    float overlayFeather = rimShadowFeather[GetRampLineIndex(materialId)];
+
+    float3 finalRimShadowColor = 0;
+    #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
+        finalRimShadowColor = color.rgb;
+    #elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
+        finalRimShadowColor = color.rgb * overlayColor;
+    #elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
+        finalRimShadowColor = overlayColor;
+    #else
+        finalRimShadowColor = color.rgb;
+    #endif
+    
+    float finalRimShadowWidth = 0;
+    #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
+        finalRimShadowWidth = _RimShadowWidth;
+    #elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
+        finalRimShadowWidth = _RimShadowWidth * overlayWidth;
+    #elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
+        finalRimShadowWidth = overlayWidth;
+    #else
+        finalRimShadowWidth = _RimShadowWidth;
+    #endif
+
+    float finalRimShadowFeather = 0;
+    #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
+        finalRimShadowFeather = _RimShadowFeather;
+    #elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
+        finalRimShadowFeather = _RimShadowFeather * overlayFeather;
+    #elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
+        finalRimShadowFeather = overlayFeather;
+    #else
+        finalRimShadowFeather = _RimShadowFeather;
+    #endif
+
+    rimShadowAreaData.color = finalRimShadowColor.rgb;
+    rimShadowAreaData.width = finalRimShadowWidth;
+    rimShadowAreaData.feather = finalRimShadowFeather;
+
+    return rimShadowAreaData;
+}
+
+struct RimShadowData
+{
+    float ct;
+    float intensity;
+    float3 offset;
+    float3 color;
+    float width;
+    float feather;
+};
+
+float3 GetRimShadow(RimShadowData data, float3 viewDirWS, float3 normalWS)
+{
+    float3 viewDirVS = TransformWorldToViewDir(viewDirWS);
+    float3 normalVS = TransformWorldToViewNormal(normalWS);
+    float rim = saturate(dot(normalize(viewDirVS - data.offset), normalVS));
+    float rimShadow = saturate(pow(max(1 - rim, 0.001), data.ct) * data.width);
+    rimShadow = smoothstep(data.feather, 1, rimShadow) * data.intensity * 0.25;
+    return lerp(1, data.color * 2, max(rimShadow, 0));
 }
 
 struct SpecularData
@@ -747,7 +858,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         #endif
     #endif
 
-    //高光
+    //Specular
     half3 specularColor = 0;
     half3 viewDirWS = normalize(GetWorldSpaceViewDir(positionWS));
 
@@ -809,7 +920,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         stockingsEffect = 1;
     #endif
     
-    //边缘光部分
+    //Rim Light
     float3 rimLightColor = 0;
     float3 rimLightMask;
     float rimNoV = dot(normalize(normalWS), normalize(GetWorldSpaceViewDir(positionWS)));
@@ -817,16 +928,16 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     #if _RIM_LIGHTING_ON
         {
-            RimLightAreaData rimLightAreaData = GetRimLightAreaData(materialId, baseColor, rampColor);
-            float3 rimColor = rimLightAreaData.color;
-            float rimWidth = rimLightAreaData.width;
-            float rimDark = rimLightAreaData.rimDark;
-            float rimEdgeSoftnesses = rimLightAreaData.edgeSoftness;
+            RimLightAreaData rimLightAreaData = GetRimLightAreaData(materialId, _RimColor);
+            float3 rimLightAreaColor = rimLightAreaData.color;
+            float rimLightAreaWidth = rimLightAreaData.width;
+            float rimLightAreaDark = rimLightAreaData.rimDark;
+            float rimLightAreaEdgeSoftnesses = rimLightAreaData.edgeSoftness;
 
             RimLightMaskData rimLightMaskData;
-            rimLightMaskData.color = rimColor;
-            rimLightMaskData.width = rimWidth;
-            rimLightMaskData.edgeSoftness = rimEdgeSoftnesses;
+            rimLightMaskData.color = rimLightAreaColor;
+            rimLightMaskData.width = rimLightAreaWidth;
+            rimLightMaskData.edgeSoftness = rimLightAreaEdgeSoftnesses;
             rimLightMaskData.thresholdMin = _RimThresholdMin;
             rimLightMaskData.thresholdMax = _RimThresholdMax;
             rimLightMaskData.modelScale = _ModelScale;
@@ -834,12 +945,33 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightMaskData.NoV = rimNoV;
         
             RimLightData rimLightData;
-            rimLightData.darkenValue = rimDark;
+            rimLightData.darkenValue = rimLightAreaDark;
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
 
             rimLightMask = GetRimLightMask(rimLightMaskData, input.positionCS, normalWS, lightMap);
             rimLightColor = GetRimLight(rimLightData, rimLightMask, rimNoL, mainLight, isFrontFace);
+        }
+    #endif
+
+    //Rim Shadow
+    float3 rimShadowColor = 1;
+    #if _RIM_SHADOW_ON
+        {
+            RimShadowAreaData rimShadowAreaData = GetRimShadowAreaData(materialId, _RimShadowColor);
+            float3 rimAreaShadowColor = rimShadowAreaData.color;
+            float rimAreaShadowWidth = rimShadowAreaData.width;
+            float rimAreaShadowFeather = rimShadowAreaData.feather;
+
+            RimShadowData rimShadowData;
+            rimShadowData.ct = _RimShadowCt;
+            rimShadowData.intensity = _RimShadowIntensity;
+            rimShadowData.offset = _RimShadowOffset.xyz;
+            rimShadowData.color = rimAreaShadowColor.rgb;
+            rimShadowData.width = rimAreaShadowWidth;
+            rimShadowData.feather = rimAreaShadowFeather;
+
+            rimShadowColor = GetRimShadow(rimShadowData, viewDirWS, normalWS);
         }
     #endif
 
@@ -881,6 +1013,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     albedo *= stockingsEffect;
     albedo += rimLightColor;
     albedo += emissionColor;
+    albedo *= rimShadowColor;
     albedo = lerp(albedo, fakeOutlineColor, fakeOutlineEffect);
 
     float alpha = _Alpha;
