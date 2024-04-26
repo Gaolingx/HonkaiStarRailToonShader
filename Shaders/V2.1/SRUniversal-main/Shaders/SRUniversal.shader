@@ -233,6 +233,8 @@ Shader "Custom/SRUniversal"
         _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
         _OutlineWidthMin("Outline Width Min (SS)(pixel)", Range(0, 10)) = 2
         _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
+        [ToggleUI]_IsFace("Use Clip Pos With ZOffset (face material)", Float) = 0
+        _OutlineZOffset("_OutlineZOffset (View Space)", Range(0,1)) = 0.0001
         [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", Float) = 1
 
         [Header(Surface Options)]

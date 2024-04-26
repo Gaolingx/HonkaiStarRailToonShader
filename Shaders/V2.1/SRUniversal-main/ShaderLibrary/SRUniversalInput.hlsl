@@ -262,6 +262,8 @@ float4 _OutlineColor7;
 float _OutlineWidth;
 float _OutlineWidthMin;
 float _OutlineWidthMax;
+float _IsFace;
+float _OutlineZOffset;
 
 
 // Bloom

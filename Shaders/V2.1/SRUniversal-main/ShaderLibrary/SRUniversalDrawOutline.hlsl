@@ -1,3 +1,4 @@
+#include "../ShaderLibrary/NiloZOffset.hlsl"
 
 struct CharOutlineAttributes
 {
@@ -71,6 +72,7 @@ float3 ExtendOutline(float3 positionWS, float3 smoothNormalWS, float width, floa
     return positionWS + smoothNormalWS * offsetLen;
 }
 
+
 CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 {
     VertexPositionInputs vertexPositionInput = GetVertexPositionInputs(input.positionOS);
@@ -80,10 +82,6 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
 
     float outlineWidth = input.color.a;
-    #if defined(_IS_FACE)
-    outlineWidth *= lerp(1.0,
-        saturate(0.4 - dot(_HeadForward.xz, normalize(GetCameraPositionWS() - positionWS).xz)), step(0.5, input.color.b));
-    #endif
     
     positionWS = ExtendOutline(positionWS, smoothNormalWS,
         _OutlineWidth * outlineWidth, _OutlineWidthMin * outlineWidth, _OutlineWidthMax * outlineWidth);
@@ -91,16 +89,15 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     float3 positionVS = TransformWorldToView(positionWS);
     float4 positionCS = TransformWorldToHClip(positionWS);
 
-    float4 positionNDC;
-    float4 ndc = positionCS * 0.5f;
-    positionNDC.xy = float2(ndc.x, ndc.y * _ProjectionParams.x) + ndc.w;
-    positionNDC.zw = positionCS.zw;
+    #if defined(_IS_FACE)
+    positionCS = NiloGetNewClipPosWithZOffset(positionCS, _OutlineZOffset + 0.03 * _IsFace);
+    #endif
 
     CharOutlineVaryings output = (CharOutlineVaryings)0;
     output.positionCS = positionCS;
     output.positionVS = positionVS;
     output.positionWS = positionWS;
-    output.positionNDC = positionNDC;
+    //output.positionNDC = positionNDC;
     output.baseUV = input.baseUV;
     output.color = input.color.rgb;
     output.normalWS = normalInput.normalWS;
