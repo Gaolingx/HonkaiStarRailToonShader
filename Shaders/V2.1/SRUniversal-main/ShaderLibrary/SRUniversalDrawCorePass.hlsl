@@ -316,15 +316,16 @@ float GetLinearEyeDepthAnyProjection(float4 svPosition)
     return GetLinearEyeDepthAnyProjection(svPosition.z);
 }
 
-struct RimLightColorData
+struct RimLightAreaData
 {
     float3 color;
     float width;
     float rimDark;
+    float edgeSoftness;
 };
-RimLightColorData GetRimColorAndDark(half materialId, half3 mainColor, half3 rampColor = 1)
+RimLightAreaData GetRimLightAreaData(half materialId, half3 mainColor, half3 rampColor = 1)
 {
-    RimLightColorData colorData;
+    RimLightAreaData colorData;
 
     half3 color = mainColor * rampColor;
     
@@ -367,6 +368,19 @@ RimLightColorData GetRimColorAndDark(half materialId, half3 mainColor, half3 ram
     
     float overlayDark = rimDarks[GetRampLineIndex(materialId)];
 
+    const float rimEdgeSoftnesses[8] = {
+        _RimEdgeSoftness0,
+        _RimEdgeSoftness1,
+        _RimEdgeSoftness2,
+        _RimEdgeSoftness3,
+        _RimEdgeSoftness4,
+        _RimEdgeSoftness5,
+        _RimEdgeSoftness6,
+        _RimEdgeSoftness7,
+    };
+    
+    float overlayEdgeSoftness = rimEdgeSoftnesses[GetRampLineIndex(materialId)];
+
     float3 finalRimColor = 0;
     #ifdef _CUSTOMRIMVARENUM_DISABLE
         finalRimColor = color.rgb;
@@ -400,9 +414,21 @@ RimLightColorData GetRimColorAndDark(half materialId, half3 mainColor, half3 ram
         finalRimDark = _RimDark;
     #endif
 
+    float finalRimEdgeSoftness = 0;
+    #ifdef _CUSTOMRIMVARENUM_DISABLE
+        finalRimEdgeSoftness = _RimEdgeSoftness;
+    #elif _CUSTOMRIMVARENUM_MULTIPLY
+        finalRimEdgeSoftness = _RimEdgeSoftness * overlayEdgeSoftness;
+    #elif _CUSTOMRIMVARENUM_OVERLAY
+        finalRimEdgeSoftness = overlayEdgeSoftness;
+    #else
+        finalRimEdgeSoftness = _RimEdgeSoftness;
+    #endif
+
     colorData.color = finalRimColor.rgb;
     colorData.width = finalRimWidth;
     colorData.rimDark = finalRimDark;
+    colorData.edgeSoftness = finalRimEdgeSoftness;
 
     return colorData;
 }
@@ -791,15 +817,16 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     #if _RIM_LIGHTING_ON
         {
-            RimLightColorData rimLightColorData = GetRimColorAndDark(materialId, baseColor, rampColor);
-            float3 rimColor = rimLightColorData.color;
-            float rimWidth = rimLightColorData.width;
-            float rimDark = rimLightColorData.rimDark;
+            RimLightAreaData rimLightAreaData = GetRimLightAreaData(materialId, baseColor, rampColor);
+            float3 rimColor = rimLightAreaData.color;
+            float rimWidth = rimLightAreaData.width;
+            float rimDark = rimLightAreaData.rimDark;
+            float rimEdgeSoftnesses = rimLightAreaData.edgeSoftness;
 
             RimLightMaskData rimLightMaskData;
             rimLightMaskData.color = rimColor;
             rimLightMaskData.width = rimWidth;
-            rimLightMaskData.edgeSoftness = _RimEdgeSoftness;
+            rimLightMaskData.edgeSoftness = rimEdgeSoftnesses;
             rimLightMaskData.thresholdMin = _RimThresholdMin;
             rimLightMaskData.thresholdMax = _RimThresholdMax;
             rimLightMaskData.modelScale = _ModelScale;
