@@ -50,7 +50,7 @@ CBUFFER_START(UnityPerMaterial)
     float4 _SpecularColor0;
     float _SpecularShininess0;
     float _SpecularIntensity0;
-    float _SpecularEdgeSoftness0;
+    float _SpecularRoughness0;
 
     float4 _EmissionColor;
     float _EmissionThreshold;
@@ -63,12 +63,17 @@ CBUFFER_START(UnityPerMaterial)
     float _RimIntensityAdditionalLight;
     float _RimIntensityBackFace;
     float _RimIntensityBackFaceAdditionalLight;
-    float _RimThresholdMin;
-    float _RimThresholdMax;
     float _RimEdgeSoftness;
     float _RimWidth0;
     float4 _RimColor0;
     float _RimDark0;
+
+    float _RimShadowCt;
+    float _RimShadowIntensity;
+    float4 _RimShadowOffset;
+    float4 _RimShadowColor0;
+    float _RimShadowWidth0;
+    float _RimShadowFeather0;
 
     float _OutlineWidth;
     float _OutlineZOffset;
@@ -113,24 +118,28 @@ float4 BaseHairOpaqueFragment(
     specularData.color = _SpecularColor0.rgb;
     specularData.NoH = dirWS.NoV * (dirWS.NoL > 0); // 感觉 NoV 做头发高光更好看！有随视线流动的效果
     specularData.shininess = _SpecularShininess0;
-    specularData.edgeSoftness = _SpecularEdgeSoftness0;
+    specularData.roughness = _SpecularRoughness0;
     specularData.intensity = _SpecularIntensity0;
-    specularData.metallic = 0;
 
     RimLightMaskData rimLightMaskData;
     rimLightMaskData.color = _RimColor0.rgb;
     rimLightMaskData.width = _RimWidth0;
     rimLightMaskData.edgeSoftness = _RimEdgeSoftness;
-    rimLightMaskData.thresholdMin = _RimThresholdMin;
-    rimLightMaskData.thresholdMax = _RimThresholdMax;
     rimLightMaskData.modelScale = _ModelScale;
     rimLightMaskData.ditherAlpha = _DitherAlpha;
-    rimLightMaskData.NoV = dirWS.NoV;
 
     RimLightData rimLightData;
     rimLightData.darkenValue = _RimDark0;
     rimLightData.intensityFrontFace = _RimIntensity;
     rimLightData.intensityBackFace = _RimIntensityBackFace;
+
+    RimShadowData rimShadowData;
+    rimShadowData.ct = _RimShadowCt;
+    rimShadowData.intensity = _RimShadowIntensity;
+    rimShadowData.offset = _RimShadowOffset.xyz;
+    rimShadowData.color = _RimShadowColor0.rgb;
+    rimShadowData.width = _RimShadowWidth0;
+    rimShadowData.feather = _RimShadowFeather0;
 
     EmissionData emissionData;
     emissionData.color = _EmissionColor.rgb;
@@ -141,8 +150,9 @@ float4 BaseHairOpaqueFragment(
     float3 diffuse = GetRampDiffuse(diffuseData, light, i.color, texColor.rgb, lightMap,
         TEXTURE2D_ARGS(_RampMapCool, sampler_RampMapCool), TEXTURE2D_ARGS(_RampMapWarm, sampler_RampMapWarm));
     float3 specular = GetSpecular(specularData, light, texColor.rgb, lightMap);
-    float3 rimLightMask = GetRimLightMask(rimLightMaskData, i.positionHCS, dirWS.N, lightMap);
+    float3 rimLightMask = GetRimLightMask(rimLightMaskData, dirWS, i.positionHCS, lightMap);
     float3 rimLight = GetRimLight(rimLightData, rimLightMask, dirWS.NoL, light, isFrontFace);
+    float3 rimShadow = GetRimShadow(rimShadowData, dirWS);
     float3 emission = GetEmission(emissionData, texColor.rgb);
 
     #if defined(_ADDITIONAL_LIGHTS)
@@ -154,11 +164,10 @@ float4 BaseHairOpaqueFragment(
 
             SpecularData specularDataAdd;
             specularDataAdd.color = _SpecularColor0.rgb;
-            specularDataAdd.NoH = dirWSAdd.NoH;
+            specularDataAdd.NoH = dirWSAdd.NoV * (dirWSAdd.NoL > 0); // 感觉 NoV 做头发高光更好看！有随视线流动的效果
             specularDataAdd.shininess = _SpecularShininess0;
-            specularDataAdd.edgeSoftness = _SpecularEdgeSoftness0;
+            specularDataAdd.roughness = _SpecularRoughness0;
             specularDataAdd.intensity = _SpecularIntensity0;
-            specularDataAdd.metallic = 0;
             specular += GetSpecular(specularDataAdd, lightAdd, texColor.rgb, lightMap);
 
             RimLightData rimLightDataAdd;
@@ -170,7 +179,7 @@ float4 BaseHairOpaqueFragment(
     #endif
 
     // Output
-    return float4(diffuse + specular + rimLight + emission, texColor.a);
+    return float4((diffuse + specular + rimLight + emission) * rimShadow, texColor.a);
 }
 
 void HairOpaqueFragment(

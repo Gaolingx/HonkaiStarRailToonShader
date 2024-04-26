@@ -200,9 +200,8 @@ struct SpecularData
     float3 color;
     float NoH;
     float shininess;
-    float edgeSoftness;
+    float roughness;
     float intensity;
-    float metallic;
 };
 
 float3 GetSpecular(SpecularData data, Light light, float3 baseColor, float4 lightMap)
@@ -210,15 +209,17 @@ float3 GetSpecular(SpecularData data, Light light, float3 baseColor, float4 ligh
     // lightMap.r: specular intensity
     // lightMap.b: specular threshold
 
-    float threshold = 1.03 - lightMap.b; // 0.03 is an offset
-    float blinnPhong = pow(max(0.01, data.NoH), data.shininess);
-    blinnPhong = smoothstep(threshold, threshold + data.edgeSoftness, blinnPhong);
-
-    // 用 F_Schlick 的效果不好看，我直接用 f0 了
-    float3 fresnel = lerp(0.04, baseColor, data.metallic);
-
     float attenuation = light.shadowAttenuation * saturate(light.distanceAttenuation);
-    return data.color * fresnel * light.color * (blinnPhong * lightMap.r * data.intensity * attenuation);
+    float blinnPhong = pow(max(0.01, data.NoH), data.shininess) * attenuation;
+
+    float threshold = 1.03 - lightMap.b; // 0.03 is an offset
+    float specular = smoothstep(threshold - data.roughness, threshold + data.roughness, blinnPhong);
+    specular *= lightMap.r * data.intensity;
+
+    // 游戏里似乎没有区分金属和非金属
+    // float3 fresnel = lerp(0.04, baseColor, data.metallic);
+
+    return data.color * baseColor * light.color * specular;
 }
 
 struct EmissionData
@@ -232,7 +233,7 @@ struct EmissionData
 float3 GetEmission(EmissionData data, float3 baseColor)
 {
     float emissionMask = 1 - step(data.value, data.threshold);
-    return data.color * baseColor * (emissionMask * data.intensity);
+    return data.color * baseColor * max(0, emissionMask * data.intensity);
 }
 
 struct RimLightMaskData
@@ -240,22 +241,18 @@ struct RimLightMaskData
     float3 color;
     float width;
     float edgeSoftness;
-    float thresholdMin;
-    float thresholdMax;
     float modelScale;
     float ditherAlpha;
-    float NoV;
 };
 
 float3 GetRimLightMask(
     RimLightMaskData rlmData,
+    Directions dirWS,
     float4 svPosition,
-    float3 normalWS,
     float4 lightMap)
 {
+    float invModelScale = rcp(rlmData.modelScale);
     float rimWidth = rlmData.width / 2000.0; // rimWidth 表示的是屏幕上像素的偏移量，和 modelScale 无关
-    float rimThresholdMin = rlmData.thresholdMin * rlmData.modelScale * 10.0;
-    float rimThresholdMax = rlmData.thresholdMax * rlmData.modelScale * 10.0;
 
     rimWidth *= lightMap.r; // 有些地方不要边缘光
     rimWidth *= _ScaledScreenParams.y; // 在不同分辨率下看起来等宽
@@ -274,24 +271,23 @@ float3 GetRimLightMask(
     }
 
     float depth = GetLinearEyeDepthAnyProjection(svPosition);
-    rimWidth *= 10.0 * rsqrt(depth / rlmData.modelScale); // 近大远小
+    rimWidth *= 10.0 * rsqrt(depth * invModelScale); // 近大远小
 
-    float3 normalVS = TransformWorldToViewNormal(normalWS);
-    float2 indexOffset = float2(sign(normalVS.x), 0) * rimWidth; // 只横向偏移
-    uint2 index = clamp(svPosition.xy - 0.5 + indexOffset, 0, _ScaledScreenParams.xy - 1); // 避免出界
+    float indexOffsetX = -sign(cross(dirWS.V, dirWS.N).y) * rimWidth;
+    uint2 index = clamp(svPosition.xy - 0.5 + float2(indexOffsetX, 0), 0, _ScaledScreenParams.xy - 1); // 避免出界
     float offsetDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(index));
 
-    float depthDelta = (offsetDepth - depth) * 50; // 只有 depth 小于 offsetDepth 的时候再画
-    float intensity = smoothstep(rimThresholdMin, rimThresholdMax, depthDelta);
+    // 只有 depth 小于 offsetDepth 的时候再画
+    float intensity = smoothstep(0.12, 0.18, (offsetDepth - depth) * invModelScale);
 
     // 用于柔化边缘光，edgeSoftness 越大，越柔和
-    float fresnel = pow(clamp(1 - rlmData.NoV, 0.01, 1), max(rlmData.edgeSoftness, 0.01));
+    float fresnel = pow(max(1 - dirWS.NoV, 0.01), max(rlmData.edgeSoftness, 0.01));
 
     // Dither Alpha 效果会扣掉角色的一部分像素，导致角色身上出现不该有的边缘光
     // 所以这里在 ditherAlpha 较强时隐去边缘光
     float ditherAlphaFadeOut = smoothstep(0.9, 1, rlmData.ditherAlpha);
 
-    return rlmData.color * (intensity * fresnel * ditherAlphaFadeOut);
+    return rlmData.color * saturate(intensity * fresnel * ditherAlphaFadeOut);
 }
 
 struct RimLightData
@@ -305,7 +301,27 @@ float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light,
 {
     float attenuation = saturate(NoL * light.shadowAttenuation * light.distanceAttenuation);
     float intensity = IS_FRONT_VFACE(isFrontFace, rimData.intensityFrontFace, rimData.intensityBackFace);
-    return rimMask * light.color * (lerp(rimData.darkenValue, 1, attenuation) * intensity);
+    return rimMask * light.color * (lerp(rimData.darkenValue, 1, attenuation) * max(0, intensity));
+}
+
+struct RimShadowData
+{
+    float ct;
+    float intensity;
+    float3 offset;
+    float3 color;
+    float width;
+    float feather;
+};
+
+float3 GetRimShadow(RimShadowData data, Directions dirWS)
+{
+    float3 viewDirVS = TransformWorldToViewDir(dirWS.V);
+    float3 normalVS = TransformWorldToViewNormal(dirWS.N);
+    float rim = saturate(dot(normalize(viewDirVS - data.offset), normalVS));
+    float rimShadow = saturate(pow(max(1 - rim, 0.001), data.ct) * data.width);
+    rimShadow = smoothstep(data.feather, 1, rimShadow) * data.intensity * 0.25;
+    return lerp(1, data.color * 2, max(rimShadow, 0));
 }
 
 void DoDitherAlphaEffect(float4 svPosition, float ditherAlpha)

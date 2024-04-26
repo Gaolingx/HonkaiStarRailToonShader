@@ -52,7 +52,7 @@ Shader "Honkai Star Rail/Character/Hair"
         _SpecularColor0("Color", Color) = (1,1,1,1)
         _SpecularShininess0("Shininess", Range(0.1, 500)) = 10
         _SpecularIntensity0("Intensity", Range(0, 100)) = 1
-        _SpecularEdgeSoftness0("Edge Softness", Range(0, 1)) = 0.1
+        _SpecularRoughness0("Roughness", Range(0, 1)) = 0.02
 
         [HeaderFoldout(Emission, Use Albedo.a as emission map)]
         _EmissionColor("Color", Color) = (1, 1, 1, 1)
@@ -68,12 +68,18 @@ Shader "Honkai Star Rail/Character/Hair"
         _RimIntensityAdditionalLight("Intensity (Front Additional)", Float) = 0.5
         _RimIntensityBackFace("Intensity (Back Main)", Float) = 0
         _RimIntensityBackFaceAdditionalLight("Intensity (Back Additional)", Float) = 0
-        _RimThresholdMin("Threshold Min", Float) = 0.6
-        _RimThresholdMax("Threshold Max", Float) = 0.9
         _RimWidth0("Width", Float) = 0.5
         _RimColor0("Color", Color) = (1.0, 1.0, 1.0, 1.0)
         _RimDark0("Darken Value", Range(0, 1)) = 0.5
         _RimEdgeSoftness("Edge Softness", Float) = 0.05
+
+        [HeaderFoldout(Rim Shadow)]
+        _RimShadowCt("Ct", Float) = 1
+        _RimShadowIntensity("Intensity", Float) = 1
+        _RimShadowOffset("Offset", Vector) = (0, 0, 0, 0)
+        _RimShadowColor0("Rim Shadow Color", Color) = (1, 1, 1, 1)
+        _RimShadowWidth0("Rim Shadow Width", Float) = 1
+        _RimShadowFeather0("Rim Shadow Feather", Range(0.01, 0.99)) = 0.01
 
         [HeaderFoldout(Outline)]
         [KeywordEnum(Tangent, Normal)] _OutlineNormal("Normal Source", Float) = 0
@@ -360,6 +366,6 @@ Shader "Honkai Star Rail/Character/Hair"
         }
     }
 
-    CustomEditor "StaloSRPShaderGUI"
+    CustomEditor "StarRailShaderGUI"
     Fallback Off
 }

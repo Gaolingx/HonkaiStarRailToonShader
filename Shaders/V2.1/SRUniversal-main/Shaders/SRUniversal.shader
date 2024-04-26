@@ -170,7 +170,7 @@ Shader "Custom/SRUniversal"
         _RimEdgeSoftness7("Rim Edge Softness 7", Float) = 0.05
 
         [Header(Rim Shadow)]
-        [Toggle(_RIM_SHADOW_ON)] _UseRimShadow("Use Rim Shadow (Default YES)",float) = 1
+        [Toggle(_RIM_SHADOW_ON)] _UseRimShadow("Use Rim Shadow (Default NO)",float) = 0
         _RimShadowCt("Rim Shadow Ct", Float) = 1
         _RimShadowIntensity("Rim Shadow Intensity", Float) = 1
         _RimShadowOffset("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
