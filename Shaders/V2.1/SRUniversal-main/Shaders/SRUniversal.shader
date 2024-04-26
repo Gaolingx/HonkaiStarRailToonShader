@@ -2,7 +2,7 @@ Shader "Custom/SRUniversal"
 {
     Properties
     {
-        [KeywordEnum (None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", float) = 0
+        [KeywordEnum (None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 0
         [HideInInspector] _HeadForward("", Vector) = (0,0,1)
         [HideInInspector] _HeadRight("", Vector) = (1,0,0)
 
@@ -41,11 +41,11 @@ Shader "Custom/SRUniversal"
         [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)",2D) = "white" {}
         _BodyWarmRampColorMixFactor("Body warm ramp color mix factor (Default 0)",Range(0,1)) = 0
         _BodyWarmRampColor("Body warm ramp color (Default white)",Color) = (1,1,1)
-        [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", float ) = 0
+        [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", Float) = 0
         _DayTime("Day Time value (Default 12)",Range(0,24)) = 12
 
         [Header(Normal)]
-        [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", float) = 0
+        [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0
         [Normal] _NormalMap("Normal Map", 2D) = "bump" {}
 
         [Header(Ramp Settings)][Space]
@@ -67,7 +67,7 @@ Shader "Custom/SRUniversal"
         _IndirectLightMixBaseColor("Indirect light mix base color (Default 1)",Range(0,1)) = 1
 
         [Header(Main Lighting)]
-        [Toggle(_AUTO_Brightness_ON)] _UseAutoBrightness("Use Auto Brightness (Default NO)", float) = 0
+        [Toggle(_AUTO_Brightness_ON)] _UseAutoBrightness("Use Auto Brightness (Default NO)", Float) = 0
         _AutoBrightnessThresholdMin("Auto Brightness Threshold Min (Default 0.5)", Float) = 0.5
         _AutoBrightnessThresholdMax("Auto Brightness Threshold Max (Default 1.0)", Float) = 1.0
         _AutoBrightnessOffset("Auto Brightness Offset (Default 0)",Range(-1,1)) = 0
@@ -81,7 +81,7 @@ Shader "Custom/SRUniversal"
         _ShadowBoost("Shadow Boost (Default 1)", Range(0.0, 1.0)) = 1.0
 
         [Header(Additional Lighting)]
-        [Toggle(_AdditionalLighting_ON)] _UseAdditionalLighting("Use Additional Lighting (Default NO)", float) = 0
+        [Toggle(_AdditionalLighting_ON)] _UseAdditionalLighting("Use Additional Lighting (Default NO)", Float) = 0
 
         [Header(Face)]
         [NoScaleOffset] _FaceMap("Face map (Default black)",2D) = "black" {}
@@ -90,7 +90,7 @@ Shader "Custom/SRUniversal"
         _FaceShadowTransitionSoftness("Face shadow transition softness (Default 0.05)", Range(0,1)) = 0.05
 
         [Header(Expression)]
-        [Toggle(_Expression_ON)] _UseFaceExpression("Use Face Expression (Default NO)", float) = 0
+        [Toggle(_Expression_ON)] _UseFaceExpression("Use Face Expression (Default NO)", Float) = 0
         _ExCheekColor("Cheek Color (Default white)", Color) = (1, 1, 1, 1)
         _ExCheekIntensity("Cheek Intensity (Default 0)", Range(0, 1)) = 0
         _ExShyColor("Shy Color (Default white)", Color) = (1, 1, 1, 1)
@@ -100,7 +100,7 @@ Shader "Custom/SRUniversal"
         _ExShadowIntensity("Shadow Intensity (Default 0)", Range(0, 1)) = 0
 
         [Header(Specular)]
-        [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", float) = 1
+        [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", Float) = 1
         [Toggle(_ANISOTROPY_SPECULAR)] _AnisotropySpecularToggle("Is Anisotropy Specular (Default NO)", Float) = 0
         _SpecularColor("Spwcular Color (Default white)", Color) = (1, 1, 1, 1)
         _SpecularShininess("Specular Shininess (Default 10)", Range(0.1, 100)) = 10
@@ -112,7 +112,7 @@ Shader "Custom/SRUniversal"
 
 
         [Header(Stockings)]
-        [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)",float) = 0
+        [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)", Float) = 0
         _UpperBodyStockings("Upper body stockings (Default black)",2D) = "black" {}
         _LowerBodyStockings("Lower body stockings (Default black)",2D) = "black" {}
         _stockingsMapBChannelUVScale("Stockings texture channel B UV Scale (Default 20)",Range(1,50)) = 20
@@ -125,7 +125,7 @@ Shader "Custom/SRUniversal"
         _StockingsTextureUsage("Stockings texture usage (Default 0.1)",Range(0,1)) = 0.1
 
         [Header(Rim Lighting)]
-        [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)",float) = 1
+        [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)", Float) = 1
         _ModelScale("Model Scale (Default 1)", Float) = 1
         _RimIntensity("Rim Intensity (Front Face)", Float) = 0.5
         _RimIntensityBackFace("Rim Intensity (Back Face)", Float) = 0
@@ -170,7 +170,7 @@ Shader "Custom/SRUniversal"
         _RimEdgeSoftness7("Rim Edge Softness 7", Float) = 0.05
 
         [Header(Rim Shadow)]
-        [Toggle(_RIM_SHADOW_ON)] _UseRimShadow("Use Rim Shadow (Default NO)",float) = 0
+        [Toggle(_RIM_SHADOW_ON)] _UseRimShadow("Use Rim Shadow (Default NO)", Float) = 0
         _RimShadowCt("Rim Shadow Ct", Float) = 1
         _RimShadowIntensity("Rim Shadow Intensity", Float) = 1
         _RimShadowOffset("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
@@ -208,19 +208,19 @@ Shader "Custom/SRUniversal"
         _BloomColor0("Color (Default white)", Color) = (1, 1, 1, 1)
 
         [Header(Emission)]
-        [Toggle(_EMISSION_ON)] _UseEmission("Use emission (Default NO)",float) = 0
+        [Toggle(_EMISSION_ON)] _UseEmission("Use emission (Default NO)", Float) = 0
         _EmissionMixBaseColor("Emission mix base color (Default 1)", Range(0,1)) = 1
         _EmissionTintColor("Emission tint color (Default white)", Color) = (1,1,1) 
         _EmissionIntensity("Emission intensity (Default 1)", Range(0,100)) = 1
 
         [Header(Outline)]
         [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
-        [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", float ) = 1
+        [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", Float) = 1
         _OutlineColor("OutlineColor (Without Ramp Texture)", Color) = (0.5, 0.5, 0.5, 1)
         [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map", Float) = 0
         _LUTMap("LUT Map", 2D) = "black" {}
         [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
-        [Toggle(_IS_FACE)] _IsFaceOutlineMode("Is face outline (Default NO)", float ) = 0
+        [Toggle(_IS_FACE)] _IsFaceOutlineMode("Is face outline (Default NO)", Float) = 0
         [KeywordEnum(Disable, Multiply, Overlay)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
         _OutlineColor0("Outline Color 0", Color) = (0, 0, 0, 1)
         _OutlineColor1("Outline Color 1", Color) = (0, 0, 0, 1)
@@ -233,7 +233,7 @@ Shader "Custom/SRUniversal"
         _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
         _OutlineWidthMin("Outline Width Min (SS)(pixel)", Range(0, 10)) = 2
         _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
-        [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", float ) = 1
+        [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", Float) = 1
 
         [Header(Surface Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode (Default Back)", Float) = 2
@@ -242,24 +242,24 @@ Shader "Custom/SRUniversal"
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha ("Core Pass src blend mode alpha (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha ("Core Pass dst blend mode alpha (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("BlendOp (Default Add)", Float) = 0
-        [Enum(Off,0, On,1)] _ZWrite("ZWrite (Default On)",Float) = 1
-        _StencilRef ("Stencil reference (Default 0)",Range(0,255)) = 0
-        _StencilReadMask("Stencil Read Mask (Default 255)",Range(0, 255)) = 255
-        _StencilWriteMask("Stencil Write Mask (Default 255)",Range(0, 255)) = 255
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil comparison (Default disabled)",Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassOp("Stencil pass comparison (Default keep)",Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilFailOp("Stencil fail comparison (Default keep)",Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFailOp("Stencil z fail comparison (Default keep)",Int) = 0
+        [Enum(Off,0, On,1)] _ZWrite("ZWrite (Default On)", Float) = 1
+        _StencilRef ("Stencil reference (Default 0)", Range(0,255)) = 0
+        _StencilReadMask("Stencil Read Mask (Default 255)", Range(0, 255)) = 255
+        _StencilWriteMask("Stencil Write Mask (Default 255)", Range(0, 255)) = 255
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil comparison (Default disabled)", Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassOp("Stencil pass comparison (Default keep)", Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilFailOp("Stencil fail comparison (Default keep)", Int) = 0
+        [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFailOp("Stencil z fail comparison (Default keep)", Int) = 0
 
         [Header(Draw Overlay)]
-        [Toggle(_DRAW_OVERLAY_ON)] _UseDrawOverlay("Use draw overlay (Default NO)",float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColorOverlay("Overlay Pass src blend mode color (Default One)",Float) = 1
+        [Toggle(_DRAW_OVERLAY_ON)] _UseDrawOverlay("Use draw overlay (Default NO)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColorOverlay("Overlay Pass src blend mode color (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColorOverlay("Overlay Pass dst blend mode color (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay Pass src blend mode alpha (Default One)",Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay Pass src blend mode alpha (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlphaOverlay("Overlay Pass dst blend mode alpha (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpOverlay("Overlay Pass blend operation (Default Add)", Float) = 0
         _StencilRefOverlay ("Overlay Pass stencil reference (Default 0)", Range(0,255)) = 0
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay Pass stencil comparison (Default disabled)",Int) = 0
+        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay Pass stencil comparison (Default disabled)", Int) = 0
 
     }
     SubShader
