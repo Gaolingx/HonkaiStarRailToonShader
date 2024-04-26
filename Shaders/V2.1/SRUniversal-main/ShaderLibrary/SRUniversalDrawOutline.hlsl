@@ -215,6 +215,12 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
     #endif
 }
 
+void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
+{
+    #if _UseAlphaClipping
+        clip(alpha - alphaTestThreshold);
+    #endif
+}
 
 float4 colorFragmentTarget(inout CharOutlineVaryings input) 
 {
@@ -259,6 +265,7 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     
     float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb, DayTime), 1.0);
     FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
+    DoClipTestToTargetAlphaValue(mainTex.a, _AlphaTestThreshold);
 
     return FinalOutlineColor;
 }

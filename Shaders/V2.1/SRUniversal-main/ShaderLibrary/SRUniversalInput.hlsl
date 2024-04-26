@@ -80,7 +80,7 @@ float3 _BackFaceTintColor;
 
 // Alpha
 float _Alpha;
-float _AlphaClip;
+float _AlphaTestThreshold;
 
 
 // Setting

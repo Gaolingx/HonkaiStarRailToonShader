@@ -387,7 +387,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #endif
 
     float4 FinalColor = float4(albedo, alpha);
-    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
     FinalColor.rgb = MixFog(FinalColor.rgb, input.positionWSAndFogFactor.w);
 
     return FinalColor;
@@ -426,7 +426,7 @@ bool isFrontFace            : SV_IsFrontFace)
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);
 
-    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
 }
 
 CharDepthOnlyVaryings CharacterDepthOnlyVertex(CharDepthOnlyAttributes input)
@@ -451,7 +451,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);
 
-    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
 
     return CharDepthOnlyFragment(input);
 }
@@ -478,7 +478,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);
 
-    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
 
     return CharDepthNormalsFragment(input);
 }
@@ -505,7 +505,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);
 
-    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaClip);
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
 
     return CharMotionVectorsFragment(input);
 }

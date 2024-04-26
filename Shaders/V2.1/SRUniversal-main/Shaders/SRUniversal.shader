@@ -21,7 +21,7 @@ Shader "Custom/SRUniversal"
         _BackFaceTintColor("Back face tint color (Default white)",Color) = (1,1,1)
         [Toggle(_UseAlphaClipping)]_UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
         _Alpha("Alpha (Default 1)", Range(0,1)) = 1
-        _AlphaClip("Alpha clip (Default 0.333)", Range(0,1)) = 0.333
+        _AlphaTestThreshold("Alpha clip (Default 0.333)", Range(0,1)) = 0.333
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)",2D) = "black" {}
@@ -184,7 +184,7 @@ Shader "Custom/SRUniversal"
         _RimShadowColor5("Rim Shadow Color 5", Color) = (1, 1, 1, 1)
         _RimShadowColor6("Rim Shadow Color 6", Color) = (1, 1, 1, 1)
         _RimShadowColor7("Rim Shadow Color 7", Color) = (1, 1, 1, 1)
-        _RimShadowWidth("Rim Shadow Width", Float) = 0
+        _RimShadowWidth("Rim Shadow Width", Float) = 1
         _RimShadowWidth0("Rim Shadow Width 0", Float) = 1
         _RimShadowWidth1("Rim Shadow Width 1", Float) = 1
         _RimShadowWidth2("Rim Shadow Width 2", Float) = 1
