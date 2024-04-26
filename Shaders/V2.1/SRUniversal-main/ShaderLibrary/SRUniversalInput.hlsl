@@ -174,9 +174,33 @@ float _RimIntensityBackFace;
 float _RimThresholdMin;
 float _RimThresholdMax;
 float _RimEdgeSoftness;
-float _RimWidth0;
+float4 _RimColor;
+float _RimWidth;
+float _RimDark;
 float4 _RimColor0;
+float _RimWidth0;
 float _RimDark0;
+float4 _RimColor1;
+float _RimWidth1;
+float _RimDark1;
+float4 _RimColor2;
+float _RimWidth2;
+float _RimDark2;
+float4 _RimColor3;
+float _RimWidth3;
+float _RimDark3;
+float4 _RimColor4;
+float _RimWidth4;
+float _RimDark4;
+float4 _RimColor5;
+float _RimWidth5;
+float _RimDark5;
+float4 _RimColor6;
+float _RimWidth6;
+float _RimDark6;
+float4 _RimColor7;
+float _RimWidth7;
+float _RimDark7;
 
 
 // Emission

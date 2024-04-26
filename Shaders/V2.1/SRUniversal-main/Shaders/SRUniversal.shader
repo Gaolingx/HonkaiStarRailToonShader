@@ -131,9 +131,34 @@ Shader "Custom/SRUniversal"
         _RimIntensityBackFace("Intensity (Back Main) (Default 0)", Float) = 0
         _RimThresholdMin("Threshold Min (Default 0.6)", Float) = 0.6
         _RimThresholdMax("Threshold Max (Default 0.9)", Float) = 0.9
-        _RimWidth0("Width (Default 0.5)", Float) = 0.5
-        _RimColor0("Color (Default white)", Color) = (1.0, 1.0, 1.0, 1.0)
-        _RimDark0("Darken Value (Default 0.5)", Range(0, 1)) = 0.5
+        _RimColor("Rim Color", Float) = 1
+        _RimWidth("Rim Width", Float) = 1
+        _RimDark("Rim Darken Value", Range(0, 1)) = 0.5
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimVarEnum("Custom Rim Var State", Float) = 0
+        _RimColor0("Rim Color 0", Color) = (1, 1, 1, 1)
+        _RimWidth0("Rim Width 0", Float) = 1
+        _RimDark0("Rim Darken Value 0", Range(0, 1)) = 0.5
+        _RimColor1("Rim Color 1", Color) = (1, 1, 1, 1)
+        _RimWidth1("Rim Width 1", Float) = 1
+        _RimDark1("Rim Darken Value 1", Range(0, 1)) = 0.5
+        _RimColor2("Rim Color 2", Color) = (1, 1, 1, 1)
+        _RimWidth2("Rim Width 2", Float) = 1
+        _RimDark2("Rim Darken Value 2", Range(0, 1)) = 0.5
+        _RimColor3("Rim Color 3", Color) = (1, 1, 1, 1)
+        _RimWidth3("Rim Width 3", Float) = 1
+        _RimDark3("Rim Darken Value 3", Range(0, 1)) = 0.5
+        _RimColor4("Rim Color 4", Color) = (1, 1, 1, 1)
+        _RimWidth4("Rim Width 4", Float) = 1
+        _RimDark4("Rim Darken Value 4", Range(0, 1)) = 0.5
+        _RimColor5("Rim Color 5", Color) = (1, 1, 1, 1)
+        _RimWidth5("Rim Width 5", Float) = 1
+        _RimDark5("Rim Darken Value 5", Range(0, 1)) = 0.5
+        _RimColor6("Rim Color 6", Color) = (1, 1, 1, 1)
+        _RimWidth6("Rim Width 6", Float) = 1
+        _RimDark6("Rim Darken Value 6", Range(0, 1)) = 0.5
+        _RimColor7("Rim Color 7", Color) = (1, 1, 1, 1)
+        _RimWidth7("Rim Width 7", Float) = 1
+        _RimDark7("Rim Darken Value 7", Range(0, 1)) = 0.5
         _RimEdgeSoftness("Edge Softness (Default 0.05)", Float) = 0.05
 
         [Header(Bloom)]
@@ -221,6 +246,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _IS_FACE
         #pragma shader_feature_local _FAKE_OUTLINE_ON
         #pragma shader_feature _USE_LUT_MAP
+        #pragma shader_feature _CUSTOMRIMVARENUM_DISABLE _CUSTOMRIMVARENUM_MULTIPLY _CUSTOMRIMVARENUM_OVERLAY
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
         #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_OVERLAY
         #pragma shader_feature_local _USE_RAMP_COLOR_ON

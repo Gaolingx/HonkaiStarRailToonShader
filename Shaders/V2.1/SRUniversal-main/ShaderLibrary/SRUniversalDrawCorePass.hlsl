@@ -316,6 +316,97 @@ float GetLinearEyeDepthAnyProjection(float4 svPosition)
     return GetLinearEyeDepthAnyProjection(svPosition.z);
 }
 
+struct RimLightColorData
+{
+    float3 color;
+    float width;
+    float rimDark;
+};
+RimLightColorData GetRimColorAndDark(half materialId, half3 mainColor, half3 rampColor = 1)
+{
+    RimLightColorData colorData;
+
+    half3 color = mainColor * rampColor;
+    
+    const float4 overlayColors[8] = {
+        _RimColor0,
+        _RimColor1,
+        _RimColor2,
+        _RimColor3,
+        _RimColor4,
+        _RimColor5,
+        _RimColor6,
+        _RimColor7,
+    };
+    
+    half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+
+    const float overlayWidths[8] = {
+        _RimWidth0,
+        _RimWidth1,
+        _RimWidth2,
+        _RimWidth3,
+        _RimWidth4,
+        _RimWidth5,
+        _RimWidth6,
+        _RimWidth7,
+    };
+    
+    float overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
+
+    const float rimDarks[8] = {
+        _RimDark0,
+        _RimDark1,
+        _RimDark2,
+        _RimDark3,
+        _RimDark4,
+        _RimDark5,
+        _RimDark6,
+        _RimDark7,
+    };
+    
+    float overlayDark = rimDarks[GetRampLineIndex(materialId)];
+
+    float3 finalRimColor = 0;
+    #ifdef _CUSTOMRIMVARENUM_DISABLE
+        finalRimColor = color.rgb;
+    #elif _CUSTOMRIMVARENUM_MULTIPLY
+        finalRimColor = color.rgb * overlayColor;
+    #elif _CUSTOMRIMVARENUM_OVERLAY
+        finalRimColor = overlayColor;
+    #else
+        finalRimColor = color.rgb;
+    #endif
+    
+    float finalRimWidth = 0;
+    #ifdef _CUSTOMRIMVARENUM_DISABLE
+        finalRimWidth = _RimWidth;
+    #elif _CUSTOMRIMVARENUM_MULTIPLY
+        finalRimWidth = _RimWidth * overlayWidth;
+    #elif _CUSTOMRIMVARENUM_OVERLAY
+        finalRimWidth = overlayWidth;
+    #else
+        finalRimWidth = _RimWidth;
+    #endif
+
+    float finalRimDark = 0;
+    #ifdef _CUSTOMRIMVARENUM_DISABLE
+        finalRimDark = _RimDark;
+    #elif _CUSTOMRIMVARENUM_MULTIPLY
+        finalRimDark = _RimDark * overlayDark;
+    #elif _CUSTOMRIMVARENUM_OVERLAY
+        finalRimDark = overlayDark;
+    #else
+        finalRimDark = _RimDark;
+    #endif
+
+    colorData.color = finalRimColor.rgb;
+    colorData.width = finalRimWidth;
+    colorData.rimDark = finalRimDark;
+
+    return colorData;
+}
+
 struct RimLightMaskData
 {
     float3 color;
@@ -324,6 +415,7 @@ struct RimLightMaskData
     float thresholdMin;
     float thresholdMax;
     float modelScale;
+    float ditherAlpha;
     float NoV;
 };
 
@@ -367,7 +459,9 @@ float3 GetRimLightMask(
     // 用于柔化边缘光，edgeSoftness 越大，越柔和
     float fresnel = pow(clamp(1 - rlmData.NoV, 0.01, 1), max(rlmData.edgeSoftness, 0.01));
 
-    return rlmData.color * (intensity * fresnel);
+    float ditherAlphaFadeOut = smoothstep(0.9, 1, rlmData.ditherAlpha);
+
+    return rlmData.color * saturate(intensity * fresnel * ditherAlphaFadeOut);
 }
 
 struct RimLightData
@@ -688,6 +782,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #else
         stockingsEffect = 1;
     #endif
+    
     //边缘光部分
     float3 rimLightColor = 0;
     float3 rimLightMask;
@@ -696,17 +791,23 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     #if _RIM_LIGHTING_ON
         {
+            RimLightColorData rimLightColorData = GetRimColorAndDark(materialId, baseColor, rampColor);
+            float3 rimColor = rimLightColorData.color;
+            float rimWidth = rimLightColorData.width;
+            float rimDark = rimLightColorData.rimDark;
+
             RimLightMaskData rimLightMaskData;
-            rimLightMaskData.color = _RimColor0.rgb;
-            rimLightMaskData.width = _RimWidth0;
+            rimLightMaskData.color = rimColor;
+            rimLightMaskData.width = rimWidth;
             rimLightMaskData.edgeSoftness = _RimEdgeSoftness;
             rimLightMaskData.thresholdMin = _RimThresholdMin;
             rimLightMaskData.thresholdMax = _RimThresholdMax;
             rimLightMaskData.modelScale = _ModelScale;
+            rimLightMaskData.ditherAlpha = 1;
             rimLightMaskData.NoV = rimNoV;
         
             RimLightData rimLightData;
-            rimLightData.darkenValue = _RimDark0;
+            rimLightData.darkenValue = rimDark;
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
 
@@ -735,12 +836,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             float fakeOutline = faceMap.b;
             float3 headForward = normalize(_HeadForward);
             fakeOutlineEffect = smoothstep(0.0, 0.25, pow(saturate(dot(headForward, viewDirectionWS)), 20) * fakeOutline);
-            float2 outlineUV = float2(0, 0.0625);
-            coolRampCol = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, outlineUV).rgb;
-            warmRampCol = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, outlineUV).rgb;
+
             float3 OutlineRamp = 0;
             #if _USE_RAMP_COLOR_ON
-                OutlineRamp = abs(lerp(coolRampCol, warmRampCol, 0.5));
+                OutlineRamp = LerpRampColor(coolRampCol, warmRampCol, 0.5);
             #else
                 OutlineRamp = _OutlineColor.rgb;
             #endif
