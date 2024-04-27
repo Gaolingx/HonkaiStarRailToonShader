@@ -289,7 +289,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     #if _RIM_LIGHTING_ON
         {
-            RimLightAreaData rimLightAreaData = GetRimLightAreaData(materialId, _RimColor);
+            RimLightAreaData rimLightAreaData = GetRimLightAreaData(materialId, _RimColor.rgb);
             float3 rimLightAreaColor = rimLightAreaData.color;
             float rimLightAreaWidth = rimLightAreaData.width;
             float rimLightAreaDark = rimLightAreaData.rimDark;
@@ -319,7 +319,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 rimShadowColor = 1;
     #if _RIM_SHADOW_ON
         {
-            RimShadowAreaData rimShadowAreaData = GetRimShadowAreaData(materialId, _RimShadowColor);
+            RimShadowAreaData rimShadowAreaData = GetRimShadowAreaData(materialId, _RimShadowColor.rgb);
             float3 rimAreaShadowColor = rimShadowAreaData.color;
             float rimAreaShadowWidth = rimShadowAreaData.width;
             float rimAreaShadowFeather = rimShadowAreaData.feather;
