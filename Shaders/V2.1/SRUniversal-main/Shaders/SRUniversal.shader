@@ -102,10 +102,43 @@ Shader "Custom/SRUniversal"
         [Header(Specular)]
         [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", Float) = 1
         [Toggle(_ANISOTROPY_SPECULAR)] _AnisotropySpecularToggle("Is Anisotropy Specular (Default NO)", Float) = 0
-        _SpecularColor("Spwcular Color (Default white)", Color) = (1, 1, 1, 1)
-        _SpecularShininess("Specular Shininess (Default 10)", Range(0.1, 100)) = 10
-        _SpecularRoughness("Specular Roughness (Default 0.1)", Range(0, 1)) = 0.1
-        _SpecularIntensity("Specualr Intensity (Default 1)", Range(0, 50)) = 1
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomSpecularVarEnum("Custom Specular Var State", Float) = 0
+        _SpecularColor("Specular Color", Color) = (1, 1, 1, 1)
+        _SpecularColor0("Specular Color 0", Color) = (1, 1, 1, 1)
+        _SpecularColor1("Specular Color 1", Color) = (1, 1, 1, 1)
+        _SpecularColor2("Specular Color 2", Color) = (1, 1, 1, 1)
+        _SpecularColor3("Specular Color 3", Color) = (1, 1, 1, 1)
+        _SpecularColor4("Specular Color 4", Color) = (1, 1, 1, 1)
+        _SpecularColor5("Specular Color 5", Color) = (1, 1, 1, 1)
+        _SpecularColor6("Specular Color 6", Color) = (1, 1, 1, 1)
+        _SpecularColor7("Specular Color 7", Color) = (1, 1, 1, 1)
+        _SpecularShininess("Specular Shininess", Float) = 10
+        _SpecularShininess0("Specular Shininess 0", Range(0.1, 500)) = 10
+        _SpecularShininess1("Specular Shininess 1", Range(0.1, 500)) = 10
+        _SpecularShininess2("Specular Shininess 2", Range(0.1, 500)) = 10
+        _SpecularShininess3("Specular Shininess 3", Range(0.1, 500)) = 10
+        _SpecularShininess4("Specular Shininess 4", Range(0.1, 500)) = 10
+        _SpecularShininess5("Specular Shininess 5", Range(0.1, 500)) = 10
+        _SpecularShininess6("Specular Shininess 6", Range(0.1, 500)) = 10
+        _SpecularShininess7("Specular Shininess 7", Range(0.1, 500)) = 10
+        _SpecularIntensity("Specular Intensity", Float) = 1
+        _SpecularIntensity0("Specular Intensity 0", Range(0, 100)) = 1
+        _SpecularIntensity1("Specular Intensity 1", Range(0, 100)) = 1
+        _SpecularIntensity2("Specular Intensity 2", Range(0, 100)) = 1
+        _SpecularIntensity3("Specular Intensity 3", Range(0, 100)) = 1
+        _SpecularIntensity4("Specular Intensity 4", Range(0, 100)) = 1
+        _SpecularIntensity5("Specular Intensity 5", Range(0, 100)) = 1
+        _SpecularIntensity6("Specular Intensity 6", Range(0, 100)) = 1
+        _SpecularIntensity7("Specular Intensity 7", Range(0, 100)) = 1
+        _SpecularRoughness("Specular Roughness", Float) = 0.02
+        _SpecularRoughness0("Specular Roughness 0", Range(0, 1)) = 0.02
+        _SpecularRoughness1("Specular Roughness 1", Range(0, 1)) = 0.02
+        _SpecularRoughness2("Specular Roughness 2", Range(0, 1)) = 0.02
+        _SpecularRoughness3("Specular Roughness 3", Range(0, 1)) = 0.02
+        _SpecularRoughness4("Specular Roughness 4", Range(0, 1)) = 0.02
+        _SpecularRoughness5("Specular Roughness 5", Range(0, 1)) = 0.02
+        _SpecularRoughness6("Specular Roughness 6", Range(0, 1)) = 0.02
+        _SpecularRoughness7("Specular Roughness 7", Range(0, 1)) = 0.02
         _SpecularKsNonMetal("Specular KS non-metal (Default 0.04)",Range(0,1)) = 0.04
         _SpecularKsMetal("Specular KS metal (Default 1)",Range(0,1)) = 1
         _MetalSpecularMetallic("Metal Specular Metallic (Default 0.52)",Range(0,1)) = 0.52
@@ -291,6 +324,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _IS_FACE
         #pragma shader_feature_local _FAKE_OUTLINE_ON
         #pragma shader_feature _USE_LUT_MAP
+        #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMLIGHTVARENUM_DISABLE _CUSTOMRIMLIGHTVARENUM_MULTIPLY _CUSTOMRIMLIGHTVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2

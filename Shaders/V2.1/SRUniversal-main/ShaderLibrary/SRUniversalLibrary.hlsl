@@ -630,6 +630,124 @@ float3 GetRimShadow(RimShadowData data, float3 viewDirWS, float3 normalWS)
 
 
 // Specular
+struct SpecularAreaData
+{
+    float3 color;
+    float intensity;
+    float shininess;
+    float roughness;
+};
+
+SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
+{
+    SpecularAreaData specularAreaData;
+
+    half3 color = specularColor;
+    
+    const float4 overlayColorsArr[8] = {
+        _SpecularColor0,
+        _SpecularColor1,
+        _SpecularColor2,
+        _SpecularColor3,
+        _SpecularColor4,
+        _SpecularColor5,
+        _SpecularColor6,
+        _SpecularColor7,
+    };
+    
+    half3 overlayColor = overlayColorsArr[GetRampLineIndex(materialId)].rgb;
+
+    const float overlayIntensityArr[8] = {
+        _SpecularIntensity0,
+        _SpecularIntensity1,
+        _SpecularIntensity2,
+        _SpecularIntensity3,
+        _SpecularIntensity4,
+        _SpecularIntensity5,
+        _SpecularIntensity6,
+        _SpecularIntensity7,
+    };
+    
+    float overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+
+    const float overlayShininessArr[8] = {
+        _SpecularShininess0,
+        _SpecularShininess1,
+        _SpecularShininess2,
+        _SpecularShininess3,
+        _SpecularShininess4,
+        _SpecularShininess5,
+        _SpecularShininess6,
+        _SpecularShininess7,
+    };
+    
+    float overlayShininess = overlayShininessArr[GetRampLineIndex(materialId)];
+
+    const float overlayRoughnessArr[8] = {
+        _SpecularRoughness0,
+        _SpecularRoughness1,
+        _SpecularRoughness2,
+        _SpecularRoughness3,
+        _SpecularRoughness4,
+        _SpecularRoughness5,
+        _SpecularRoughness6,
+        _SpecularRoughness7,
+    };
+    
+    float overlayRoughness = overlayRoughnessArr[GetRampLineIndex(materialId)];
+
+    float3 finalSpecularColor = 0;
+    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
+        finalSpecularColor = color.rgb;
+    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
+        finalSpecularColor = color.rgb * overlayColor;
+    #elif _CUSTOMSPECULARVARENUM_OVERLAY
+        finalSpecularColor = overlayColor;
+    #else
+        finalSpecularColor = color.rgb;
+    #endif
+
+    float finalSpecularIntensity = 0;
+    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
+        finalSpecularIntensity = _SpecularIntensity;
+    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
+        finalSpecularIntensity = _SpecularIntensity * overlayIntensity;
+    #elif _CUSTOMSPECULARVARENUM_OVERLAY
+        finalSpecularIntensity = overlayIntensity;
+    #else
+        finalSpecularIntensity = _SpecularIntensity;
+    #endif
+    
+    float finalSpecularShininess = 0;
+    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
+        finalSpecularShininess = _SpecularShininess;
+    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
+        finalSpecularShininess = _SpecularShininess * overlayShininess;
+    #elif _CUSTOMSPECULARVARENUM_OVERLAY
+        finalSpecularShininess = overlayShininess;
+    #else
+        finalSpecularShininess = _SpecularShininess;
+    #endif
+
+    float finalSpecularRoughness = 0;
+    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
+        finalSpecularRoughness = _SpecularRoughness;
+    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
+        finalSpecularRoughness = _SpecularRoughness * overlayRoughness;
+    #elif _CUSTOMSPECULARVARENUM_OVERLAY
+        finalSpecularRoughness = overlayRoughness;
+    #else
+        finalSpecularRoughness = _SpecularRoughness;
+    #endif
+
+    specularAreaData.color = finalSpecularColor.rgb;
+    specularAreaData.intensity = finalSpecularIntensity;
+    specularAreaData.shininess = finalSpecularShininess;
+    specularAreaData.roughness = finalSpecularRoughness;
+
+    return specularAreaData;
+}
+
 struct SpecularData
 {
     half3 color;

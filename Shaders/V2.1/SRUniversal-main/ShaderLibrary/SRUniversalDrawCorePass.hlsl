@@ -226,6 +226,12 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #if _SPECULAR_ON
         #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
             {
+                SpecularAreaData specularAreaData = GetSpecularAreaData(materialId, _SpecularColor.rgb);
+                float3 SpecularColor = specularAreaData.color;
+                float SpecularIntensity = specularAreaData.intensity;
+                float SpecularShininess = specularAreaData.shininess;
+                float SpecularRoughness = specularAreaData.roughness;
+
                 SpecularData specularData;
                 specularData.color = baseColor;
                 specularData.specularIntensity = specularIntensity;
@@ -235,7 +241,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 specularData.SpecularKsMetal = _SpecularKsMetal;
                 //specularData.MetalSpecularMetallic = _MetalSpecularMetallic;
 
-                specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirWS, positionWS, _SpecularColor, _SpecularShininess, _SpecularRoughness, _SpecularIntensity, diffuseFac);
+                specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirWS, normalWS, SpecularColor, SpecularShininess, SpecularRoughness, SpecularIntensity, diffuseFac);
 
                 //specularColor *= mainLight.shadowAttenuation;
             }

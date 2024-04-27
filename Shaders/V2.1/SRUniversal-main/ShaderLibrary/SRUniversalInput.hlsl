@@ -147,13 +147,49 @@ float _ExShadowIntensity;
 
 
 // Specular
-half3 _SpecularColor;
-half _SpecularShininess;
-half _SpecularRoughness;
-half _SpecularIntensity;
-half _SpecularKsNonMetal;
-half _SpecularKsMetal;
-half _MetalSpecularMetallic;
+float4 _SpecularColor;
+float4 _SpecularColor0;
+float4 _SpecularColor1;
+float4 _SpecularColor2;
+float4 _SpecularColor3;
+float4 _SpecularColor4;
+float4 _SpecularColor5;
+float4 _SpecularColor6;
+float4 _SpecularColor7;
+
+float _SpecularShininess;
+float _SpecularShininess0;
+float _SpecularShininess1;
+float _SpecularShininess2;
+float _SpecularShininess3;
+float _SpecularShininess4;
+float _SpecularShininess5;
+float _SpecularShininess6;
+float _SpecularShininess7;
+
+float _SpecularRoughness;
+float _SpecularRoughness0;
+float _SpecularRoughness1;
+float _SpecularRoughness2;
+float _SpecularRoughness3;
+float _SpecularRoughness4;
+float _SpecularRoughness5;
+float _SpecularRoughness6;
+float _SpecularRoughness7;
+
+float _SpecularIntensity;
+float _SpecularIntensity0;
+float _SpecularIntensity1;
+float _SpecularIntensity2;
+float _SpecularIntensity3;
+float _SpecularIntensity4;
+float _SpecularIntensity5;
+float _SpecularIntensity6;
+float _SpecularIntensity7;
+
+float _SpecularKsNonMetal;
+float _SpecularKsMetal;
+float _MetalSpecularMetallic;
 
 
 // Stockings
