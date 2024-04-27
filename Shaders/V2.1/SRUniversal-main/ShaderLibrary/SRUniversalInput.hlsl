@@ -303,7 +303,24 @@ float _OutlineZOffset;
 
 
 // Bloom
+float _BloomIntensity;
 float _mmBloomIntensity0;
+float _mmBloomIntensity1;
+float _mmBloomIntensity2;
+float _mmBloomIntensity3;
+float _mmBloomIntensity4;
+float _mmBloomIntensity5;
+float _mmBloomIntensity6;
+float _mmBloomIntensity7;
+
+float4 _BloomColor;
 float4 _BloomColor0;
+float4 _BloomColor1;
+float4 _BloomColor2;
+float4 _BloomColor3;
+float4 _BloomColor4;
+float4 _BloomColor5;
+float4 _BloomColor6;
+float4 _BloomColor7;
 
 CBUFFER_END

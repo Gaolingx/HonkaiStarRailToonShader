@@ -406,7 +406,13 @@ out float4 colorTarget      : SV_Target0)
 {
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
-    colorTarget.rgb = MixBloomColor(outputColor.rgb, _BloomColor0.rgb, _mmBloomIntensity0);
+    float4 lightMap = GetLightMapTex(input.uv, _HairLightMap, _UpperBodyLightMap, _LowerBodyLightMap);
+
+    BloomAreaData bloomAreaData = GetBloomAreaData(lightMap.a, outputColor.rgb);
+    float3 bloomColor = bloomAreaData.color;
+    float bloomIntensity = bloomAreaData.intensity;
+
+    colorTarget.rgb = MixBloomColor(outputColor.rgb, bloomColor, bloomIntensity);
     colorTarget.a = outputColor.a;
 }
 

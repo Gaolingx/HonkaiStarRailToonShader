@@ -237,8 +237,26 @@ Shader "Custom/SRUniversal"
         _RimShadowFeather7("Rim Shadow Feather 7", Range(0.01, 0.99)) = 0.01
 
         [Header(Bloom)]
-        _mmBloomIntensity0("Intensity (Default 0)", Float) = 0
-        _BloomColor0("Color (Default white)", Color) = (1, 1, 1, 1)
+        _BloomIntensity("Bloom Intensity", Float) = 0
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomBloomVarEnum("Custom Bloom Intensity State", Float) = 0
+        _mmBloomIntensity0("Bloom Intensity 0", Float) = 0
+        _mmBloomIntensity1("Bloom Intensity 1", Float) = 0
+        _mmBloomIntensity2("Bloom Intensity 2", Float) = 0
+        _mmBloomIntensity3("Bloom Intensity 3", Float) = 0
+        _mmBloomIntensity4("Bloom Intensity 4", Float) = 0
+        _mmBloomIntensity5("Bloom Intensity 5", Float) = 0
+        _mmBloomIntensity6("Bloom Intensity 6", Float) = 0
+        _mmBloomIntensity7("Bloom Intensity 7", Float) = 0
+        _BloomColor("Bloom Color", Color) = (1, 1, 1, 1)
+        [KeywordEnum(Disable, Tint, Overlay)] _CustomBloomColorVarEnum("Custom Bloom Color State", Float) = 0
+        _BloomColor0("Bloom Color 0", Color) = (1, 1, 1, 1)
+        _BloomColor1("Bloom Color 1", Color) = (1, 1, 1, 1)
+        _BloomColor2("Bloom Color 2", Color) = (1, 1, 1, 1)
+        _BloomColor3("Bloom Color 3", Color) = (1, 1, 1, 1)
+        _BloomColor4("Bloom Color 4", Color) = (1, 1, 1, 1)
+        _BloomColor5("Bloom Color 5", Color) = (1, 1, 1, 1)
+        _BloomColor6("Bloom Color 6", Color) = (1, 1, 1, 1)
+        _BloomColor7("Bloom Color 7", Color) = (1, 1, 1, 1)
 
         [Header(Emission)]
         [Toggle(_EMISSION_ON)] _UseEmission("Use emission (Default NO)", Float) = 0
@@ -327,6 +345,8 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMLIGHTVARENUM_DISABLE _CUSTOMRIMLIGHTVARENUM_MULTIPLY _CUSTOMRIMLIGHTVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
+        #pragma shader_feature _CUSTOMBLOOMVARENUM_DISABLE _CUSTOMBLOOMVARENUM_MULTIPLY _CUSTOMBLOOMVARENUM_OVERLAY
+        #pragma shader_feature _CUSTOMBLOOMCOLORVARENUM_DISABLE _CUSTOMBLOOMCOLORVARENUM_TINT _CUSTOMBLOOMCOLORVARENUM_OVERLAY
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
         #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_OVERLAY
         #pragma shader_feature_local _USE_RAMP_COLOR_ON

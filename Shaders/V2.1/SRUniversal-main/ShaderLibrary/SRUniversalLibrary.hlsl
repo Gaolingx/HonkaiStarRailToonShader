@@ -644,7 +644,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
 
     half3 color = specularColor;
     
-    const float4 overlayColorsArr[8] = {
+    const float4 overlayColorArr[8] = {
         _SpecularColor0,
         _SpecularColor1,
         _SpecularColor2,
@@ -655,7 +655,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularColor7,
     };
     
-    half3 overlayColor = overlayColorsArr[GetRampLineIndex(materialId)].rgb;
+    half3 overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
 
     const float overlayIntensityArr[8] = {
         _SpecularIntensity0,
@@ -783,4 +783,72 @@ half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS,
 {
     float metallic = step(abs(GetRampLineIndex(surface.materialId) - GetMetalIndex()), 0.001);
     return CalculateSpecular(surface, light, viewDirWS, normalWS, specColor, shininess, roughness, intensity, diffuseFac, metallic);
+}
+
+
+// Bloom
+struct BloomAreaData
+{
+    float3 color;
+    float intensity;
+};
+
+BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
+{
+    BloomAreaData bloomAreaData;
+
+    half3 color = mainColor;
+    
+    const float4 overlayColorArr[8] = {
+        _BloomColor0,
+        _BloomColor1,
+        _BloomColor2,
+        _BloomColor3,
+        _BloomColor4,
+        _BloomColor5,
+        _BloomColor6,
+        _BloomColor7,
+    };
+    
+    half3 overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
+
+    const float overlayIntensityArr[8] = {
+        _mmBloomIntensity0,
+        _mmBloomIntensity1,
+        _mmBloomIntensity2,
+        _mmBloomIntensity3,
+        _mmBloomIntensity4,
+        _mmBloomIntensity5,
+        _mmBloomIntensity6,
+        _mmBloomIntensity7,
+    };
+    
+    float overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+
+    float3 finalBloomColor = 0;
+    #ifdef _CUSTOMBLOOMCOLORVARENUM_DISABLE
+        finalBloomColor = color.rgb;
+    #elif _CUSTOMBLOOMCOLORVARENUM_TINT
+        finalBloomColor = color.rgb * overlayColor * _BloomColor;
+    #elif _CUSTOMBLOOMCOLORVARENUM_OVERLAY
+        finalBloomColor = overlayColor;
+    #else
+        finalBloomColor = color.rgb;
+    #endif
+
+    float finalBloomIntensity = 0;
+    #ifdef _CUSTOMBLOOMVARENUM_DISABLE
+        finalBloomIntensity = _BloomIntensity;
+    #elif _CUSTOMBLOOMVARENUM_MULTIPLY
+        finalBloomIntensity = overlayIntensity * _BloomIntensity;
+    #elif _CUSTOMBLOOMVARENUM_OVERLAY
+        finalBloomIntensity = overlayIntensity;
+    #else
+        finalBloomIntensity = _BloomIntensity;
+    #endif
+
+    bloomAreaData.color = finalBloomColor.rgb;
+    bloomAreaData.intensity = finalBloomIntensity;
+
+    return bloomAreaData;
 }
