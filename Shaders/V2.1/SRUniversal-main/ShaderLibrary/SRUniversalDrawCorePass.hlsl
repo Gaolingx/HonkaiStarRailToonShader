@@ -345,13 +345,19 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 emissionColor = 0;
     #if _EMISSION_ON
         {
-            emissionColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
+            float4 mainTex = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
             _HairColorMap, _HairColorMapColor,
             _UpperBodyColorMap, _UpperBodyColorMapColor,
-            _LowerBodyColorMap, _LowerBodyColorMapColor).a;
-            emissionColor *= LinearColorMix(f3one, baseColor, _EmissionMixBaseColor);
-            emissionColor *= _EmissionTintColor;
-            emissionColor *= _EmissionIntensity;
+            _LowerBodyColorMap, _LowerBodyColorMapColor);
+
+            EmissionData emissionData;
+            emissionData.color = LinearColorMix(f3one, baseColor, _EmissionMixBaseColorFac);
+            emissionData.tintColor = _EmissionTintColor.rgb;
+            emissionData.prevPassColor = _EmissionPrevPassColor.rgb;
+            emissionData.intensity = _EmissionIntensity;
+            emissionData.threshold = _EmissionThreshold;
+
+            emissionColor = CalculateBaseEmission(emissionData, mainTex);
         }
     #endif
 

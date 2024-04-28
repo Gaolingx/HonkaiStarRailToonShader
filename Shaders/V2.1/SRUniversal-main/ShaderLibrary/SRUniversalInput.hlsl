@@ -280,9 +280,11 @@ float _RimShadowFeather6;
 float _RimShadowFeather7;
 
 // Emission
-float _EmissionMixBaseColor;
 float3 _EmissionTintColor;
+float3 _EmissionPrevPassColor;
 float _EmissionIntensity;
+float _EmissionThreshold;
+float _EmissionMixBaseColorFac;
 
 
 // Outline

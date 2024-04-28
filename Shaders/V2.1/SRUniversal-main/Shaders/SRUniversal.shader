@@ -260,9 +260,11 @@ Shader "Custom/SRUniversal"
 
         [Header(Emission)]
         [Toggle(_EMISSION_ON)] _UseEmission("Use emission (Default NO)", Float) = 0
-        _EmissionMixBaseColor("Emission mix base color (Default 1)", Range(0,1)) = 1
-        _EmissionTintColor("Emission tint color (Default white)", Color) = (1,1,1) 
-        _EmissionIntensity("Emission intensity (Default 1)", Range(0,100)) = 1
+        _EmissionMixBaseColorFac("Emission mix base color factor (Default 1)", Range(0,1)) = 1
+        _EmissionTintColor("Emission tint color (Default white)", Color) = (1,1,1)
+        _EmissionPrevPassColor("Emission prev pass color (Default black)", Color) = (0,0,0)
+        _EmissionIntensity("Emission intensity (Default 1)", Range(0,10)) = 1
+        _EmissionThreshold("Emission threshold (Default 0.1)", Range(0,10)) = 0.1
 
         [Header(Outline)]
         [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1

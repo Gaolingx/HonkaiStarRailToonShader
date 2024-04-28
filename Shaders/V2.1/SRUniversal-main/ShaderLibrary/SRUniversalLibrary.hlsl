@@ -786,6 +786,31 @@ half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS,
 }
 
 
+// Emission
+struct EmissionData
+{
+    float3 color;
+    float3 tintColor;
+    float3 prevPassColor;
+    float intensity;
+    float threshold;
+};
+
+half3 CalculateBaseEmission(EmissionData emissionData, float4 albedo)
+{
+    half emissionThreshold = albedo.a - emissionData.threshold;
+    half emissionThresholdInv = max(1 - emissionData.threshold, 0.001);
+    half3 emissionFactor = saturate(emissionThreshold / emissionThresholdInv);
+    emissionFactor = emissionData.threshold < albedo.a ? emissionFactor : 0;
+
+    half3 emissionTintColor = emissionData.color * emissionData.tintColor * emissionData.intensity;
+    half3 prevPassColor = emissionData.prevPassColor;
+    half3 emissionColor = lerp(prevPassColor, emissionTintColor, emissionFactor);
+
+    return emissionColor;
+}
+
+
 // Bloom
 struct BloomAreaData
 {
