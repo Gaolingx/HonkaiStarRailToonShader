@@ -19,9 +19,9 @@ Shader "Custom/SRUniversal"
         _ColorSaturation("Base color saturation Adjust (Default 1)",Range(0,3)) = 1
         _FrontFaceTintColor("Front face tint color (Default white)",Color) = (1,1,1)
         _BackFaceTintColor("Back face tint color (Default white)",Color) = (1,1,1)
-        [Toggle(_UseAlphaClipping)]_UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
+        [Toggle(_UseAlphaClipping)] _UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
         _Alpha("Alpha (Default 1)", Range(0,1)) = 1
-        _AlphaTestThreshold("Alpha clip (Default 0.333)", Range(0,1)) = 0.333
+        _AlphaTestThreshold("Alpha clip (Default 0.1)", Range(0,1)) = 0.1
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)",2D) = "black" {}
@@ -44,9 +44,13 @@ Shader "Custom/SRUniversal"
         [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", Float) = 0
         _DayTime("Day Time value (Default 12)",Range(0,24)) = 12
 
+        [Header(LutMap)]
+        [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map (Default NO)", Float) = 0
+        _LUTMap("LUT Map (Default black)", 2D) = "black" {}
+
         [Header(Normal)]
         [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0
-        [Normal] _NormalMap("Normal Map", 2D) = "bump" {}
+        [Normal] _NormalMap("Normal Map (Default black)", 2D) = "bump" {}
 
         [Header(Ramp Settings)][Space]
         [Toggle(_CUSTOM_RAMP_MAPPING)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
@@ -152,7 +156,7 @@ Shader "Custom/SRUniversal"
         _StockingsDarkColor("Stockings dark color (Default black)",Color) = (0,0,0)
         [HDR] _StockingsLightColor("Stockings light color (Default 1.8, 1.48299, 0.856821)",Color) = (1.8, 1.48299, 0.856821)
         _StockingsTransitionColor("Stockings transition color (Default 0.360381, 0.242986, 0.358131)",Color) = (0.360381, 0.242986, 0.358131)
-        _StockingsTransitionThreshold("Stockings transition Threshold (Default 0.58)",Range(0,1)) = 0.58
+        _StockingsTransitionThreshold("Stockings transition threshold (Default 0.58)",Range(0,1)) = 0.58
         _StockingsTransitionPower("Stockings transition power (Default 1)",Range(0,50)) = 1
         _StockingsTransitionHardness("Stockings transition hardness (Default 0.4)",Range(0,1)) = 0.4
         _StockingsTextureUsage("Stockings texture usage (Default 0.1)",Range(0,1)) = 0.1
@@ -164,11 +168,11 @@ Shader "Custom/SRUniversal"
         _RimIntensityBackFace("Rim Intensity (Back Face)", Float) = 0
         _RimThresholdMin("Rim Threshold Min (Default 0.6)", Float) = 0.6
         _RimThresholdMax("Rim Threshold Max (Default 0.9)", Float) = 0.9
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimLightVarEnum("Custom Rim Light Var State", Float) = 0
         _RimColor("Rim Color", Color) = (1, 1, 1, 1)
         _RimWidth("Rim Width", Float) = 1
         _RimDark("Rim Darken Value", Range(0, 1)) = 0.5
         _RimEdgeSoftness("Rim Edge Softness", Float) = 0.05
-        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimLightVarEnum("Custom Rim Light Var State", Float) = 0
         _RimColor0("Rim Color 0", Color) = (1, 1, 1, 1)
         _RimWidth0("Rim Width 0", Float) = 1
         _RimDark0("Rim Darken Value 0", Range(0, 1)) = 0.5
@@ -207,8 +211,8 @@ Shader "Custom/SRUniversal"
         _RimShadowCt("Rim Shadow Ct", Float) = 1
         _RimShadowIntensity("Rim Shadow Intensity", Float) = 1
         _RimShadowOffset("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
-        _RimShadowColor("Rim Shadow Color", Color) = (1, 1, 1, 1)
         [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimShadowVarEnum("Custom Rim Shadow Var State", Float) = 0
+        _RimShadowColor("Rim Shadow Color", Color) = (1, 1, 1, 1)
         _RimShadowColor0("Rim Shadow Color 0", Color) = (1, 1, 1, 1)
         _RimShadowColor1("Rim Shadow Color 1", Color) = (1, 1, 1, 1)
         _RimShadowColor2("Rim Shadow Color 2", Color) = (1, 1, 1, 1)
@@ -237,8 +241,8 @@ Shader "Custom/SRUniversal"
         _RimShadowFeather7("Rim Shadow Feather 7", Range(0.01, 0.99)) = 0.01
 
         [Header(Bloom)]
-        _BloomIntensity("Bloom Intensity", Float) = 0
         [KeywordEnum(Disable, Multiply, Overlay)] _CustomBloomVarEnum("Custom Bloom Intensity State", Float) = 0
+        _BloomIntensity("Bloom Intensity", Float) = 0
         _mmBloomIntensity0("Bloom Intensity 0", Float) = 0
         _mmBloomIntensity1("Bloom Intensity 1", Float) = 0
         _mmBloomIntensity2("Bloom Intensity 2", Float) = 0
@@ -247,8 +251,8 @@ Shader "Custom/SRUniversal"
         _mmBloomIntensity5("Bloom Intensity 5", Float) = 0
         _mmBloomIntensity6("Bloom Intensity 6", Float) = 0
         _mmBloomIntensity7("Bloom Intensity 7", Float) = 0
-        _BloomColor("Bloom Color", Color) = (1, 1, 1, 1)
         [KeywordEnum(Disable, Tint, Overlay)] _CustomBloomColorVarEnum("Custom Bloom Color State", Float) = 0
+        _BloomColor("Bloom Color", Color) = (1, 1, 1, 1)
         _BloomColor0("Bloom Color 0", Color) = (1, 1, 1, 1)
         _BloomColor1("Bloom Color 1", Color) = (1, 1, 1, 1)
         _BloomColor2("Bloom Color 2", Color) = (1, 1, 1, 1)
@@ -270,8 +274,7 @@ Shader "Custom/SRUniversal"
         [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
         [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", Float) = 1
         _OutlineColor("OutlineColor (Without Ramp Texture)", Color) = (0.5, 0.5, 0.5, 1)
-        [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map", Float) = 0
-        _LUTMap("LUT Map", 2D) = "black" {}
+        [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
         [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         [Toggle(_IS_FACE)] _IsFaceOutlineMode("Is face outline (Default NO)", Float) = 0
         [KeywordEnum(Disable, Multiply, Overlay)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
@@ -344,6 +347,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _IS_FACE
         #pragma shader_feature_local _FAKE_OUTLINE_ON
         #pragma shader_feature _USE_LUT_MAP
+        #pragma shader_feature _USE_LUT_MAP_OUTLINE
         #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMLIGHTVARENUM_DISABLE _CUSTOMRIMLIGHTVARENUM_MULTIPLY _CUSTOMRIMLIGHTVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY

@@ -1,3 +1,4 @@
+#include "../ShaderLibrary/SRUniversalLibrary.hlsl"
 #include "../ShaderLibrary/NiloZOffset.hlsl"
 
 struct CharOutlineAttributes
@@ -112,38 +113,7 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     return output;
 }
 
-half GetRampV(half matId)
-{
-    return 0.0625 + 0.125 * lerp(lerp(lerp(lerp(lerp(lerp(lerp(
-        _RampV0,
-        _RampV1, step(0.125, matId)),
-        _RampV2, step(0.250, matId)),
-        _RampV3, step(0.375, matId)),
-        _RampV4, step(0.500, matId)),
-        _RampV5, step(0.625, matId)),
-        _RampV6, step(0.750, matId)),
-        _RampV7, step(0.875, matId));
-}
-
-half GetRampLineIndex(half matId)
-{
-    return lerp(lerp(lerp(lerp(lerp(lerp(lerp(
-        _RampV0,
-        _RampV1, step(0.125, matId)),
-        _RampV2, step(0.250, matId)),
-        _RampV3, step(0.375, matId)),
-        _RampV4, step(0.500, matId)),
-        _RampV5, step(0.625, matId)),
-        _RampV6, step(0.750, matId)),
-        _RampV7, step(0.875, matId));
-}
-
-half3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
-{
-    return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
-}
-
-half4 SampleCoolRampMap(float2 uv)
+half4 SampleCoolRampMapOutline(float2 uv)
 {
     half4 color = 0;
     #if _AREA_HAIR
@@ -157,7 +127,7 @@ half4 SampleCoolRampMap(float2 uv)
     return color;
 }
 
-half4 SampleWarmRampMap(float2 uv)
+half4 SampleWarmRampMapOutline(float2 uv)
 {
     half4 color = 0;
     #if _AREA_HAIR
@@ -171,20 +141,15 @@ half4 SampleWarmRampMap(float2 uv)
     return color;
 }
 
-half4 SampleLUTMap(int materialId, int renderType)
-{
-    return _LUTMap.Load(int3(materialId, renderType, 0));
-}
-
 half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 {
-    half3 color;
+    half3 color = 0;
     #if _USE_RAMP_COLOR_ON
-        #if _USE_LUT_MAP
-            color = SampleLUTMap((int)GetRampLineIndex(materialId), 3).rgb;
+        #if _USE_LUT_MAP || _USE_LUT_MAP_OUTLINE
+            color = GetLUTMapOutlineColor(materialId).rgb;
         #else
-            half3 coolColor = SampleCoolRampMap(float2(0, GetRampV(materialId))).rgb;
-            half3 warmColor = SampleWarmRampMap(float2(0, GetRampV(materialId))).rgb;
+            half3 coolColor = SampleCoolRampMapOutline(float2(0, GetRampV(materialId))).rgb;
+            half3 warmColor = SampleWarmRampMapOutline(float2(0, GetRampV(materialId))).rgb;
             color = mainColor * LerpRampColor(coolColor, warmColor, DayTime);
         #endif
     #else
@@ -212,13 +177,6 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
         return overlayColor;
     #else
         return color;
-    #endif
-}
-
-void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
-{
-    #if _UseAlphaClipping
-        clip(alpha - alphaTestThreshold);
     #endif
 }
 

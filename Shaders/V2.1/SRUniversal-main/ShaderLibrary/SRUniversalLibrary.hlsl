@@ -323,6 +323,66 @@ half GetMetalIndex()
     return _RampV4;
 }
 
+// LutMap
+half4 SampleLUTMap(int materialId, int renderType)
+{
+    return _LUTMap.Load(int3(materialId, renderType, 0));
+}
+
+// LutMap Specular
+half3 GetLUTMapSpecularColor(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 0).rgb;
+}
+half GetLUTMapSpecularShininess(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 1).r;
+}
+half GetLUTMapSpecularRoughness(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 1).g;
+}
+half GetLUTMapSpecularIntensity(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 1).b;
+}
+
+// LutMap Outline
+half3 GetLUTMapOutlineColor(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 2).rgb;
+}
+
+// LutMap RimLight
+half3 GetLUTMapRimLightColor(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 3).rgb;
+}
+
+// LutMap RimShadow
+half3 GetLUTMapRimShadowColor(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 5).rgb;
+}
+half GetLUTMapRimShadowWidth(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 6).r;
+}
+half GetLUTMapRimShadowFeather(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 6).g;
+}
+
+// LutMap Bloom
+half GetLUTMapBloomIntensity(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 6).b;
+}
+half3 GetLUTMapBloomColor(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 7).rgb;
+}
+
 
 // RimLight
 struct RimLightAreaData
@@ -350,7 +410,12 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
         _RimColor7,
     };
     
-    half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+    half3 overlayColor = 0;
+    #if _USE_LUT_MAP
+        overlayColor = GetLUTMapRimLightColor(materialId).rgb;
+    #else
+        overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+    #endif
 
     const float overlayWidths[8] = {
         _RimWidth0,
@@ -511,7 +576,7 @@ float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light,
 {
     float attenuation = saturate(NoL * light.shadowAttenuation * light.distanceAttenuation);
     float intensity = lerp(rimData.intensityBackFace, rimData.intensityFrontFace, isFrontFace);
-    return rimMask * light.color * (lerp(rimData.darkenValue, 1, attenuation) * intensity);
+    return rimMask * (lerp(rimData.darkenValue, 1, attenuation) * intensity);
 }
 
 
@@ -540,7 +605,12 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
         _RimShadowColor7,
     };
     
-    half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+    half3 overlayColor = 0;
+    #if _USE_LUT_MAP
+        overlayColor = GetLUTMapRimShadowColor(materialId).rgb;
+    #else
+        overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+    #endif
 
     const float overlayWidths[8] = {
         _RimShadowWidth0,
@@ -553,7 +623,12 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
         _RimShadowWidth7,
     };
     
-    float overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
+    float overlayWidth = 0;
+    #if _USE_LUT_MAP
+        overlayWidth = GetLUTMapRimShadowWidth(materialId);
+    #else
+        overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
+    #endif
 
     const float rimShadowFeather[8] = {
         _RimShadowFeather0,
@@ -566,7 +641,12 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
         _RimShadowFeather7,
     };
     
-    float overlayFeather = rimShadowFeather[GetRampLineIndex(materialId)];
+    float overlayFeather = 0;
+    #if _USE_LUT_MAP
+        overlayFeather = GetLUTMapRimShadowFeather(materialId);
+    #else
+        overlayFeather = rimShadowFeather[GetRampLineIndex(materialId)];
+    #endif
 
     float3 finalRimShadowColor = 0;
     #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
@@ -655,7 +735,12 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularColor7,
     };
     
-    half3 overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
+    half3 overlayColor = 0;
+    #if _USE_LUT_MAP
+        overlayColor = GetLUTMapSpecularColor(materialId).rgb;
+    #else
+        overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
+    #endif
 
     const float overlayIntensityArr[8] = {
         _SpecularIntensity0,
@@ -668,7 +753,12 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularIntensity7,
     };
     
-    float overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+    float overlayIntensity = 0;
+    #if _USE_LUT_MAP
+        overlayIntensity = GetLUTMapSpecularIntensity(materialId);
+    #else
+        overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+    #endif
 
     const float overlayShininessArr[8] = {
         _SpecularShininess0,
@@ -681,7 +771,12 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularShininess7,
     };
     
-    float overlayShininess = overlayShininessArr[GetRampLineIndex(materialId)];
+    float overlayShininess = 0;
+    #if _USE_LUT_MAP
+        overlayShininess = GetLUTMapSpecularShininess(materialId);
+    #else
+        overlayShininess = overlayShininessArr[GetRampLineIndex(materialId)];
+    #endif
 
     const float overlayRoughnessArr[8] = {
         _SpecularRoughness0,
@@ -694,7 +789,12 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularRoughness7,
     };
     
-    float overlayRoughness = overlayRoughnessArr[GetRampLineIndex(materialId)];
+    float overlayRoughness = 0;
+    #if _USE_LUT_MAP
+        overlayRoughness = GetLUTMapSpecularRoughness(materialId);
+    #else
+        overlayRoughness = overlayRoughnessArr[GetRampLineIndex(materialId)];
+    #endif
 
     float3 finalSpecularColor = 0;
     #ifdef _CUSTOMSPECULARVARENUM_DISABLE
@@ -835,7 +935,12 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
         _BloomColor7,
     };
     
-    half3 overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
+    half3 overlayColor = 0;
+    #if _USE_LUT_MAP
+        overlayColor = GetLUTMapBloomColor(materialId).rgb;
+    #else
+        overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
+    #endif
 
     const float overlayIntensityArr[8] = {
         _mmBloomIntensity0,
@@ -848,7 +953,12 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
         _mmBloomIntensity7,
     };
     
-    float overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+    float overlayIntensity = 0;
+    #if _USE_LUT_MAP
+        overlayIntensity = GetLUTMapBloomIntensity(materialId);
+    #else
+        overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+    #endif
 
     float3 finalBloomColor = 0;
     #ifdef _CUSTOMBLOOMCOLORVARENUM_DISABLE
