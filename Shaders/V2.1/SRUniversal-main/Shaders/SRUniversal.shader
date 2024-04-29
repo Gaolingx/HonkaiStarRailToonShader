@@ -111,7 +111,7 @@ Shader "Custom/SRUniversal"
         [Header(Specular)]
         [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", Float) = 1
         [Toggle(_ANISOTROPY_SPECULAR)] _AnisotropySpecularToggle("Is Anisotropy Specular (Default NO)", Float) = 0
-        [KeywordEnum(Disable, Multiply, Overlay)] _CustomSpecularVarEnum("Custom Specular Var State", Float) = 0
+        [KeywordEnum(Disable, Tint, Overlay)] _CustomSpecularColorVarEnum("Custom Specular Color State", Float) = 0
         _SpecularColor("Specular Color", Color) = (1, 1, 1, 1)
         _SpecularColor0("Specular Color 0", Color) = (1, 1, 1, 1)
         _SpecularColor1("Specular Color 1", Color) = (1, 1, 1, 1)
@@ -121,6 +121,7 @@ Shader "Custom/SRUniversal"
         _SpecularColor5("Specular Color 5", Color) = (1, 1, 1, 1)
         _SpecularColor6("Specular Color 6", Color) = (1, 1, 1, 1)
         _SpecularColor7("Specular Color 7", Color) = (1, 1, 1, 1)
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomSpecularVarEnum("Custom Specular Var State", Float) = 0
         _SpecularShininess("Specular Shininess", Float) = 10
         _SpecularShininess0("Specular Shininess 0", Range(0.1, 500)) = 10
         _SpecularShininess1("Specular Shininess 1", Range(0.1, 500)) = 10
@@ -173,6 +174,7 @@ Shader "Custom/SRUniversal"
         _RimIntensityBackFace("Rim Intensity (Back Face)", Float) = 0
         _RimThresholdMin("Rim Threshold Min (Default 0.6)", Float) = 0.6
         _RimThresholdMax("Rim Threshold Max (Default 0.9)", Float) = 0.9
+        [KeywordEnum(Disable, Tint, Overlay)] _CustomRimLightColorVarEnum("Custom Rim Light Color State", Float) = 0
         [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimLightVarEnum("Custom Rim Light Var State", Float) = 0
         _RimColor("Rim Color", Color) = (1, 1, 1, 1)
         _RimWidth("Rim Width", Float) = 1
@@ -216,7 +218,7 @@ Shader "Custom/SRUniversal"
         _RimShadowCt("Rim Shadow Ct", Float) = 1
         _RimShadowIntensity("Rim Shadow Intensity", Float) = 1
         _RimShadowOffset("Rim Shadow Offset", Vector) = (0, 0, 0, 0)
-        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimShadowVarEnum("Custom Rim Shadow Var State", Float) = 0
+        [KeywordEnum(Disable, Tint, Overlay)] _CustomRimShadowColorVarEnum("Custom Rim Shadow Color State", Float) = 0
         _RimShadowColor("Rim Shadow Color", Color) = (1, 1, 1, 1)
         _RimShadowColor0("Rim Shadow Color 0", Color) = (1, 1, 1, 1)
         _RimShadowColor1("Rim Shadow Color 1", Color) = (1, 1, 1, 1)
@@ -226,6 +228,7 @@ Shader "Custom/SRUniversal"
         _RimShadowColor5("Rim Shadow Color 5", Color) = (1, 1, 1, 1)
         _RimShadowColor6("Rim Shadow Color 6", Color) = (1, 1, 1, 1)
         _RimShadowColor7("Rim Shadow Color 7", Color) = (1, 1, 1, 1)
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimShadowVarEnum("Custom Rim Shadow Var State", Float) = 0
         _RimShadowWidth("Rim Shadow Width", Float) = 1
         _RimShadowWidth0("Rim Shadow Width 0", Float) = 1
         _RimShadowWidth1("Rim Shadow Width 1", Float) = 1
@@ -246,16 +249,6 @@ Shader "Custom/SRUniversal"
         _RimShadowFeather7("Rim Shadow Feather 7", Range(0.01, 0.99)) = 0.01
 
         [Header(Bloom)]
-        [KeywordEnum(Disable, Multiply, Overlay)] _CustomBloomVarEnum("Custom Bloom Intensity State", Float) = 0
-        _BloomIntensity("Bloom Intensity", Float) = 0
-        _mmBloomIntensity0("Bloom Intensity 0", Float) = 0
-        _mmBloomIntensity1("Bloom Intensity 1", Float) = 0
-        _mmBloomIntensity2("Bloom Intensity 2", Float) = 0
-        _mmBloomIntensity3("Bloom Intensity 3", Float) = 0
-        _mmBloomIntensity4("Bloom Intensity 4", Float) = 0
-        _mmBloomIntensity5("Bloom Intensity 5", Float) = 0
-        _mmBloomIntensity6("Bloom Intensity 6", Float) = 0
-        _mmBloomIntensity7("Bloom Intensity 7", Float) = 0
         [KeywordEnum(Disable, Tint, Overlay)] _CustomBloomColorVarEnum("Custom Bloom Color State", Float) = 0
         _BloomColor("Bloom Color", Color) = (1, 1, 1, 1)
         _BloomColor0("Bloom Color 0", Color) = (1, 1, 1, 1)
@@ -266,6 +259,16 @@ Shader "Custom/SRUniversal"
         _BloomColor5("Bloom Color 5", Color) = (1, 1, 1, 1)
         _BloomColor6("Bloom Color 6", Color) = (1, 1, 1, 1)
         _BloomColor7("Bloom Color 7", Color) = (1, 1, 1, 1)
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomBloomVarEnum("Custom Bloom Intensity State", Float) = 0
+        _BloomIntensity("Bloom Intensity", Float) = 0
+        _mmBloomIntensity0("Bloom Intensity 0", Float) = 0
+        _mmBloomIntensity1("Bloom Intensity 1", Float) = 0
+        _mmBloomIntensity2("Bloom Intensity 2", Float) = 0
+        _mmBloomIntensity3("Bloom Intensity 3", Float) = 0
+        _mmBloomIntensity4("Bloom Intensity 4", Float) = 0
+        _mmBloomIntensity5("Bloom Intensity 5", Float) = 0
+        _mmBloomIntensity6("Bloom Intensity 6", Float) = 0
+        _mmBloomIntensity7("Bloom Intensity 7", Float) = 0
 
         [Header(Emission)]
         [Toggle(_EMISSION_ON)] _UseEmission("Use emission (Default NO)", Float) = 0
@@ -353,8 +356,11 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _FAKE_OUTLINE_ON
         #pragma shader_feature _USE_LUT_MAP
         #pragma shader_feature _USE_LUT_MAP_OUTLINE
+        #pragma shader_feature _CUSTOMSPECULARCOLORVARENUM_DISABLE _CUSTOMSPECULARCOLORVARENUM_TINT _CUSTOMSPECULARCOLORVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
+        #pragma shader_feature _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE _CUSTOMRIMLIGHTCOLORVARENUM_TINT _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMLIGHTVARENUM_DISABLE _CUSTOMRIMLIGHTVARENUM_MULTIPLY _CUSTOMRIMLIGHTVARENUM_OVERLAY
+        #pragma shader_feature _CUSTOMRIMSHADOWCOLORVARENUM_DISABLE _CUSTOMRIMSHADOWCOLORVARENUM_TINT _CUSTOMRIMSHADOWCOLORVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMBLOOMVARENUM_DISABLE _CUSTOMBLOOMVARENUM_MULTIPLY _CUSTOMBLOOMVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMBLOOMCOLORVARENUM_DISABLE _CUSTOMBLOOMCOLORVARENUM_TINT _CUSTOMBLOOMCOLORVARENUM_OVERLAY

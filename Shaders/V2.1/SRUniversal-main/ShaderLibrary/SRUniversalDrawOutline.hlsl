@@ -169,15 +169,18 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
     
     half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
 
+    half3 outlineColor = 0;
     #ifdef _CUSTOMOUTLINEVARENUM_DISABLE
-        return color;
+        outlineColor = color;
     #elif _CUSTOMOUTLINEVARENUM_MULTIPLY
-        return color * overlayColor;
+        outlineColor = color * overlayColor;
     #elif _CUSTOMOUTLINEVARENUM_OVERLAY
-        return overlayColor;
+        outlineColor = overlayColor;
     #else
-        return color;
+        outlineColor = color;
     #endif
+
+    return outlineColor;
 }
 
 float4 colorFragmentTarget(inout CharOutlineVaryings input) 

@@ -493,11 +493,11 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     #endif
 
     float3 finalRimColor = 0;
-    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
+    #ifdef _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE
         finalRimColor = color.rgb;
-    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
+    #elif _CUSTOMRIMLIGHTCOLORVARENUM_TINT
         finalRimColor = color.rgb * overlayColor;
-    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
+    #elif _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY
         finalRimColor = overlayColor;
     #else
         finalRimColor = color.rgb;
@@ -685,11 +685,11 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     #endif
 
     float3 finalRimShadowColor = 0;
-    #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
+    #ifdef _CUSTOMRIMSHADOWCOLORVARENUM_DISABLE
         finalRimShadowColor = color.rgb;
-    #elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
+    #elif _CUSTOMRIMSHADOWCOLORVARENUM_TINT
         finalRimShadowColor = color.rgb * overlayColor;
-    #elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
+    #elif _CUSTOMRIMSHADOWCOLORVARENUM_OVERLAY
         finalRimShadowColor = overlayColor;
     #else
         finalRimShadowColor = color.rgb;
@@ -833,11 +833,11 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     #endif
 
     float3 finalSpecularColor = 0;
-    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
+    #ifdef _CUSTOMSPECULARCOLORVARENUM_DISABLE
         finalSpecularColor = color.rgb;
-    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
+    #elif _CUSTOMSPECULARCOLORVARENUM_TINT
         finalSpecularColor = color.rgb * overlayColor;
-    #elif _CUSTOMSPECULARVARENUM_OVERLAY
+    #elif _CUSTOMSPECULARCOLORVARENUM_OVERLAY
         finalSpecularColor = overlayColor;
     #else
         finalSpecularColor = color.rgb;
