@@ -19,6 +19,9 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Thanks to stalomeow's material setter.
+// <https://github.com/stalomeow/StarRailNPRShader/blob/main/Runtime/StarRailCharacterRenderingController.cs>
+
 using System;
 using System.Collections.Generic;
 using HSR.NPRShader.Shadow;
