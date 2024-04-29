@@ -308,7 +308,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightMaskData.thresholdMin = _RimThresholdMin;
             rimLightMaskData.thresholdMax = _RimThresholdMax;
             rimLightMaskData.modelScale = _ModelScale;
-            rimLightMaskData.ditherAlpha = 1;
+            rimLightMaskData.ditherAlpha = _DitherAlpha;
             rimLightMaskData.NoV = rimNoV;
         
             RimLightData rimLightData;
@@ -400,6 +400,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     float4 FinalColor = float4(albedo, alpha);
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
     FinalColor.rgb = MixFog(FinalColor.rgb, input.positionWSAndFogFactor.w);
 
     return FinalColor;
@@ -445,6 +446,7 @@ bool isFrontFace            : SV_IsFrontFace)
     float4 FinalColor = float4(baseColor, alpha);
 
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionHCS, _DitherAlpha);
 }
 
 CharDepthOnlyVaryings CharacterDepthOnlyVertex(CharDepthOnlyAttributes input)
@@ -470,6 +472,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     float4 FinalColor = float4(baseColor, alpha);
 
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionHCS, _DitherAlpha);
 
     return CharDepthOnlyFragment(input);
 }
@@ -497,6 +500,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     float4 FinalColor = float4(baseColor, alpha);
 
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionHCS, _DitherAlpha);
 
     return CharDepthNormalsFragment(input);
 }
@@ -524,6 +528,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     float4 FinalColor = float4(baseColor, alpha);
 
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionHCS, _DitherAlpha);
 
     return CharMotionVectorsFragment(input);
 }

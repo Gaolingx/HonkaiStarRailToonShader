@@ -224,6 +224,7 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb, DayTime), 1.0);
     FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
     DoClipTestToTargetAlphaValue(mainTex.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
 
     return FinalOutlineColor;
 }

@@ -51,6 +51,8 @@ namespace HSR.NPRShader
         [SerializeField] [Range(0, 1)] private float m_ExCheekIntensity = 0;
         [SerializeField] [Range(0, 1)] private float m_ExShyIntensity = 0;
         [SerializeField] [Range(0, 1)] private float m_ExShadowIntensity = 0;
+        [SerializeField] [Range(0, 3)] private float m_ColorSaturation = 1;
+        [SerializeField] [Range(-1, 1)] private float m_AutoBrightnessOffset = 0;
 
         [Header("Character Shadow")]
         [SerializeField] private bool m_IsCastingShadow = true;
@@ -93,6 +95,18 @@ namespace HSR.NPRShader
         {
             get => m_ExShadowIntensity;
             set => m_ExShadowIntensity = Mathf.Clamp01(value);
+        }
+
+        public float BaseColorSaturationAdjust
+        {
+            get => m_ColorSaturation;
+            set => m_ColorSaturation = Mathf.Clamp(value, 0, 3);
+        }
+
+        public float AutoBrightnessOffset
+        {
+            get => m_AutoBrightnessOffset;
+            set => m_AutoBrightnessOffset = Mathf.Clamp(value, -1, 1);
         }
 
         public bool IsCastingShadow
@@ -174,6 +188,8 @@ namespace HSR.NPRShader
                 floats.Add((PropertyIds._ExCheekIntensity, m_ExCheekIntensity));
                 floats.Add((PropertyIds._ExShyIntensity, m_ExShyIntensity));
                 floats.Add((PropertyIds._ExShadowIntensity, m_ExShadowIntensity));
+                floats.Add((PropertyIds._ColorSaturation, m_ColorSaturation));
+                floats.Add((PropertyIds._AutoBrightnessOffset, m_AutoBrightnessOffset));
 
                 if (m_MMDHeadBone != null)
                 {
@@ -260,6 +276,8 @@ namespace HSR.NPRShader
             public static readonly int _ExCheekIntensity = StringHelpers.ShaderPropertyIDFromMemberName();
             public static readonly int _ExShyIntensity = StringHelpers.ShaderPropertyIDFromMemberName();
             public static readonly int _ExShadowIntensity = StringHelpers.ShaderPropertyIDFromMemberName();
+            public static readonly int _ColorSaturation = StringHelpers.ShaderPropertyIDFromMemberName();
+            public static readonly int _AutoBrightnessOffset = StringHelpers.ShaderPropertyIDFromMemberName();
 
             public static readonly int _HeadForward = StringHelpers.ShaderPropertyIDFromMemberName();
             public static readonly int _HeadUp = StringHelpers.ShaderPropertyIDFromMemberName();

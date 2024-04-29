@@ -83,6 +83,10 @@ float _Alpha;
 float _AlphaTestThreshold;
 
 
+// DitherAlpha
+float _DitherAlpha;
+
+
 // Setting
 float _RampV0;
 float _RampV1;

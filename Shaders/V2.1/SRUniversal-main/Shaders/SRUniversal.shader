@@ -19,9 +19,14 @@ Shader "Custom/SRUniversal"
         _ColorSaturation("Base color saturation Adjust (Default 1)",Range(0,3)) = 1
         _FrontFaceTintColor("Front face tint color (Default white)",Color) = (1,1,1)
         _BackFaceTintColor("Back face tint color (Default white)",Color) = (1,1,1)
+
+        [Header (Alpha Test)]
         [Toggle(_UseAlphaClipping)] _UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
         _Alpha("Alpha (Default 1)", Range(0,1)) = 1
         _AlphaTestThreshold("Alpha clip (Default 0.1)", Range(0,1)) = 0.1
+
+        [Header(Dither Alpha)]
+        _DitherAlpha("Dither Alpha (Default 1)", Range(0, 1)) = 1
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)",2D) = "black" {}

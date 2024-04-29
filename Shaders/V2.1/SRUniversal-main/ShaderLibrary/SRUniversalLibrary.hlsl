@@ -115,6 +115,23 @@ void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold)
 }
 
 
+// DitherAlpha
+void DoDitherAlphaEffect(float4 svPosition, float ditherAlpha)
+{
+    static const float4 thresholds[4] =
+    {
+        float4(01.0 / 17.0, 09.0 / 17.0, 03.0 / 17.0, 11.0 / 17.0),
+        float4(13.0 / 17.0, 05.0 / 17.0, 15.0 / 17.0, 07.0 / 17.0),
+        float4(04.0 / 17.0, 12.0 / 17.0, 02.0 / 17.0, 10.0 / 17.0),
+        float4(16.0 / 17.0, 08.0 / 17.0, 14.0 / 17.0, 06.0 / 17.0)
+    };
+
+    uint xIndex = fmod(svPosition.x - 0.5, 4);
+    uint yIndex = fmod(svPosition.y - 0.5, 4);
+    clip(ditherAlpha - thresholds[yIndex][xIndex]);
+}
+
+
 // CharacterMainLight
 Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
 {
@@ -253,7 +270,7 @@ TEXTURE2D(HairWarmRamp), float3 HairWarmRampColor, float HairWarmRampColorMixFac
 TEXTURE2D(BodyCoolRamp), float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
 TEXTURE2D(BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
 {
-    RampColor R;
+    RampColor rampColor;
     float3 coolRampTexCol = 1;
     float3 warmRampTexCol = 1;
     float3 coolRampCol = 1;
@@ -270,9 +287,9 @@ TEXTURE2D(BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFac
         coolRampCol = LinearColorMix(coolRampTexCol, BodyCoolRampColor, BodyCoolRampColorMixFactor);
         warmRampCol = LinearColorMix(warmRampTexCol, BodyWarmRampColor, BodyWarmRampColorMixFactor);
     #endif
-    R.coolRampCol = coolRampCol;
-    R.warmRampCol = warmRampCol;
-    return R;
+    rampColor.coolRampCol = coolRampCol;
+    rampColor.warmRampCol = warmRampCol;
+    return rampColor;
 }
 
 
