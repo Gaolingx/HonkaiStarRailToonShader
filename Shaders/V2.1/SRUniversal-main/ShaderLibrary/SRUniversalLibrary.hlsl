@@ -375,6 +375,10 @@ half3 GetLUTMapRimLightColor(int materialId)
 {
     return SampleLUTMap((int)GetRampLineIndex(materialId), 3).rgb;
 }
+half GetLUTMapRimLightWidth(int materialId)
+{
+    return SampleLUTMap((int)GetRampLineIndex(materialId), 4).r;
+}
 half GetLUTMapRimLightEdgeSoftness(int materialId)
 {
     return SampleLUTMap((int)GetRampLineIndex(materialId), 4).g;
@@ -454,8 +458,12 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     };
     
     float overlayWidth = 0;
-    overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
-
+    #if _USE_LUT_MAP
+        overlayWidth = GetLUTMapRimLightWidth(materialId);
+    #else
+        overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
+    #endif
+    
     const float rimDarks[8] = {
         _RimDark0,
         _RimDark1,
