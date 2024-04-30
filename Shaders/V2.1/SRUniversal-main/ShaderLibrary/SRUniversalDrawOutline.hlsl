@@ -171,11 +171,11 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
     #elif _CUSTOMOUTLINEVARENUM_MULTIPLY
         outlineColor = color * overlayColor;
     #elif _CUSTOMOUTLINEVARENUM_TINT
-        outlineColor = color * _OutlineColor;
+        outlineColor = color * _OutlineColor.rgb;
     #elif _CUSTOMOUTLINEVARENUM_OVERLAY
         outlineColor = overlayColor;
     #elif _CUSTOMOUTLINEVARENUM_CUSTOM
-        outlineColor = _OutlineDefaultColor;
+        outlineColor = _OutlineDefaultColor.rgb;
     #else
         outlineColor = color;
     #endif

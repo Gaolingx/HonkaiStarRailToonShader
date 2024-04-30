@@ -95,7 +95,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
-    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+    baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
     
     //对有LightMap的部位，采样 LightMap
     float4 lightMap = 0;
@@ -192,10 +192,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     rampUV = float2(rampU, GetRampV(materialId));
 
     //Ramp Color
-    RampColor RC = RampColorConstruct(rampUV, _HairCoolRamp, _HairCoolRampColor, _HairCoolRampColorMixFactor,
-    _HairWarmRamp, _HairWarmRampColor, _HairWarmRampColorMixFactor,
-    _BodyCoolRamp, _BodyCoolRampColor, _BodyCoolRampColorMixFactor,
-    _BodyWarmRamp, _BodyWarmRampColor, _BodyWarmRampColorMixFactor);
+    RampColor RC = RampColorConstruct(rampUV, 
+    _HairCoolRamp, _HairCoolRampColor.rgb, _HairCoolRampColorMixFactor,
+    _HairWarmRamp, _HairWarmRampColor.rgb, _HairWarmRampColorMixFactor,
+    _BodyCoolRamp, _BodyCoolRampColor.rgb, _BodyCoolRampColorMixFactor,
+    _BodyWarmRamp, _BodyWarmRampColor.rgb, _BodyWarmRampColorMixFactor);
     coolRampCol = RC.coolRampCol;
     warmRampCol = RC.warmRampCol;
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
@@ -274,9 +275,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 fac = lerp(fac, 1, stockingsMapRG.g); // 厚度插值亮区
                 Gradient curve = GradientConstruct();
                 curve.colorsLength = 3;
-                curve.colors[0] = float4(_StockingsDarkColor, 0);
-                curve.colors[1] = float4(_StockingsTransitionColor, _StockingsTransitionThreshold);
-                curve.colors[2] = float4(_StockingsLightColor, 1);
+                curve.colors[0] = float4(_StockingsDarkColor.rgb, 0);
+                curve.colors[1] = float4(_StockingsTransitionColor.rgb, _StockingsTransitionThreshold);
+                curve.colors[2] = float4(_StockingsLightColor.rgb, 1);
                 float3 stockingsColor = SampleGradient(curve, fac); // 将亮区的系数映射成颜色
 
                 stockingsEffect = lerp(f3one, stockingsColor, stockingsMapRG.r);
@@ -440,7 +441,7 @@ bool isFrontFace            : SV_IsFrontFace)
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
-    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+    baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
 
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);
@@ -466,7 +467,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
-    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+    baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
 
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);
@@ -494,7 +495,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
-    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+    baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
 
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);
@@ -522,7 +523,7 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
     _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
-    baseColor *= lerp(_BackFaceTintColor, _FrontFaceTintColor, isFrontFace);
+    baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
 
     float alpha = _Alpha;
     float4 FinalColor = float4(baseColor, alpha);

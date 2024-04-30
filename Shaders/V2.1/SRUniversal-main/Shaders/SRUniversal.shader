@@ -10,16 +10,16 @@ Shader "Custom/SRUniversal"
         [Header(Base Color)]
         [HideinInspector] _BaseMap("", 2D) = "white" { }
         [NoScaleOffset] _FaceColorMap("Face color map (Default white)", 2D) = "white" { }
-        [HDR] _FaceColorMapColor("Face color map color (Default white)", Color) = (1, 1, 1)
+        [HDR] _FaceColorMapColor("Face color map color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _HairColorMap("Hair color map (Default white)", 2D) = "white" { }
-        [HDR] _HairColorMapColor("Hair color map color (Default white)", Color) = (1, 1, 1)
+        [HDR] _HairColorMapColor("Hair color map color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _UpperBodyColorMap("Upper body color map (Default white)", 2D) = "white" { }
-        [HDR] _UpperBodyColorMapColor("Upper body color map color (Default white)", Color) = (1, 1, 1)
+        [HDR] _UpperBodyColorMapColor("Upper body color map color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _LowerBodyColorMap("Lower body color map (Default white)", 2D) = "white" { }
-        [HDR] _LowerBodyColorMapColor("Lower body color map color (Default white)", Color) = (1, 1, 1)
+        [HDR] _LowerBodyColorMapColor("Lower body color map color (Default white)", Color) = (1, 1, 1, 1)
         _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0, 3)) = 1
-        _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1)
-        _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1)
+        _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1, 1)
+        _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1, 1)
 
         [Header(Alpha Test)]
         [Toggle(_UseAlphaClipping)] _UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
@@ -37,16 +37,16 @@ Shader "Custom/SRUniversal"
         [Header(Ramp Map)]
         [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)", 2D) = "white" { }
         _HairCoolRampColorMixFactor("Hair cool ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _HairCoolRampColor("Hair cool ramp color (Default white)", Color) = (1, 1, 1)
+        _HairCoolRampColor("Hair cool ramp color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _HairWarmRamp("Hair warm ramp (Default white)", 2D) = "white" { }
         _HairWarmRampColorMixFactor("Hair warm ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _HairWarmRampColor("Hair warm ramp color (Default white)", Color) = (1, 1, 1)
+        _HairWarmRampColor("Hair warm ramp color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _BodyCoolRamp("Body cool ramp (Default white)", 2D) = "white" { }
         _BodyCoolRampColorMixFactor("Body cool ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _BodyCoolRampColor("Body cool ramp color (Default white)", Color) = (1, 1, 1)
+        _BodyCoolRampColor("Body cool ramp color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)", 2D) = "white" { }
         _BodyWarmRampColorMixFactor("Body warm ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _BodyWarmRampColor("Body warm ramp color (Default white)", Color) = (1, 1, 1)
+        _BodyWarmRampColor("Body warm ramp color (Default white)", Color) = (1, 1, 1, 1)
         [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", Float) = 0
         _DayTime("Day Time value (Default 12)", Range(0, 24)) = 12
 
@@ -160,7 +160,7 @@ Shader "Custom/SRUniversal"
         _UpperBodyStockings("Upper body stockings (Default black)", 2D) = "black" { }
         _LowerBodyStockings("Lower body stockings (Default black)", 2D) = "black" { }
         _stockingsMapBChannelUVScale("Stockings texture channel B UV Scale (Default 20)", Range(1, 50)) = 20
-        _StockingsDarkColor("Stockings dark color (Default black)", Color) = (0, 0, 0)
+        _StockingsDarkColor("Stockings dark color (Default black)", Color) = (0, 0, 0, 1)
         [HDR] _StockingsLightColor("Stockings light color (Default 1.8, 1.48299, 0.856821)", Color) = (1.8, 1.48299, 0.856821)
         _StockingsTransitionColor("Stockings transition color (Default 0.360381, 0.242986, 0.358131)", Color) = (0.360381, 0.242986, 0.358131)
         _StockingsTransitionThreshold("Stockings transition threshold (Default 0.58)", Range(0, 1)) = 0.58
@@ -274,8 +274,8 @@ Shader "Custom/SRUniversal"
         [Header(Emission)]
         [Toggle(_EMISSION_ON)] _UseEmission("Use emission (Default NO)", Float) = 0
         _EmissionMixBaseColorFac("Emission mix base color factor (Default 1)", Range(0, 1)) = 1
-        _EmissionTintColor("Emission tint color (Default white)", Color) = (1, 1, 1)
-        _EmissionPrevPassColor("Emission prev pass color (Default black)", Color) = (0, 0, 0)
+        _EmissionTintColor("Emission tint color (Default white)", Color) = (1, 1, 1, 1)
+        _EmissionPrevPassColor("Emission prev pass color (Default black)", Color) = (0, 0, 0, 1)
         _EmissionIntensity("Emission intensity (Default 1)", Range(0, 10)) = 1
         _EmissionThreshold("Emission threshold (Default 0.1)", Range(0, 10)) = 0.1
 

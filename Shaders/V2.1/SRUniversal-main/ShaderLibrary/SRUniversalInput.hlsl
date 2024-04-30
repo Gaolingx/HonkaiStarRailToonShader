@@ -59,6 +59,7 @@ SAMPLER(sampler_LUTMap);
 // see -> https://blogs.unity3d.com/2019/02/28/srp-batcher-speed-up-your-rendering/
 CBUFFER_START(UnityPerMaterial);
 float3 _HeadForward;
+float3 _HeadUp;
 float3 _HeadRight;
 
 float4 _BaseMap_ST;
@@ -74,8 +75,8 @@ float4 _LowerBodyColorMapColor;
 float _ColorSaturation;
 
 // FaceTintColor
-float3 _FrontFaceTintColor;
-float3 _BackFaceTintColor;
+float4 _FrontFaceTintColor;
+float4 _BackFaceTintColor;
 
 
 // Alpha
@@ -103,13 +104,13 @@ float _DayTime;
 
 
 // RampColor
-float3 _HairCoolRampColor;
-float3 _HairWarmRampColor;
+float4 _HairCoolRampColor;
+float4 _HairWarmRampColor;
 float _HairCoolRampColorMixFactor;
 float _HairWarmRampColorMixFactor;
 
-float3 _BodyCoolRampColor;
-float3 _BodyWarmRampColor;
+float4 _BodyCoolRampColor;
+float4 _BodyWarmRampColor;
 float _BodyCoolRampColorMixFactor;
 float _BodyWarmRampColorMixFactor;
 
@@ -198,9 +199,9 @@ float _MetalSpecularMetallic;
 
 // Stockings
 float _stockingsMapBChannelUVScale;
-float3 _StockingsDarkColor;
-float3 _StockingsLightColor;
-float3 _StockingsTransitionColor;
+float4 _StockingsDarkColor;
+float4 _StockingsLightColor;
+float4 _StockingsTransitionColor;
 float _StockingsTransitionThreshold;
 float _StockingsTransitionPower;
 float _StockingsTransitionHardness;
@@ -284,8 +285,8 @@ float _RimShadowFeather6;
 float _RimShadowFeather7;
 
 // Emission
-float3 _EmissionTintColor;
-float3 _EmissionPrevPassColor;
+float4 _EmissionTintColor;
+float4 _EmissionPrevPassColor;
 float _EmissionIntensity;
 float _EmissionThreshold;
 float _EmissionMixBaseColorFac;
