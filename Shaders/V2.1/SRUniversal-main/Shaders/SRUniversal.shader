@@ -2,26 +2,26 @@ Shader "Custom/SRUniversal"
 {
     Properties
     {
-        [KeywordEnum (None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 0
+        [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 0
         [HideInInspector] _HeadForward("", Vector) = (0, 0, 1)
-        [HideInInspector] _HeadUp("", Vector) = (0, 1, 0)
+        [HideInInspector] _HeadUp("", Vector) = (0, 0, 0)
         [HideInInspector] _HeadRight("", Vector) = (1, 0, 0)
 
-        [Header (Base Color)]
-        [HideinInspector] _BaseMap("", 2D) = "white" {}
-        [NoScaleOffset] _FaceColorMap("Face color map (Default white)", 2D) = "white" {}
+        [Header(Base Color)]
+        [HideinInspector] _BaseMap("", 2D) = "white" { }
+        [NoScaleOffset] _FaceColorMap("Face color map (Default white)", 2D) = "white" { }
         [HDR] _FaceColorMapColor("Face color map color (Default white)", Color) = (1, 1, 1)
-        [NoScaleOffset] _HairColorMap("Hair color map (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _HairColorMap("Hair color map (Default white)", 2D) = "white" { }
         [HDR] _HairColorMapColor("Hair color map color (Default white)", Color) = (1, 1, 1)
-        [NoScaleOffset] _UpperBodyColorMap("Upper body color map (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _UpperBodyColorMap("Upper body color map (Default white)", 2D) = "white" { }
         [HDR] _UpperBodyColorMapColor("Upper body color map color (Default white)", Color) = (1, 1, 1)
-        [NoScaleOffset] _LowerBodyColorMap("Lower body color map (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _LowerBodyColorMap("Lower body color map (Default white)", 2D) = "white" { }
         [HDR] _LowerBodyColorMapColor("Lower body color map color (Default white)", Color) = (1, 1, 1)
-        _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0,3)) = 1
+        _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0, 3)) = 1
         _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1)
         _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1)
 
-        [Header (Alpha Test)]
+        [Header(Alpha Test)]
         [Toggle(_UseAlphaClipping)] _UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
         _Alpha("Alpha (Default 1)", Range(0, 1)) = 1
         _AlphaTestThreshold("Alpha clip (Default 0.1)", Range(0, 1)) = 0.1
@@ -30,33 +30,33 @@ Shader "Custom/SRUniversal"
         _DitherAlpha("Dither Alpha (Default 1)", Range(0, 1)) = 1
 
         [Header(Light Map)]
-        [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" {}
-        [NoScaleOffset] _UpperBodyLightMap("Upper body map (Default black)", 2D) = "black" {}
-        [NoScaleOffset] _LowerBodyLightMap("Lower body map (Default black)", 2D) = "black" {}
+        [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" { }
+        [NoScaleOffset] _UpperBodyLightMap("Upper body map (Default black)", 2D) = "black" { }
+        [NoScaleOffset] _LowerBodyLightMap("Lower body map (Default black)", 2D) = "black" { }
 
         [Header(Ramp Map)]
-        [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)", 2D) = "white" { }
         _HairCoolRampColorMixFactor("Hair cool ramp color mix factor (Default 0)", Range(0, 1)) = 0
         _HairCoolRampColor("Hair cool ramp color (Default white)", Color) = (1, 1, 1)
-        [NoScaleOffset] _HairWarmRamp("Hair warm ramp (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _HairWarmRamp("Hair warm ramp (Default white)", 2D) = "white" { }
         _HairWarmRampColorMixFactor("Hair warm ramp color mix factor (Default 0)", Range(0, 1)) = 0
         _HairWarmRampColor("Hair warm ramp color (Default white)", Color) = (1, 1, 1)
-        [NoScaleOffset] _BodyCoolRamp("Body cool ramp (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _BodyCoolRamp("Body cool ramp (Default white)", 2D) = "white" { }
         _BodyCoolRampColorMixFactor("Body cool ramp color mix factor (Default 0)", Range(0, 1)) = 0
         _BodyCoolRampColor("Body cool ramp color (Default white)", Color) = (1, 1, 1)
-        [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)", 2D) = "white" { }
         _BodyWarmRampColorMixFactor("Body warm ramp color mix factor (Default 0)", Range(0, 1)) = 0
         _BodyWarmRampColor("Body warm ramp color (Default white)", Color) = (1, 1, 1)
         [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", Float) = 0
-        _DayTime("Day Time value (Default 12)", Range(0,24)) = 12
+        _DayTime("Day Time value (Default 12)", Range(0, 24)) = 12
 
         [Header(LutMap)]
         [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map (Default NO)", Float) = 0
-        _LUTMap("LUT Map (Default black)", 2D) = "black" {}
+        _LUTMap("LUT Map (Default black)", 2D) = "black" { }
 
         [Header(Normal)]
         [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0
-        [Normal] _NormalMap("Normal Map (Default black)", 2D) = "bump" {}
+        [Normal] _NormalMap("Normal Map (Default black)", 2D) = "bump" { }
 
         [Header(Ramp Settings)][Space]
         [Toggle(_CUSTOM_RAMP_MAPPING)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
@@ -94,8 +94,8 @@ Shader "Custom/SRUniversal"
         [Toggle(_AdditionalLighting_ON)] _UseAdditionalLighting("Use Additional Lighting (Default NO)", Float) = 0
 
         [Header(Face)]
-        [NoScaleOffset] _FaceMap("Face map (Default black)", 2D) = "black" {}
-        [NoScaleOffset] _ExpressionMap("Expression Map (Default white)", 2D) = "white" {}
+        [NoScaleOffset] _FaceMap("Face map (Default black)", 2D) = "black" { }
+        [NoScaleOffset] _ExpressionMap("Expression Map (Default white)", 2D) = "white" { }
         _FaceShadowOffset("Face shadow offset (Default -0.01)", Range(-1, 1)) = -0.01
         _FaceShadowTransitionSoftness("Face shadow transition softness (Default 0.05)", Range(0, 1)) = 0.05
 
@@ -110,7 +110,7 @@ Shader "Custom/SRUniversal"
         _ExShadowIntensity("Shadow Intensity (Default 0)", Range(0, 1)) = 0
 
         [Header(Specular)]
-        [Toggle(_SPECULAR_ON)] _EnableSpecular ("Enable Specular (Default YES)", Float) = 1
+        [Toggle(_SPECULAR_ON)] _EnableSpecular("Enable Specular (Default YES)", Float) = 1
         [Toggle(_ANISOTROPY_SPECULAR)] _AnisotropySpecularToggle("Is Anisotropy Specular (Default NO)", Float) = 0
         [KeywordEnum(Disable, Tint, Overlay)] _CustomSpecularColorVarEnum("Custom Specular Color State", Float) = 0
         _SpecularColor("Specular Color", Color) = (1, 1, 1, 1)
@@ -157,8 +157,8 @@ Shader "Custom/SRUniversal"
 
         [Header(Stockings)]
         [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)", Float) = 0
-        _UpperBodyStockings("Upper body stockings (Default black)", 2D) = "black" {}
-        _LowerBodyStockings("Lower body stockings (Default black)", 2D) = "black" {}
+        _UpperBodyStockings("Upper body stockings (Default black)", 2D) = "black" { }
+        _LowerBodyStockings("Lower body stockings (Default black)", 2D) = "black" { }
         _stockingsMapBChannelUVScale("Stockings texture channel B UV Scale (Default 20)", Range(1, 50)) = 20
         _StockingsDarkColor("Stockings dark color (Default black)", Color) = (0, 0, 0)
         [HDR] _StockingsLightColor("Stockings light color (Default 1.8, 1.48299, 0.856821)", Color) = (1.8, 1.48299, 0.856821)
@@ -303,14 +303,14 @@ Shader "Custom/SRUniversal"
         [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", Float) = 1
 
         [Header(Surface Options)]
-        [Enum(UnityEngine.Rendering.CullMode)] _CullMode ("Cull Mode (Default Back)", Float) = 2
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColor ("Core Pass src blend mode color (Default One)", Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor ("Core Pass dst blend mode color (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha ("Core Pass src blend mode alpha (Default One)", Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha ("Core Pass dst blend mode alpha (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp ("BlendOp (Default Add)", Float) = 0
-        [Enum(Off,0, On,1)] _ZWrite("ZWrite (Default On)", Float) = 1
-        _StencilRef ("Stencil reference (Default 0)", Range(0, 255)) = 0
+        [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode (Default Back)", Float) = 2
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColor("Core Pass src blend mode color (Default One)", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor("Core Pass dst blend mode color (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha("Core Pass src blend mode alpha (Default One)", Float) = 1
+        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha("Core Pass dst blend mode alpha (Default Zero)", Float) = 0
+        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp("BlendOp (Default Add)", Float) = 0
+        [Enum(Off, 0, On, 1)] _ZWrite("ZWrite (Default On)", Float) = 1
+        _StencilRef("Stencil reference (Default 0)", Range(0, 255)) = 0
         _StencilReadMask("Stencil Read Mask (Default 255)", Range(0, 255)) = 255
         _StencilWriteMask("Stencil Write Mask (Default 255)", Range(0, 255)) = 255
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil comparison (Default disabled)", Int) = 0
@@ -325,7 +325,7 @@ Shader "Custom/SRUniversal"
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay Pass src blend mode alpha (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlphaOverlay("Overlay Pass dst blend mode alpha (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpOverlay("Overlay Pass blend operation (Default Add)", Float) = 0
-        _StencilRefOverlay ("Overlay Pass stencil reference (Default 0)", Range(0, 255)) = 0
+        _StencilRefOverlay("Overlay Pass stencil reference (Default 0)", Range(0, 255)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay Pass stencil comparison (Default disabled)", Int) = 0
 
     }
@@ -467,7 +467,7 @@ Shader "Custom/SRUniversal"
 
             ENDHLSL
         }
-        
+
         Pass 
         {
             Name "CharDrawOutline"
