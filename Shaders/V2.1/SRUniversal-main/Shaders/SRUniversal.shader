@@ -4,7 +4,7 @@ Shader "Custom/SRUniversal"
     {
         [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 0
         [HideInInspector] _HeadForward("", Vector) = (0, 0, 1)
-        [HideInInspector] _HeadUp("", Vector) = (0, 0, 0)
+        [HideInInspector] _HeadUp("", Vector) = (0, 1, 0)
         [HideInInspector] _HeadRight("", Vector) = (1, 0, 0)
 
         [Header(Base Color)]
@@ -281,12 +281,12 @@ Shader "Custom/SRUniversal"
 
         [Header(Outline)]
         [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
-        [Toggle(_USE_RAMP_COLOR_ON)] _UseRampColor("Use Ramp Color (Default YES)", Float) = 1
-        _OutlineColor("OutlineColor (Without Ramp Texture)", Color) = (0.5, 0.5, 0.5, 1)
-        [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
+        _OutlineDefaultColor("Outline Default Color", Color) = (0.5, 0.5, 0.5, 1)
         [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         [Toggle(_IS_FACE)] _IsFaceOutlineMode("Is face outline (Default NO)", Float) = 0
-        [KeywordEnum(Disable, Multiply, Overlay)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
+        [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
+        [KeywordEnum(Disable, Multiply, Tint, Overlay, Custom)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
+        _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
         _OutlineColor0("Outline Color 0", Color) = (0, 0, 0, 1)
         _OutlineColor1("Outline Color 1", Color) = (0, 0, 0, 1)
         _OutlineColor2("Outline Color 2", Color) = (0, 0, 0, 1)
@@ -301,6 +301,7 @@ Shader "Custom/SRUniversal"
         [ToggleUI]_IsFace("Use Clip Pos With ZOffset (face material)", Float) = 0
         _OutlineZOffset("_OutlineZOffset (View Space)", Range(0, 1)) = 0.0001
         [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", Float) = 1
+        _FakeOutlineColor("Fake Outline Color", Color) = (0.5, 0.5, 0.5, 1)
 
         [Header(Surface Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode (Default Back)", Float) = 2
@@ -366,8 +367,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature _CUSTOMBLOOMVARENUM_DISABLE _CUSTOMBLOOMVARENUM_MULTIPLY _CUSTOMBLOOMVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMBLOOMCOLORVARENUM_DISABLE _CUSTOMBLOOMCOLORVARENUM_TINT _CUSTOMBLOOMCOLORVARENUM_OVERLAY
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
-        #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_OVERLAY
-        #pragma shader_feature_local _USE_RAMP_COLOR_ON
+        #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _DRAW_OVERLAY_ON
         #pragma shader_feature_local _EMISSION_ON

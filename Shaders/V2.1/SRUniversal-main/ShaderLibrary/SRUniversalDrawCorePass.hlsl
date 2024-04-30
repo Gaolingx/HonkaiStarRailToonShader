@@ -370,10 +370,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             fakeOutlineEffect = smoothstep(0.0, 0.25, pow(saturate(dot(headForward, viewDirectionWS)), 20) * fakeOutline);
 
             float3 OutlineRamp = 0;
-            #if _USE_RAMP_COLOR_ON
-                OutlineRamp = LerpRampColor(coolRampCol, warmRampCol, 0.5);
+            #ifdef _CUSTOMOUTLINEVARENUM_CUSTOM
+                OutlineRamp = _FakeOutlineColor.rgb;
             #else
-                OutlineRamp = _OutlineColor.rgb;
+                OutlineRamp = rampColor;
             #endif
             fakeOutlineColor = OutlineRamp;
         }

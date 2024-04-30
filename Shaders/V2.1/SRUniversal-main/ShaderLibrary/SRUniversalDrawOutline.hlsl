@@ -144,16 +144,12 @@ half4 SampleWarmRampMapOutline(float2 uv)
 half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 {
     half3 color = 0;
-    #if _USE_RAMP_COLOR_ON
-        #if _USE_LUT_MAP && _USE_LUT_MAP_OUTLINE
-            color = GetLUTMapOutlineColor(materialId).rgb;
-        #else
-            half3 coolColor = SampleCoolRampMapOutline(float2(0, GetRampV(materialId))).rgb;
-            half3 warmColor = SampleWarmRampMapOutline(float2(0, GetRampV(materialId))).rgb;
-            color = mainColor * LerpRampColor(coolColor, warmColor, DayTime);
-        #endif
+    #if _USE_LUT_MAP && _USE_LUT_MAP_OUTLINE
+        color = GetLUTMapOutlineColor(materialId).rgb;
     #else
-        color = _OutlineColor.rgb;
+        half3 coolColor = SampleCoolRampMapOutline(float2(0, GetRampV(materialId))).rgb;
+        half3 warmColor = SampleWarmRampMapOutline(float2(0, GetRampV(materialId))).rgb;
+        color = mainColor * LerpRampColor(coolColor, warmColor, DayTime);
     #endif
 
     const float4 overlayColors[8] = {
@@ -174,8 +170,12 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
         outlineColor = color;
     #elif _CUSTOMOUTLINEVARENUM_MULTIPLY
         outlineColor = color * overlayColor;
+    #elif _CUSTOMOUTLINEVARENUM_TINT
+        outlineColor = color * _OutlineColor;
     #elif _CUSTOMOUTLINEVARENUM_OVERLAY
         outlineColor = overlayColor;
+    #elif _CUSTOMOUTLINEVARENUM_CUSTOM
+        outlineColor = _OutlineDefaultColor;
     #else
         outlineColor = color;
     #endif
