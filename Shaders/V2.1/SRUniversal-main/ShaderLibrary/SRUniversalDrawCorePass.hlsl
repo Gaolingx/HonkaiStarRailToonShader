@@ -38,7 +38,7 @@ CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
     // 世界空间相机向量
     output.viewDirectionWS = unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexPositionInputs.positionWS : GetWorldToViewMatrix()[2].xyz;
     // 间接光 with 球谐函数
-    output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0,0,0), _IndirectLightFlattenNormal));
+    output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0, 0, 0), _IndirectLightFlattenNormal));
 
     output.positionCS = vertexPositionInputs.positionCS;
 

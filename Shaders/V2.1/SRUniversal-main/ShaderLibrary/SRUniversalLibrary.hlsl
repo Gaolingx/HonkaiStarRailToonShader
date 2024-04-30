@@ -25,14 +25,14 @@ Gradient GradientConstruct()
 {
     Gradient g;
     g.colorsLength = 2;
-    g.colors[0] = float4(1,1,1,0); //第四位不是alpha，而是它在轴上的坐标
-    g.colors[1] = float4(1,1,1,1);
-    g.colors[2] = float4(0,0,0,0);
-    g.colors[3] = float4(0,0,0,0);
-    g.colors[4] = float4(0,0,0,0);
-    g.colors[5] = float4(0,0,0,0);
-    g.colors[6] = float4(0,0,0,0);
-    g.colors[7] = float4(0,0,0,0);
+    g.colors[0] = float4(1, 1, 1, 0); //第四位不是alpha，而是它在轴上的坐标
+    g.colors[1] = float4(1, 1, 1, 1);
+    g.colors[2] = float4(0, 0, 0, 0);
+    g.colors[3] = float4(0, 0, 0, 0);
+    g.colors[4] = float4(0, 0, 0, 0);
+    g.colors[5] = float4(0, 0, 0, 0);
+    g.colors[6] = float4(0, 0, 0, 0);
+    g.colors[7] = float4(0, 0, 0, 0);
     return g;
 }
 
