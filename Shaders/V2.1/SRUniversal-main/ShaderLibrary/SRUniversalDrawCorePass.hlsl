@@ -89,17 +89,18 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-    _HairColorMap, _HairColorMapColor,
-    _UpperBodyColorMap, _UpperBodyColorMapColor,
-    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = GetMainTexColor(input.uv,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
     
     //对有LightMap的部位，采样 LightMap
     float4 lightMap = 0;
-    lightMap = GetLightMapTex(input.uv, _HairLightMap, _UpperBodyLightMap, _LowerBodyLightMap);
+    lightMap = GetLightMapTex(input.uv, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
 
     //对脸部采样 faceMap，脸部的LightMap就是这张FaceMap
     float4 faceMap = 0;
@@ -193,10 +194,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     //Ramp Color
     RampColor RC = RampColorConstruct(rampUV, 
-    _HairCoolRamp, _HairCoolRampColor.rgb, _HairCoolRampColorMixFactor,
-    _HairWarmRamp, _HairWarmRampColor.rgb, _HairWarmRampColorMixFactor,
-    _BodyCoolRamp, _BodyCoolRampColor.rgb, _BodyCoolRampColorMixFactor,
-    _BodyWarmRamp, _BodyWarmRampColor.rgb, _BodyWarmRampColorMixFactor);
+    TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp), _HairCoolRampColor.rgb, _HairCoolRampColorMixFactor,
+    TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp), _HairWarmRampColor.rgb, _HairWarmRampColorMixFactor,
+    TEXTURE2D_ARGS(_BodyCoolRamp, sampler_BodyCoolRamp), _BodyCoolRampColor.rgb, _BodyCoolRampColorMixFactor,
+    TEXTURE2D_ARGS(_BodyWarmRamp, sampler_BodyWarmRamp), _BodyWarmRampColor.rgb, _BodyWarmRampColorMixFactor);
     coolRampCol = RC.coolRampCol;
     warmRampCol = RC.warmRampCol;
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
@@ -346,15 +347,15 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 emissionColor = 0;
     #if _EMISSION_ON
         {
-            float4 mainTex = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-            _HairColorMap, _HairColorMapColor,
-            _UpperBodyColorMap, _UpperBodyColorMapColor,
-            _LowerBodyColorMap, _LowerBodyColorMapColor);
+            float4 mainTex = GetMainTexColor(input.uv,
+            TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+            TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+            TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+            TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor);
 
             EmissionData emissionData;
-            emissionData.color = LinearColorMix(f3one, baseColor, _EmissionMixBaseColorFac);
+            emissionData.color = LinearColorMix(f3one, mainTex.rgb, _EmissionMixBaseColorFac);
             emissionData.tintColor = _EmissionTintColor.rgb;
-            emissionData.prevPassColor = _EmissionPrevPassColor.rgb;
             emissionData.intensity = _EmissionIntensity;
             emissionData.threshold = _EmissionThreshold;
 
@@ -414,7 +415,7 @@ out float4 colorTarget      : SV_Target0)
 {
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
-    float4 lightMap = GetLightMapTex(input.uv, _HairLightMap, _UpperBodyLightMap, _LowerBodyLightMap);
+    float4 lightMap = lightMap = GetLightMapTex(input.uv, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
 
     BloomAreaData bloomAreaData = GetBloomAreaData(lightMap.a, outputColor.rgb);
     float3 bloomColor = bloomAreaData.color;
@@ -435,10 +436,11 @@ bool isFrontFace            : SV_IsFrontFace)
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-    _HairColorMap, _HairColorMapColor,
-    _UpperBodyColorMap, _UpperBodyColorMapColor,
-    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = GetMainTexColor(input.uv,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
@@ -461,10 +463,11 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-    _HairColorMap, _HairColorMapColor,
-    _UpperBodyColorMap, _UpperBodyColorMapColor,
-    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = GetMainTexColor(input.uv,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
@@ -489,10 +492,11 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-    _HairColorMap, _HairColorMapColor,
-    _UpperBodyColorMap, _UpperBodyColorMapColor,
-    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = GetMainTexColor(input.uv,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
@@ -517,10 +521,11 @@ bool isFrontFace            : SV_IsFrontFace) : SV_Target
 {
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
-    baseColor = GetMainTexColor(input.uv, _FaceColorMap, _FaceColorMapColor,
-    _HairColorMap, _HairColorMapColor,
-    _UpperBodyColorMap, _UpperBodyColorMapColor,
-    _LowerBodyColorMap, _LowerBodyColorMapColor).rgb;
+    baseColor = GetMainTexColor(input.uv,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
     baseColor = RGBAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);

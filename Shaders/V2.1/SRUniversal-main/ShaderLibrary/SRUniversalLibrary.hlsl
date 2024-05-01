@@ -233,10 +233,10 @@ half3 CalculateGI(float3 baseColor, float diffuseThreshold, half3 sh, float inte
 
 
 // MainTex
-float4 GetMainTexColor(float2 uv, TEXTURE2D(FaceColorMap), float4 FaceColorMapColor,
-TEXTURE2D(HairColorMap), float4 HairColorMapColor,
-TEXTURE2D(UpperBodyColorMap), float4 UpperBodyColorMapColor,
-TEXTURE2D(LowerBodyColorMap), float4 LowerBodyColorMapColor)
+float4 GetMainTexColor(float2 uv, TEXTURE2D_PARAM(FaceColorMap, sampler_FaceColorMap), float4 FaceColorMapColor,
+TEXTURE2D_PARAM(HairColorMap, sampler_HairColorMap), float4 HairColorMapColor,
+TEXTURE2D_PARAM(UpperBodyColorMap, sampler_UpperBodyColorMap), float4 UpperBodyColorMapColor,
+TEXTURE2D_PARAM(LowerBodyColorMap, sampler_LowerBodyColorMap), float4 LowerBodyColorMapColor)
 {
     float4 areaMap = 0;
     float4 areaColor = 0;
@@ -265,10 +265,10 @@ struct RampColor
     float3 warmRampCol;
 };
 
-RampColor RampColorConstruct(float2 rampUV, TEXTURE2D(HairCoolRamp), float3 HairCoolRampColor, float HairCoolRampColorMixFactor,
-TEXTURE2D(HairWarmRamp), float3 HairWarmRampColor, float HairWarmRampColorMixFactor,
-TEXTURE2D(BodyCoolRamp), float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
-TEXTURE2D(BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
+RampColor RampColorConstruct(float2 rampUV, TEXTURE2D_PARAM(HairCoolRamp, sampler_HairCoolRamp), float3 HairCoolRampColor, float HairCoolRampColorMixFactor,
+TEXTURE2D_PARAM(HairWarmRamp, sampler_HairWarmRamp), float3 HairWarmRampColor, float HairWarmRampColorMixFactor,
+TEXTURE2D_PARAM(BodyCoolRamp, sampler_BodyCoolRamp), float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
+TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
 {
     RampColor rampColor;
     float3 coolRampTexCol = 1;
@@ -294,7 +294,7 @@ TEXTURE2D(BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFac
 
 
 // LightMap
-float4 GetLightMapTex(float2 uv, TEXTURE2D(HairLightMap), TEXTURE2D(UpperBodyLightMap), TEXTURE2D(LowerBodyLightMap))
+float4 GetLightMapTex(float2 uv, TEXTURE2D_PARAM(HairLightMap, sampler_HairLightMap), TEXTURE2D_PARAM(UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_PARAM(LowerBodyLightMap, sampler_LowerBodyLightMap))
 {
     float4 lightMap = 0;
     #if _AREA_HAIR
@@ -935,7 +935,6 @@ struct EmissionData
 {
     float3 color;
     float3 tintColor;
-    float3 prevPassColor;
     float intensity;
     float threshold;
 };
@@ -948,8 +947,7 @@ half3 CalculateBaseEmission(EmissionData emissionData, float4 albedo)
     emissionFactor = emissionData.threshold < albedo.a ? emissionFactor : 0;
 
     half3 emissionTintColor = emissionData.color * emissionData.tintColor * emissionData.intensity;
-    half3 prevPassColor = emissionData.prevPassColor;
-    half3 emissionColor = lerp(prevPassColor, emissionTintColor, emissionFactor);
+    half3 emissionColor = lerp(f3zero, emissionTintColor, emissionFactor);
 
     return emissionColor;
 }
