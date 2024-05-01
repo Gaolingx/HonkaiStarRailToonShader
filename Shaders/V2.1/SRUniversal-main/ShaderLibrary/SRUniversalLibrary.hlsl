@@ -349,67 +349,67 @@ half4 SampleLUTMap(int materialId, int renderType)
 // LutMap Specular
 half3 GetLUTMapSpecularColor(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 0).rgb;
+    return SampleLUTMap((int)(materialId), 0).rgb;
 }
 half GetLUTMapSpecularShininess(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 1).r;
+    return SampleLUTMap((int)(materialId), 1).r;
 }
 half GetLUTMapSpecularRoughness(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 1).g;
+    return SampleLUTMap((int)(materialId), 1).g;
 }
 half GetLUTMapSpecularIntensity(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 1).b;
+    return SampleLUTMap((int)(materialId), 1).b;
 }
 
 // LutMap Outline
 half3 GetLUTMapOutlineColor(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 2).rgb;
+    return SampleLUTMap((int)(materialId), 2).rgb;
 }
 
 // LutMap RimLight
 half3 GetLUTMapRimLightColor(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 3).rgb;
+    return SampleLUTMap((int)(materialId), 3).rgb;
 }
 half GetLUTMapRimLightWidth(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 4).r;
+    return SampleLUTMap((int)(materialId), 4).r;
 }
 half GetLUTMapRimLightEdgeSoftness(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 4).g;
+    return SampleLUTMap((int)(materialId), 4).g;
 }
 half GetLUTMapRimLightDark(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 4).b;
+    return SampleLUTMap((int)(materialId), 4).b;
 }
 
 // LutMap RimShadow
 half3 GetLUTMapRimShadowColor(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 5).rgb;
+    return SampleLUTMap((int)(materialId), 5).rgb;
 }
 half GetLUTMapRimShadowWidth(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 6).r;
+    return SampleLUTMap((int)(materialId), 6).r;
 }
 half GetLUTMapRimShadowFeather(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 6).g;
+    return SampleLUTMap((int)(materialId), 6).g;
 }
 
 // LutMap Bloom
 half GetLUTMapBloomIntensity(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 6).b;
+    return SampleLUTMap((int)(materialId), 6).b;
 }
 half3 GetLUTMapBloomColor(int materialId)
 {
-    return SampleLUTMap((int)GetRampLineIndex(materialId), 7).rgb;
+    return SampleLUTMap((int)(materialId), 7).rgb;
 }
 
 
@@ -441,7 +441,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
-        overlayColor = GetLUTMapRimLightColor(materialId).rgb;
+        overlayColor = GetLUTMapRimLightColor(GetRampLineIndex(materialId)).rgb;
     #else
         overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
     #endif
@@ -459,7 +459,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     
     float overlayWidth = 0;
     #if _USE_LUT_MAP
-        overlayWidth = GetLUTMapRimLightWidth(materialId);
+        overlayWidth = GetLUTMapRimLightWidth(GetRampLineIndex(materialId));
     #else
         overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
     #endif
@@ -477,7 +477,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     
     float overlayDark = 0;
     #if _USE_LUT_MAP
-        overlayDark = GetLUTMapRimLightDark(materialId);
+        overlayDark = GetLUTMapRimLightDark(GetRampLineIndex(materialId));
     #else
         overlayDark = rimDarks[GetRampLineIndex(materialId)];
     #endif
@@ -495,7 +495,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     
     float overlayEdgeSoftness = 0;
     #if _USE_LUT_MAP
-        overlayEdgeSoftness = GetLUTMapRimLightEdgeSoftness(materialId);
+        overlayEdgeSoftness = GetLUTMapRimLightEdgeSoftness(GetRampLineIndex(materialId));
     #else
         overlayEdgeSoftness = rimEdgeSoftnesses[GetRampLineIndex(materialId)];
     #endif
@@ -651,7 +651,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
-        overlayColor = GetLUTMapRimShadowColor(materialId).rgb;
+        overlayColor = GetLUTMapRimShadowColor(GetRampLineIndex(materialId)).rgb;
     #else
         overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
     #endif
@@ -669,7 +669,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     
     float overlayWidth = 0;
     #if _USE_LUT_MAP
-        overlayWidth = GetLUTMapRimShadowWidth(materialId);
+        overlayWidth = GetLUTMapRimShadowWidth(GetRampLineIndex(materialId));
     #else
         overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
     #endif
@@ -687,7 +687,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     
     float overlayFeather = 0;
     #if _USE_LUT_MAP
-        overlayFeather = GetLUTMapRimShadowFeather(materialId);
+        overlayFeather = GetLUTMapRimShadowFeather(GetRampLineIndex(materialId));
     #else
         overlayFeather = rimShadowFeather[GetRampLineIndex(materialId)];
     #endif
@@ -781,7 +781,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
-        overlayColor = GetLUTMapSpecularColor(materialId).rgb;
+        overlayColor = GetLUTMapSpecularColor(GetRampLineIndex(materialId)).rgb;
     #else
         overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
     #endif
@@ -799,7 +799,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     
     float overlayIntensity = 0;
     #if _USE_LUT_MAP
-        overlayIntensity = GetLUTMapSpecularIntensity(materialId);
+        overlayIntensity = GetLUTMapSpecularIntensity(GetRampLineIndex(materialId));
     #else
         overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
     #endif
@@ -817,7 +817,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     
     float overlayShininess = 0;
     #if _USE_LUT_MAP
-        overlayShininess = GetLUTMapSpecularShininess(materialId);
+        overlayShininess = GetLUTMapSpecularShininess(GetRampLineIndex(materialId));
     #else
         overlayShininess = overlayShininessArr[GetRampLineIndex(materialId)];
     #endif
@@ -835,7 +835,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     
     float overlayRoughness = 0;
     #if _USE_LUT_MAP
-        overlayRoughness = GetLUTMapSpecularRoughness(materialId);
+        overlayRoughness = GetLUTMapSpecularRoughness(GetRampLineIndex(materialId));
     #else
         overlayRoughness = overlayRoughnessArr[GetRampLineIndex(materialId)];
     #endif
@@ -981,7 +981,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
     
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
-        overlayColor = GetLUTMapBloomColor(materialId).rgb;
+        overlayColor = GetLUTMapBloomColor(GetRampLineIndex(materialId)).rgb;
     #else
         overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
     #endif
@@ -999,7 +999,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
     
     float overlayIntensity = 0;
     #if _USE_LUT_MAP
-        overlayIntensity = GetLUTMapBloomIntensity(materialId);
+        overlayIntensity = GetLUTMapBloomIntensity(GetRampLineIndex(materialId));
     #else
         overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
     #endif

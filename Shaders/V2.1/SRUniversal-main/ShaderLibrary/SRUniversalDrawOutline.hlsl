@@ -145,7 +145,7 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 {
     half3 color = 0;
     #if _USE_LUT_MAP && _USE_LUT_MAP_OUTLINE
-        color = GetLUTMapOutlineColor(materialId).rgb;
+        color = GetLUTMapOutlineColor(GetRampLineIndex(materialId)).rgb;
     #else
         half3 coolColor = SampleCoolRampMapOutline(float2(0, GetRampV(materialId))).rgb;
         half3 warmColor = SampleWarmRampMapOutline(float2(0, GetRampV(materialId))).rgb;
