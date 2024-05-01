@@ -27,7 +27,7 @@ Shader "Custom/SRUniversal"
         _AlphaTestThreshold("Alpha clip (Default 0.1)", Range(0, 1)) = 0.1
 
         [Header(Dither Alpha)]
-        _DitherAlpha("Dither Alpha (Default 1)", Range(0, 1)) = 1
+        _DitherAlpha("Dither alpha (Default 1)", Range(0, 1)) = 1
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" { }
@@ -383,7 +383,7 @@ Shader "Custom/SRUniversal"
                 "RenderType" = "Opaque"
                 "LightMode" = "HSRForward2"
             }
-            Cull[_CullMode]
+            Cull [_CullMode]
             Stencil{
                 Ref [_StencilRef]
                 ReadMask [_StencilReadMask]
@@ -424,7 +424,7 @@ Shader "Custom/SRUniversal"
                 "RenderType" = "Opaque"
                 "LightMode" = "HSRForward3"
             }
-            Cull[_CullMode]
+            Cull [_CullMode]
             Stencil{
                 Ref [_StencilRefOverlay]
                 Comp [_StencilCompOverlay]
