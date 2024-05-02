@@ -929,6 +929,52 @@ half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS,
     return CalculateSpecular(surface, light, viewDirWS, normalWS, specColor, shininess, roughness, intensity, diffuseFac, metallic);
 }
 
+// Stockings
+struct StockingsData
+{
+    float NoV;
+    float stockingsMapBChannelUVScale;
+    float stockingsTransitionPower;
+    float stockingsTransitionHardness;
+    float stockingsTextureUsage;
+    float stockingsTransitionThreshold;
+    float4 stockingsDarkColor;
+    float4 stockingsTransitionColor;
+    float4 stockingsLightColor;
+};
+
+float3 CalculateStockingsEffect(StockingsData stockingsData, float2 uv, TEXTURE2D_PARAM(UpperBodyStockings, sampler_UpperBodyStockings), TEXTURE2D_PARAM(LowerBodyStockings, sampler_LowerBodyStockings))
+{
+    float2 stockingsMapRG = 0;
+    float stockingsMapB = 0;
+    #if _AREA_UPPERBODY
+        stockingsMapRG = SAMPLE_TEXTURE2D(UpperBodyStockings, sampler_UpperBodyStockings, uv).rg;
+        stockingsMapB = SAMPLE_TEXTURE2D(UpperBodyStockings, sampler_UpperBodyStockings, uv * stockingsData.stockingsMapBChannelUVScale).b;
+    #elif _AREA_LOWERBODY
+        stockingsMapRG = SAMPLE_TEXTURE2D(LowerBodyStockings, sampler_LowerBodyStockings, uv).rg;
+        stockingsMapB = SAMPLE_TEXTURE2D(LowerBodyStockings, sampler_LowerBodyStockings, uv * stockingsData.stockingsMapBChannelUVScale).b;
+    #endif
+    //用法线点乘视角向量模拟皮肤透过丝袜
+    float fac = stockingsData.NoV;
+    //做一次幂运算，调整亮区大小
+    fac = pow(saturate(fac), stockingsData.stockingsTransitionPower);
+    //调整亮暗过渡的硬度
+    fac = saturate((fac - stockingsData.stockingsTransitionHardness / 2) / (1 - stockingsData.stockingsTransitionHardness));
+    fac = fac * (stockingsMapB * stockingsData.stockingsTextureUsage + (1 - stockingsData.stockingsTextureUsage)); // 细节纹理
+    fac = lerp(fac, 1, stockingsMapRG.g); // 厚度插值亮区
+    Gradient curve = GradientConstruct();
+    curve.colorsLength = 3;
+    curve.colors[0] = float4(stockingsData.stockingsDarkColor.rgb, 0);
+    curve.colors[1] = float4(stockingsData.stockingsTransitionColor.rgb, stockingsData.stockingsTransitionThreshold);
+    curve.colors[2] = float4(stockingsData.stockingsLightColor.rgb, 1);
+    float3 stockingsColor = SampleGradient(curve, fac); // 将亮区的系数映射成颜色
+
+    float3 stockingsEffect = 1;
+    stockingsEffect = lerp(f3one, stockingsColor, stockingsMapRG.r);
+
+    return stockingsEffect;
+}
+
 
 // Emission
 struct EmissionData

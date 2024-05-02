@@ -85,7 +85,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #endif
     
     //视线方向
-    float3 viewDirectionWS = normalize(input.viewDirectionWS);
+    float3 viewDirectionWS = normalize(GetWorldSpaceViewDir(positionWS));
+
+    float NoV = dot(normalize(normalWS), normalize(GetWorldSpaceViewDir(positionWS)));
+    float NoL = dot(normalize(normalWS), normalize(mainLight.direction));
 
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
@@ -147,7 +150,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //lightmap的G通道直接光阴影的形状，值越小，越容易进入阴影，有些刺的效果就是这里出来的
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
         {
-            float NoL = dot(normalWS, lightDirectionWS);
             float remappedNoL = NoL * 0.5 + 0.5;
             float shadowThreshold = diffuseThreshold;
             //加个过渡，这里_ShadowThresholdSoftness=0.1
@@ -256,33 +258,18 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #if _STOCKINGS_ON
         #if _AREA_UPPERBODY || _AREA_LOWERBODY
             {
-                float2 stockingsMapRG = 0;
-                float stockingsMapB = 0;
-                #if _AREA_UPPERBODY
-                    stockingsMapRG = SAMPLE_TEXTURE2D(_UpperBodyStockings, sampler_UpperBodyStockings, input.uv).rg;
-                    stockingsMapB = SAMPLE_TEXTURE2D(_UpperBodyStockings, sampler_UpperBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
-                #elif _AREA_LOWERBODY
-                    stockingsMapRG = SAMPLE_TEXTURE2D(_LowerBodyStockings, sampler_LowerBodyStockings, input.uv).rg;
-                    stockingsMapB = SAMPLE_TEXTURE2D(_LowerBodyStockings, sampler_LowerBodyStockings, input.uv * _stockingsMapBChannelUVScale).b;
-                #endif
-                //用法线点乘视角向量模拟皮肤透过丝袜
-                float NoV = dot(normalWS, viewDirectionWS);
-                float fac = NoV;
-                //做一次幂运算，调整亮区大小
-                fac = pow(saturate(fac), _StockingsTransitionPower);
-                //调整亮暗过渡的硬度
-                fac = saturate((fac - _StockingsTransitionHardness / 2) / (1 - _StockingsTransitionHardness));
-                fac = fac * (stockingsMapB * _StockingsTextureUsage + (1 - _StockingsTextureUsage)); // 细节纹理
-                fac = lerp(fac, 1, stockingsMapRG.g); // 厚度插值亮区
-                Gradient curve = GradientConstruct();
-                curve.colorsLength = 3;
-                curve.colors[0] = float4(_StockingsDarkColor.rgb, 0);
-                curve.colors[1] = float4(_StockingsTransitionColor.rgb, _StockingsTransitionThreshold);
-                curve.colors[2] = float4(_StockingsLightColor.rgb, 1);
-                float3 stockingsColor = SampleGradient(curve, fac); // 将亮区的系数映射成颜色
+                StockingsData stockingsData;
+                stockingsData.NoV = NoV;
+                stockingsData.stockingsMapBChannelUVScale = _stockingsMapBChannelUVScale;
+                stockingsData.stockingsTransitionPower = _StockingsTransitionPower;
+                stockingsData.stockingsTransitionHardness = _StockingsTransitionHardness;
+                stockingsData.stockingsTextureUsage = _StockingsTextureUsage;
+                stockingsData.stockingsTransitionThreshold = _StockingsTransitionThreshold;
+                stockingsData.stockingsDarkColor = _StockingsDarkColor;
+                stockingsData.stockingsTransitionColor = _StockingsTransitionColor;
+                stockingsData.stockingsLightColor = _StockingsLightColor;
 
-                stockingsEffect = lerp(f3one, stockingsColor, stockingsMapRG.r);
-
+                stockingsEffect = CalculateStockingsEffect(stockingsData, input.uv, TEXTURE2D_ARGS(_UpperBodyStockings, sampler_UpperBodyStockings), TEXTURE2D_ARGS(_LowerBodyStockings, sampler_LowerBodyStockings));
             }
         #endif
     #else
@@ -292,8 +279,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //Rim Light
     float3 rimLightColor = 0;
     float3 rimLightMask;
-    float rimNoV = dot(normalize(normalWS), normalize(GetWorldSpaceViewDir(positionWS)));
-    float rimNoL = dot(normalize(normalWS), normalize(mainLight.direction));
 
     #if _RIM_LIGHTING_ON
         {
@@ -311,7 +296,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightMaskData.thresholdMax = _RimThresholdMax;
             rimLightMaskData.modelScale = _ModelScale;
             rimLightMaskData.ditherAlpha = _DitherAlpha;
-            rimLightMaskData.NoV = rimNoV;
+            rimLightMaskData.NoV = NoV;
         
             RimLightData rimLightData;
             rimLightData.darkenValue = rimLightAreaDark;
@@ -319,7 +304,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightData.intensityBackFace = _RimIntensityBackFace;
 
             rimLightMask = GetRimLightMask(rimLightMaskData, input.positionCS, normalWS, lightMap);
-            rimLightColor = GetRimLight(rimLightData, rimLightMask, rimNoL, mainLight, isFrontFace);
+            rimLightColor = GetRimLight(rimLightData, rimLightMask, NoL, mainLight, isFrontFace);
         }
     #endif
 
