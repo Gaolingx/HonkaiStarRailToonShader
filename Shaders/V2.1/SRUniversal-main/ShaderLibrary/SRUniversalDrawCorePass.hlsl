@@ -15,8 +15,7 @@ struct CharCoreVaryings
     float3 normalWS                 : TEXCOORD2;
     float3 bitangentWS              : TEXCOORD3;
     float3 tangentWS                : TEXCOORD4;
-    float3 viewDirectionWS          : TEXCOORD5;
-    float3 SH                       : TEXCOORD6;
+    float3 SH                       : TEXCOORD5;
     float4 positionCS               : SV_POSITION;
 };
 
@@ -35,8 +34,6 @@ CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
     output.normalWS = vertexNormalInputs.normalWS;
     output.tangentWS = vertexNormalInputs.tangentWS;
     output.bitangentWS = vertexNormalInputs.bitangentWS;
-    // 世界空间相机向量
-    output.viewDirectionWS = unity_OrthoParams.w == 0 ? GetCameraPositionWS() - vertexPositionInputs.positionWS : GetWorldToViewMatrix()[2].xyz;
     // 间接光 with 球谐函数
     output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0, 0, 0), _IndirectLightFlattenNormal));
 
@@ -225,7 +222,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     //Specular
     half3 specularColor = 0;
-    half3 viewDirWS = normalize(GetWorldSpaceViewDir(positionWS));
 
     #if _SPECULAR_ON
         #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
@@ -245,7 +241,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 specularData.SpecularKsMetal = _SpecularKsMetal;
                 //specularData.MetalSpecularMetallic = _MetalSpecularMetallic;
 
-                specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirWS, normalWS, SpecularColor, SpecularShininess, SpecularRoughness, SpecularIntensity, diffuseFac);
+                specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirectionWS, normalWS, SpecularColor, SpecularShininess, SpecularRoughness, SpecularIntensity, diffuseFac);
 
                 //specularColor *= mainLight.shadowAttenuation;
             }
@@ -325,7 +321,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimShadowData.width = rimAreaShadowWidth;
             rimShadowData.feather = rimAreaShadowFeather;
 
-            rimShadowColor = GetRimShadow(rimShadowData, viewDirWS, normalWS);
+            rimShadowColor = GetRimShadow(rimShadowData, viewDirectionWS, normalWS);
         }
     #endif
 
