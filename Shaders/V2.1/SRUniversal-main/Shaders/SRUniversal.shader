@@ -72,9 +72,7 @@ Shader "Custom/SRUniversal"
         [Header(Indirect Lighting)]
         _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)", Range(0, 1)) = 0
         _IndirectLightIntensity("Indirect light intensity (Default 1)", Range(0, 2)) = 1
-        _IndirectLightUsage("Indirect light usage (Default 0.5)", Range(0, 1)) = 0.5
-        _IndirectLightOcclusionUsage("Indirect light occlusion usage (Default 0.5)", Range(0, 1)) = 0.5
-        _IndirectLightMixBaseColor("Indirect light mix base color (Default 1)", Range(0, 1)) = 1
+        _IndirectLightUsage("Indirect light color usage (Default 0.5)", Range(0, 1)) = 0.5
 
         [Header(Main Lighting)]
         [Toggle(_AUTO_Brightness_ON)] _UseAutoBrightness("Use Auto Brightness (Default NO)", Float) = 0

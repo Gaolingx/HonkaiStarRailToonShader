@@ -119,8 +119,6 @@ float _BodyWarmRampColorMixFactor;
 float _IndirectLightFlattenNormal;
 float _IndirectLightIntensity;
 float _IndirectLightUsage;
-float _IndirectLightOcclusionUsage;
-float _IndirectLightMixBaseColor;
 
 
 float _AutoBrightnessThresholdMin;

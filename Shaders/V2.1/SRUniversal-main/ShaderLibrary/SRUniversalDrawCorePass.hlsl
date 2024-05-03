@@ -87,6 +87,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float NoV = dot(normalize(normalWS), normalize(GetWorldSpaceViewDir(positionWS)));
     float NoL = dot(normalize(normalWS), normalize(mainLight.direction));
 
+    // BaseColor
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
     baseColor = GetMainTexColor(input.uv,
@@ -129,17 +130,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
+    // GI
     float3 indirectLightColor = 0;
     //float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
     indirectLightColor = CalculateGI(baseColor, diffuseThreshold, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
-    #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
-        //lightmap的R通道是AO，也就是静态阴影，根据AO，来影响环境光照
-        indirectLightColor *= lerp(1, specularIntensity, _IndirectLightOcclusionUsage); // 加个 Ambient Occlusion
-    #elif _AREA_FACE
-        indirectLightColor *= lerp(1, lerp(faceMap.g, 1, step(faceMap.r, 0.5)), _IndirectLightOcclusionUsage);
-    #endif
-    indirectLightColor *= lerp(1, baseColor, _IndirectLightMixBaseColor);
-
 
     float mainLightShadow = 1;
     int rampRowIndex = 0;
@@ -191,7 +185,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float rampU = diffuseFac * (1 - _ShadowRampOffset) + _ShadowRampOffset;
     rampUV = float2(rampU, GetRampV(materialId));
 
-    //Ramp Color
+    // Ramp Color
     RampColor RC = RampColorConstruct(rampUV, 
     TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp), _HairCoolRampColor.rgb, _HairCoolRampColorMixFactor,
     TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp), _HairWarmRampColor.rgb, _HairWarmRampColorMixFactor,
@@ -211,6 +205,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     rampColor = lerp(f3one, rampColor, _ShadowBoost);
     float3 FinalDiffuse = mainLightColor * baseColor * rampColor;
 
+    // Additional Lights
     #if defined(_ADDITIONAL_LIGHTS)
         #if _AdditionalLighting_ON
             CHAR_LIGHT_LOOP_BEGIN(positionWS, input.positionCS)
@@ -220,7 +215,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         #endif
     #endif
 
-    //Specular
+    // Specular
     half3 specularColor = 0;
 
     #if _SPECULAR_ON
@@ -250,6 +245,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         specularColor = 0;
     #endif
 
+    //Stockings
     float3 stockingsEffect = 1;
     #if _STOCKINGS_ON
         #if _AREA_UPPERBODY || _AREA_LOWERBODY
@@ -272,7 +268,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         stockingsEffect = 1;
     #endif
     
-    //Rim Light
+    // Rim Light
     float3 rimLightColor = 0;
     float3 rimLightMask;
 
@@ -304,7 +300,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
-    //Rim Shadow
+    // Rim Shadow
     float3 rimShadowColor = 1;
     #if _RIM_SHADOW_ON
         {
@@ -325,6 +321,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
+    // Emission
     float3 emissionColor = 0;
     #if _EMISSION_ON
         {
@@ -344,6 +341,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
+    // Fake Outline
     float fakeOutlineEffect = 0;
     float3 fakeOutlineColor = 0;
     #if _AREA_FACE && _OUTLINE_ON && _FAKE_OUTLINE_ON
@@ -362,6 +360,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
+    // TotalColor
     float3 albedo = 0;
     albedo += indirectLightColor;
     albedo += FinalDiffuse;
