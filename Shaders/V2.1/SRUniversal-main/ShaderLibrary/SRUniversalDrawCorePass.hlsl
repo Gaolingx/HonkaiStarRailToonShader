@@ -344,7 +344,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     // Fake Outline
     float fakeOutlineEffect = 0;
     float3 fakeOutlineColor = 0;
-    #if _AREA_FACE && _OUTLINE_ON && _FAKE_OUTLINE_ON
+    #if _AREA_FACE && _FAKE_OUTLINE_ON
         {
             float fakeOutline = faceMap.b;
             float3 headForward = normalize(_HeadForward);
