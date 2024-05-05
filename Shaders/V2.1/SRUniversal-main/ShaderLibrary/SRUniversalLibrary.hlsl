@@ -1052,7 +1052,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
     #ifdef _CUSTOMBLOOMCOLORVARENUM_DISABLE
         finalBloomColor = color.rgb;
     #elif _CUSTOMBLOOMCOLORVARENUM_TINT
-        finalBloomColor = color.rgb * overlayColor * _BloomColor;
+        finalBloomColor = color.rgb * overlayColor * _BloomColor.rgb;
     #elif _CUSTOMBLOOMCOLORVARENUM_OVERLAY
         finalBloomColor = overlayColor;
     #else
