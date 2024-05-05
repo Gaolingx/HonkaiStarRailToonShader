@@ -79,10 +79,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         #elif _NORMALMAPCHANNELMODEVARENUM_TWOCHANNEL
             normalMap.rg = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv).rg;
             normalMap.b = 0.5 * (sqrt(1 - pow((2 * normalMap.r - 1), 2) - pow((2 * normalMap.g - 1), 2))) + 0.5;
+            normalMap.a = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv).a;
         #else
             normalMap = f4one;
         #endif
-        float3 normalTS = UnpackNormal(float4(normalMap.rgb, 1));
+        float3 normalTS = UnpackNormal(normalMap);
         float3 normalWS = TransformTangentToWorld(normalTS, tangentToWorld, true);
         input.normalWS = normalWS;
     #else
