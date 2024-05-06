@@ -84,11 +84,6 @@ float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFacto
     return finalColor;
 }
 
-float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float DayTime)
-{
-    return lerp(warmRamp, coolRamp, abs(DayTime - 12.0) * rcp(12.0));
-}
-
 float GetLinearEyeDepthAnyProjection(float depth)
 {
     if (IsPerspectiveProjection())
@@ -292,6 +287,14 @@ TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp), float3 BodyWarmRampColor, f
     return rampColor;
 }
 
+float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float dayTime, float shadowBoost)
+{
+    float3 rampColor = 0;
+    rampColor = lerp(warmRamp, coolRamp, abs(dayTime - 12.0) * rcp(12.0));
+    rampColor = lerp(f3one, rampColor, shadowBoost);
+    return rampColor;
+}
+
 
 // LightMap
 float4 GetLightMapTex(float2 uv, TEXTURE2D_PARAM(HairLightMap, sampler_HairLightMap), TEXTURE2D_PARAM(UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_PARAM(LowerBodyLightMap, sampler_LowerBodyLightMap))
@@ -338,6 +341,16 @@ half GetRampLineIndex(half matId)
 half GetMetalIndex()
 {
     return _RampV4;
+}
+
+float2 GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, bool singleMaterial)
+{
+    float material = singleMaterial ? 0 : lightMap.a;
+
+    float2 rampUV;
+    float rampU = diffuseFac * (1 - shadowRampOffset) + shadowRampOffset;
+    rampUV = float2(rampU, GetRampV(material));
+    return rampUV;
 }
 
 // LutMap
@@ -557,22 +570,20 @@ struct RimLightMaskData
     float3 color;
     float width;
     float edgeSoftness;
-    float thresholdMin;
-    float thresholdMax;
     float modelScale;
     float ditherAlpha;
-    float NoV;
 };
 
 float3 GetRimLightMask(
     RimLightMaskData rlmData,
-    float4 svPosition,
     float3 normalWS,
+    float3 viewDirWS,
+    float NoV,
+    float4 svPosition,
     float4 lightMap)
 {
+    float invModelScale = rcp(rlmData.modelScale);
     float rimWidth = rlmData.width / 2000.0; // rimWidth 表示的是屏幕上像素的偏移量，和 modelScale 无关
-    float rimThresholdMin = rlmData.thresholdMin * rlmData.modelScale * 10.0;
-    float rimThresholdMax = rlmData.thresholdMax * rlmData.modelScale * 10.0;
 
     rimWidth *= lightMap.r; // 有些地方不要边缘光
     rimWidth *= _ScaledScreenParams.y; // 在不同分辨率下看起来等宽
@@ -591,19 +602,20 @@ float3 GetRimLightMask(
     }
 
     float depth = GetLinearEyeDepthAnyProjection(svPosition);
-    rimWidth *= 10.0 * rsqrt(depth / rlmData.modelScale); // 近大远小
+    rimWidth *= 10.0 * rsqrt(depth * invModelScale); // 近大远小
 
-    float3 normalVS = TransformWorldToViewNormal(normalWS);
-    float2 indexOffset = float2(sign(normalVS.x), 0) * rimWidth; // 只横向偏移
-    uint2 index = clamp(svPosition.xy - 0.5 + indexOffset, 0, _ScaledScreenParams.xy - 1); // 避免出界
+    float indexOffsetX = -sign(cross(viewDirWS, normalWS).y) * rimWidth;
+    uint2 index = clamp(svPosition.xy - 0.5 + float2(indexOffsetX, 0), 0, _ScaledScreenParams.xy - 1); // 避免出界
     float offsetDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(index));
 
-    float depthDelta = (offsetDepth - depth) * 50; // 只有 depth 小于 offsetDepth 的时候再画
-    float intensity = smoothstep(rimThresholdMin, rimThresholdMax, depthDelta);
+    // 只有 depth 小于 offsetDepth 的时候再画
+    float intensity = smoothstep(0.12, 0.18, (offsetDepth - depth) * invModelScale);
 
     // 用于柔化边缘光，edgeSoftness 越大，越柔和
-    float fresnel = pow(clamp(1 - rlmData.NoV, 0.01, 1), max(rlmData.edgeSoftness, 0.01));
+    float fresnel = pow(max(1 - NoV, 0.01), max(rlmData.edgeSoftness, 0.01));
 
+    // Dither Alpha 效果会扣掉角色的一部分像素，导致角色身上出现不该有的边缘光
+    // 所以这里在 ditherAlpha 较强时隐去边缘光
     float ditherAlphaFadeOut = smoothstep(0.9, 1, rlmData.ditherAlpha);
 
     return rlmData.color * saturate(intensity * fresnel * ditherAlphaFadeOut);
@@ -620,7 +632,7 @@ float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light,
 {
     float attenuation = saturate(NoL * light.shadowAttenuation * light.distanceAttenuation);
     float intensity = lerp(rimData.intensityBackFace, rimData.intensityFrontFace, isFrontFace);
-    return rimMask * (lerp(rimData.darkenValue, 1, attenuation) * intensity);
+    return rimMask * (lerp(rimData.darkenValue, 1, attenuation) * max(0, intensity));
 }
 
 

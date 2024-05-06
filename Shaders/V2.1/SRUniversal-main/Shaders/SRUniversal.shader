@@ -61,6 +61,7 @@ Shader "Custom/SRUniversal"
 
         [Header(Ramp Settings)][Space]
         [Toggle(_CUSTOM_RAMP_MAPPING)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
+        [ToggleUI] _SingleMaterial("Is Single Material (Use Ramp Line of Mat0)", Float) = 0
         [IntRange] _RampV0("Ramp Line of Mat0 (Default 0)", Range(0, 7)) = 0
         [IntRange] _RampV1("Ramp Line of Mat1 (Default 1)", Range(0, 7)) = 1
     	[IntRange] _RampV2("Ramp Line of Mat2 (Default 2)", Range(0, 7)) = 2
@@ -83,7 +84,7 @@ Shader "Custom/SRUniversal"
         _MainLightBrightnessFactor("Main light brightness factor (Default 1)", Range(0, 1)) = 1
         _MainLightColorUsage("Main light color usage (Default 1)", Range(0, 1)) = 1
         _MainLightShadowOffset("Main light shadow offset (Default 0)", Range(-1, 1)) = 0
-        _LerpAOIntensity("Lerp AO Intensity (Default 1)", Range(0, 1)) = 1
+        _LerpAOIntensity("Lerp AO Intensity (Default 1)", Range(0, 1)) = 0
         _ShadowThresholdCenter("Shadow threshold center (Default 0)", Range(-1, 1)) = 0
         _ShadowThresholdSoftness("Shadow threshold softness (Default 0.1)", Range(0, 1)) = 0.1
         _ShadowRampOffset("Shadow ramp offset (Default 0.75)", Range(0, 1)) = 0.75
@@ -172,8 +173,6 @@ Shader "Custom/SRUniversal"
         _ModelScale("Model Scale (Default 1)", Float) = 1
         _RimIntensity("Rim Intensity (Front Face)", Float) = 0.5
         _RimIntensityBackFace("Rim Intensity (Back Face)", Float) = 0
-        _RimThresholdMin("Rim Threshold Min (Default 0.6)", Float) = 0.6
-        _RimThresholdMax("Rim Threshold Max (Default 0.9)", Float) = 0.9
         [KeywordEnum(Disable, Tint, Overlay)] _CustomRimLightColorVarEnum("Custom Rim Light Color State", Float) = 0
         [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimLightVarEnum("Custom Rim Light Var State", Float) = 0
         _RimColor("Rim Color", Color) = (1, 1, 1, 1)
@@ -296,7 +295,7 @@ Shader "Custom/SRUniversal"
         _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
         _OutlineWidthMin("Outline Width Min (SS)(pixel)", Range(0, 10)) = 2
         _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
-        [ToggleUI]_IsFace("Use Clip Pos With ZOffset (face material)", Float) = 0
+        [ToggleUI] _IsFace("Use Clip Pos With ZOffset (face material)", Float) = 0
         _OutlineZOffset("_OutlineZOffset (View Space)", Range(0, 1)) = 0.0001
         [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", Float) = 1
         _FakeOutlineColor("Fake Outline Color", Color) = (0.5, 0.5, 0.5, 1)

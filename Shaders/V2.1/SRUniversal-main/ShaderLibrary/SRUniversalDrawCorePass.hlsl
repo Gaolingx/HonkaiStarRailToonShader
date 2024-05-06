@@ -6,6 +6,7 @@ struct CharCoreAttributes
     half3 normalOS      : NORMAL;
     half4 tangentOS     : TANGENT;
     float2 uv           : TEXCOORD0;
+    float4 color        : COLOR;
 };
 
 struct CharCoreVaryings
@@ -16,6 +17,7 @@ struct CharCoreVaryings
     float3 bitangentWS              : TEXCOORD3;
     float3 tangentWS                : TEXCOORD4;
     float3 SH                       : TEXCOORD5;
+    float4 color                    : COLOR;
     float4 positionCS               : SV_POSITION;
 };
 
@@ -34,6 +36,8 @@ CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
     output.normalWS = vertexNormalInputs.normalWS;
     output.tangentWS = vertexNormalInputs.tangentWS;
     output.bitangentWS = vertexNormalInputs.bitangentWS;
+    // 顶点色
+    output.color = input.color;
     // 间接光 with 球谐函数
     output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0, 0, 0), _IndirectLightFlattenNormal));
 
@@ -55,14 +59,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //获取主光源颜色
     float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
     #if _AUTO_Brightness_ON
-        if (LightColor.r <= 1 || LightColor.g <= 1 || LightColor.b <= 1) //仅限SDR
-        {
-            LightColor = clamp(pow(LightColor, 0.5), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _AutoBrightnessOffset;
-        }
-        else
-        {
-            LightColor += _AutoBrightnessOffset;
-        }
+        LightColor = clamp(pow(LightColor, 0.5), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _AutoBrightnessOffset;
     #endif
     //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
     float3 mainLightColor = GetMainLightColor(LightColor.rgb, _MainLightColorUsage);
@@ -81,6 +78,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #else
         float3 normalWS = normalize(input.normalWS);
     #endif
+
+    float4 vertexColor = input.color;
     
     //视线方向
     float3 viewDirectionWS = normalize(GetWorldSpaceViewDir(positionWS));
@@ -134,21 +133,21 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
     indirectLightColor = CalculateGI(baseColor, lightMap.g, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
 
+    // Shadow
     float mainLightShadow = 1;
-    int rampRowIndex = 0;
-    int rampRowNum = 1;
-    //lightmap的G通道直接光阴影的形状，值越小，越容易进入阴影，有些刺的效果就是这里出来的
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
         {
             float remappedNoL = NoL * 0.5 + 0.5;
+            //lightmap的G通道直接光阴影的形状，值越小，越容易进入阴影，有些刺的效果就是这里出来的
             float shadowThreshold = lightMap.g;
+            //应用AO
+            shadowThreshold *= lerp(1, vertexColor.r, _LerpAOIntensity);
             //加个过渡，这里_ShadowThresholdSoftness=0.1
             mainLightShadow = smoothstep(
             1.0 - shadowThreshold - _ShadowThresholdSoftness,
             1.0 - shadowThreshold + _ShadowThresholdSoftness,
             remappedNoL + _ShadowThresholdCenter) + _MainLightShadowOffset;
-            //应用AO
-            mainLightShadow *= lerp(1, lightMap.r, _LerpAOIntensity);
+
             mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
         }
     #elif _AREA_FACE
@@ -176,15 +175,13 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
+    // Ramp UV
     float diffuseFac = mainLightShadow;
-    float3 coolRampCol = 1;
-    float3 warmRampCol = 1;
-    float2 rampUV;
-
-    float rampU = diffuseFac * (1 - _ShadowRampOffset) + _ShadowRampOffset;
-    rampUV = float2(rampU, GetRampV(lightMap.a));
+    float2 rampUV = GetRampUV(diffuseFac, _ShadowRampOffset, lightMap, _SingleMaterial);
 
     // Ramp Color
+    float3 coolRampCol = 1;
+    float3 warmRampCol = 1;
     RampColor RC = RampColorConstruct(rampUV, 
     TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp), _HairCoolRampColor.rgb, _HairCoolRampColorMixFactor,
     TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp), _HairWarmRampColor.rgb, _HairWarmRampColorMixFactor,
@@ -200,9 +197,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
     #endif
     
-    float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime);
-    rampColor = lerp(f3one, rampColor, _ShadowBoost);
-    float3 FinalDiffuse = mainLightColor * baseColor * rampColor;
+    float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime, _ShadowBoost);
+    
+    float3 FinalDiffuse = mainLightColor * mainLight.distanceAttenuation * baseColor * rampColor;
 
     // Additional Lights
     #if defined(_ADDITIONAL_LIGHTS)
@@ -283,18 +280,15 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightMaskData.color = rimLightAreaColor;
             rimLightMaskData.width = rimLightAreaWidth;
             rimLightMaskData.edgeSoftness = rimLightAreaEdgeSoftnesses;
-            rimLightMaskData.thresholdMin = _RimThresholdMin;
-            rimLightMaskData.thresholdMax = _RimThresholdMax;
             rimLightMaskData.modelScale = _ModelScale;
             rimLightMaskData.ditherAlpha = _DitherAlpha;
-            rimLightMaskData.NoV = NoV;
         
             RimLightData rimLightData;
             rimLightData.darkenValue = rimLightAreaDark;
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
 
-            rimLightMask = GetRimLightMask(rimLightMaskData, input.positionCS, normalWS, lightMap);
+            float3 rimLightMask = GetRimLightMask(rimLightMaskData, normalWS, viewDirectionWS, NoV, input.positionCS, lightMap);
             rimLightColor = GetRimLight(rimLightData, rimLightMask, NoL, mainLight, isFrontFace);
         }
     #endif

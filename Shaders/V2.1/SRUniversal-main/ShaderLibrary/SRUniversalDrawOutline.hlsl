@@ -149,7 +149,7 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
     #else
         half3 coolColor = SampleCoolRampMapOutline(float2(0, GetRampV(materialId))).rgb;
         half3 warmColor = SampleWarmRampMapOutline(float2(0, GetRampV(materialId))).rgb;
-        color = mainColor * LerpRampColor(coolColor, warmColor, DayTime);
+        color = mainColor * LerpRampColor(coolColor, warmColor, DayTime, _ShadowBoost);
     #endif
 
     const float4 overlayColors[8] = {
