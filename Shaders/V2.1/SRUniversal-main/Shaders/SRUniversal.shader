@@ -80,7 +80,7 @@ Shader "Custom/SRUniversal"
         [Toggle(_AUTO_Brightness_ON)] _UseAutoBrightness("Use Auto Brightness (Default NO)", Float) = 0
         _AutoBrightnessThresholdMin("Auto Brightness Threshold Min (Default 0.5)", Float) = 0.5
         _AutoBrightnessThresholdMax("Auto Brightness Threshold Max (Default 1.0)", Float) = 1.0
-        _AutoBrightnessOffset("Auto Brightness Offset (Default 0)", Range(-1, 1)) = 0
+        _BrightnessOffset("Auto Brightness Offset (Default 0)", Float) = 0
         _MainLightBrightnessFactor("Main light brightness factor (Default 1)", Range(0, 1)) = 1
         _MainLightColorUsage("Main light color usage (Default 1)", Range(0, 1)) = 1
         _MainLightShadowOffset("Main light shadow offset (Default 0)", Range(-1, 1)) = 0

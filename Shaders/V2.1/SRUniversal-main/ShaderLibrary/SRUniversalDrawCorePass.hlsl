@@ -59,7 +59,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //获取主光源颜色
     float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
     #if _AUTO_Brightness_ON
-        LightColor = clamp(pow(LightColor, 0.5), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _AutoBrightnessOffset;
+        LightColor = clamp(pow(LightColor, 0.5), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _BrightnessOffset;
     #endif
     //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
     float3 mainLightColor = GetMainLightColor(LightColor.rgb, _MainLightColorUsage);
@@ -79,8 +79,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         float3 normalWS = normalize(input.normalWS);
     #endif
 
-    float4 vertexColor = input.color;
-    
     //视线方向
     float3 viewDirectionWS = normalize(GetWorldSpaceViewDir(positionWS));
 
@@ -137,41 +135,23 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float mainLightShadow = 1;
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
         {
-            float remappedNoL = NoL * 0.5 + 0.5;
-            //lightmap的G通道直接光阴影的形状，值越小，越容易进入阴影，有些刺的效果就是这里出来的
-            float shadowThreshold = lightMap.g;
-            //应用AO
-            shadowThreshold *= lerp(1, vertexColor.r, _LerpAOIntensity);
-            //加个过渡，这里_ShadowThresholdSoftness=0.1
-            mainLightShadow = smoothstep(
-            1.0 - shadowThreshold - _ShadowThresholdSoftness,
-            1.0 - shadowThreshold + _ShadowThresholdSoftness,
-            remappedNoL + _ShadowThresholdCenter) + _MainLightShadowOffset;
+            BodyShadowData bodyShadowData;
+            bodyShadowData.aoIntensity = _LerpAOIntensity;
+            bodyShadowData.shadowSoftness = _ShadowThresholdSoftness;
+            bodyShadowData.shadowCenterOffset = _ShadowThresholdCenter;
+            bodyShadowData.mainLightShadowOffset = _MainLightShadowOffset;
 
-            mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
+            mainLightShadow = GetBodyMainLightShadow(bodyShadowData, mainLight, lightMap, input.color, NoL);
         }
     #elif _AREA_FACE
         {
-            float3 headForward = normalize(_HeadForward).xyz;
-            float3 headRight = normalize(_HeadRight).xyz;
-            float3 headUp = normalize(cross(headForward, headRight));
-            float3 lightDir = normalize(lightDirectionWS - dot(lightDirectionWS, headUp) * headUp);
-            //光照在左脸的时候。左脸的uv采样左脸，右脸的uv采样右脸，而光照在右脸的时候，左脸的uv采样右脸，右脸的uv采样左脸，因为SDF贴图明暗变化在右脸
-            float isRight = step(0, dot(lightDir, headRight));
-            //相当于float sdfUVx=isRight?1-input.uv.x:input.uv.x;
-            //即打在右脸的时候，反转uv的u坐标
-            float sdfUVx = lerp(input.uv.x, 1 - input.uv.x, isRight);
-            float2 sdfUV = float2(sdfUVx, input.uv.y);
-            //使用uv采样面部贴图的a通道
-            float sdfValue = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, sdfUV).a;
-            sdfValue += _FaceShadowOffset;
-            //dot(lightDir,headForward)的范围是[1,-1]映射到[0,1]
-            float sdfThreshold = 1 - (dot(lightDir, headForward) * 0.5 + 0.5);
-            //采样结果大于点乘结果，不在阴影，小于则处于阴影
-            float sdf = smoothstep(sdfThreshold - _FaceShadowTransitionSoftness, sdfThreshold + _FaceShadowTransitionSoftness, sdfValue);
-            //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
-            mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
-            mainLightShadow *= mainLight.shadowAttenuation;
+            FaceShadowData faceShadowData;
+            faceShadowData.headForward = _HeadForward;
+            faceShadowData.headRight = _HeadRight;
+            faceShadowData.faceShadowOffset = _FaceShadowOffset;
+            faceShadowData.shadowTransitionSoftness = _FaceShadowTransitionSoftness;
+
+            mainLightShadow = GetFaceMainLightShadow(faceShadowData, mainLight, TEXTURE2D_ARGS(_FaceMap, sampler_FaceMap), input.uv, lightDirectionWS);
         }
     #endif
 
@@ -247,7 +227,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         #if _AREA_UPPERBODY || _AREA_LOWERBODY
             {
                 StockingsData stockingsData;
-                stockingsData.NoV = NoV;
                 stockingsData.stockingsMapBChannelUVScale = _stockingsMapBChannelUVScale;
                 stockingsData.stockingsTransitionPower = _StockingsTransitionPower;
                 stockingsData.stockingsTransitionHardness = _StockingsTransitionHardness;
@@ -257,7 +236,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 stockingsData.stockingsTransitionColor = _StockingsTransitionColor;
                 stockingsData.stockingsLightColor = _StockingsLightColor;
 
-                stockingsEffect = CalculateStockingsEffect(stockingsData, input.uv, TEXTURE2D_ARGS(_UpperBodyStockings, sampler_UpperBodyStockings), TEXTURE2D_ARGS(_LowerBodyStockings, sampler_LowerBodyStockings));
+                stockingsEffect = CalculateStockingsEffect(stockingsData, NoV, input.uv, TEXTURE2D_ARGS(_UpperBodyStockings, sampler_UpperBodyStockings), TEXTURE2D_ARGS(_LowerBodyStockings, sampler_LowerBodyStockings));
             }
         #endif
     #else
@@ -288,7 +267,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
 
-            float3 rimLightMask = GetRimLightMask(rimLightMaskData, normalWS, viewDirectionWS, NoV, input.positionCS, lightMap);
+            rimLightMask = GetRimLightMask(rimLightMaskData, normalWS, viewDirectionWS, NoV, input.positionCS, lightMap);
             rimLightColor = GetRimLight(rimLightData, rimLightMask, NoL, mainLight, isFrontFace);
         }
     #endif
