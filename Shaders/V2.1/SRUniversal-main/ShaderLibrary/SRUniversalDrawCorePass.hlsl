@@ -101,6 +101,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     baseColor *= lerp(_BackFaceTintColor.rgb, _FrontFaceTintColor.rgb, isFrontFace);
     
     //对有LightMap的部位，采样 LightMap
+    // LightMap
+    // lightMap.r: Specular Intensity
+    // lightMap.b: Specular Threshold
+    // lightMap.a: Material Index
     float4 lightMap = 0;
     lightMap = GetLightMapTex(input.uv, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
 
@@ -109,12 +113,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #if _AREA_FACE
         faceMap = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, input.uv);
     #endif
-
-    // LightMap
-    float specularIntensity = lightMap.r;
-    float diffuseThreshold = lightMap.g;
-    float specularThreshold = lightMap.b;
-    float materialId = lightMap.a;
 
     // Expression
     #if _AREA_FACE && _Expression_ON
@@ -134,7 +132,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     // GI
     float3 indirectLightColor = 0;
     //float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
-    indirectLightColor = CalculateGI(baseColor, diffuseThreshold, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
+    indirectLightColor = CalculateGI(baseColor, lightMap.g, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
 
     float mainLightShadow = 1;
     int rampRowIndex = 0;
@@ -143,14 +141,14 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
         {
             float remappedNoL = NoL * 0.5 + 0.5;
-            float shadowThreshold = diffuseThreshold;
+            float shadowThreshold = lightMap.g;
             //加个过渡，这里_ShadowThresholdSoftness=0.1
             mainLightShadow = smoothstep(
             1.0 - shadowThreshold - _ShadowThresholdSoftness,
             1.0 - shadowThreshold + _ShadowThresholdSoftness,
             remappedNoL + _ShadowThresholdCenter) + _MainLightShadowOffset;
             //应用AO
-            mainLightShadow *= lerp(1, specularIntensity, _LerpAOIntensity);
+            mainLightShadow *= lerp(1, lightMap.r, _LerpAOIntensity);
             mainLightShadow = lerp(0.20, mainLightShadow, saturate(mainLight.shadowAttenuation + HALF_EPS));
         }
     #elif _AREA_FACE
@@ -184,7 +182,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float2 rampUV;
 
     float rampU = diffuseFac * (1 - _ShadowRampOffset) + _ShadowRampOffset;
-    rampUV = float2(rampU, GetRampV(materialId));
+    rampUV = float2(rampU, GetRampV(lightMap.a));
 
     // Ramp Color
     RampColor RC = RampColorConstruct(rampUV, 
@@ -222,7 +220,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #if _SPECULAR_ON
         #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
             {
-                SpecularAreaData specularAreaData = GetSpecularAreaData(materialId, _SpecularColor.rgb);
+                SpecularAreaData specularAreaData = GetSpecularAreaData(lightMap.a, _SpecularColor.rgb);
                 float3 SpecularColor = specularAreaData.color;
                 float SpecularIntensity = specularAreaData.intensity;
                 float SpecularShininess = specularAreaData.shininess;
@@ -230,9 +228,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
                 SpecularData specularData;
                 specularData.color = baseColor;
-                specularData.specularIntensity = specularIntensity;
-                specularData.specularThreshold = specularThreshold;
-                specularData.materialId = materialId;
+                specularData.specularIntensity = lightMap.r;
+                specularData.specularThreshold = lightMap.b;
+                specularData.materialId = lightMap.a;
                 specularData.SpecularKsNonMetal = _SpecularKsNonMetal;
                 specularData.SpecularKsMetal = _SpecularKsMetal;
                 //specularData.MetalSpecularMetallic = _MetalSpecularMetallic;
@@ -275,7 +273,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     #if _RIM_LIGHTING_ON
         {
-            RimLightAreaData rimLightAreaData = GetRimLightAreaData(materialId, _RimColor.rgb);
+            RimLightAreaData rimLightAreaData = GetRimLightAreaData(lightMap.a, _RimColor.rgb);
             float3 rimLightAreaColor = rimLightAreaData.color;
             float rimLightAreaWidth = rimLightAreaData.width;
             float rimLightAreaDark = rimLightAreaData.rimDark;
@@ -305,7 +303,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float3 rimShadowColor = 1;
     #if _RIM_SHADOW_ON
         {
-            RimShadowAreaData rimShadowAreaData = GetRimShadowAreaData(materialId, _RimShadowColor.rgb);
+            RimShadowAreaData rimShadowAreaData = GetRimShadowAreaData(lightMap.a, _RimShadowColor.rgb);
             float3 rimAreaShadowColor = rimShadowAreaData.color;
             float rimAreaShadowWidth = rimShadowAreaData.width;
             float rimAreaShadowFeather = rimShadowAreaData.feather;

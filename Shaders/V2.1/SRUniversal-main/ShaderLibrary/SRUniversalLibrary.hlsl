@@ -916,7 +916,8 @@ float3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, fl
     float3 f0 = lerp(surface.SpecularKsNonMetal, surface.color, metallic);
     float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - HoV, 5.0);
 
-    float3 lightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
+    float attenuation = light.shadowAttenuation * saturate(light.distanceAttenuation);
+    float3 lightColor = light.color * attenuation;
     float3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, surface.SpecularKsMetal, metallic);
     
     return specular * intensity * surface.specularIntensity;
