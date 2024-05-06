@@ -71,6 +71,11 @@ float4 _HairColorMapColor;
 float4 _UpperBodyColorMapColor;
 float4 _LowerBodyColorMapColor;
 
+
+// NormalMap
+float _BumpFactor;
+
+
 // ColorSaturation
 float _ColorSaturation;
 

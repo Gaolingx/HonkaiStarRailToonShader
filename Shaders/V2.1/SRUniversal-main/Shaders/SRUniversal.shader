@@ -56,7 +56,7 @@ Shader "Custom/SRUniversal"
 
         [Header(Normal)]
         [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0
-        [KeywordEnum(ThreeChannel, TwoChannel)] _NormalMapChannelModeVarEnum("Normal Map Channel Mode", Float) = 0
+        _BumpFactor("Bump Scale", Float) = 1.0
         [Normal] _NormalMap("Normal Map (Default black)", 2D) = "bump" { }
 
         [Header(Ramp Settings)][Space]
@@ -356,7 +356,6 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _FAKE_OUTLINE_ON
         #pragma shader_feature _USE_LUT_MAP
         #pragma shader_feature _USE_LUT_MAP_OUTLINE
-        #pragma shader_feature _NORMALMAPCHANNELMODEVARENUM_THREECHANNEL _NORMALMAPCHANNELMODEVARENUM_TWOCHANNEL
         #pragma shader_feature _CUSTOMSPECULARCOLORVARENUM_DISABLE _CUSTOMSPECULARCOLORVARENUM_TINT _CUSTOMSPECULARCOLORVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE _CUSTOMRIMLIGHTCOLORVARENUM_TINT _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY

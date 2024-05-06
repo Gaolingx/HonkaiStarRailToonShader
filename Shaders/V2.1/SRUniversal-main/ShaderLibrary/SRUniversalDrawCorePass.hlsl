@@ -73,18 +73,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
     #if _USE_NORMAL_MAP
         float3x3 tangentToWorld = float3x3(input.tangentWS, input.bitangentWS, input.normalWS);
-        float4 normalMap = 0;
-        #ifdef _NORMALMAPCHANNELMODEVARENUM_THREECHANNEL
-            normalMap = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv);
-        #elif _NORMALMAPCHANNELMODEVARENUM_TWOCHANNEL
-            normalMap.rg = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv).rg;
-            normalMap.b = 0.5 * (sqrt(1 - pow((2 * normalMap.r - 1), 2) - pow((2 * normalMap.g - 1), 2))) + 0.5;
-            normalMap.a = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv).a;
-        #else
-            normalMap = f4one;
-        #endif
-        float3 normalTS = UnpackNormal(normalMap);
-        float3 normalWS = TransformTangentToWorld(normalTS, tangentToWorld, true);
+        float3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
+        float3 normalFactor = float3(_BumpFactor, _BumpFactor, 1);
+        float3 normal = normalize(normalTS * normalFactor);
+        float3 normalWS = TransformTangentToWorld(normal, tangentToWorld, true);
         input.normalWS = normalWS;
     #else
         float3 normalWS = normalize(input.normalWS);

@@ -226,7 +226,7 @@ Light GetCharacterAdditionalLight(uint lightIndex, float3 positionWS)
 
 
 // GI
-half3 CalculateGI(float3 baseColor, float diffuseThreshold, half3 sh, float intensity, float mainColorLerp)
+float3 CalculateGI(float3 baseColor, float diffuseThreshold, float3 sh, float intensity, float mainColorLerp)
 {
     return intensity * lerp(f3one, baseColor, mainColorLerp) * lerp(desaturation(sh), sh, mainColorLerp) * diffuseThreshold;
 }
@@ -894,16 +894,16 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
 
 struct SpecularData
 {
-    half3 color;
-    half specularIntensity;
-    half specularThreshold;
-    half materialId;
-    half SpecularKsNonMetal;
-    half SpecularKsMetal;
+    float3 color;
+    float specularIntensity;
+    float specularThreshold;
+    float materialId;
+    float SpecularKsNonMetal;
+    float SpecularKsMetal;
 };
 
-half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
-half3 specColor, float shininess, float roughness, float intensity, float diffuseFac, float metallic = 0.0)
+float3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, float3 normalWS, 
+    float3 specColor, float shininess, float roughness, float intensity, float diffuseFac, float metallic = 0.0)
 {
     //roughness = lerp(1.0, roughness * roughness, metallic);
     //float smoothness = exp2(shininess * (1.0 - roughness) + 1.0) + 1.0;
@@ -916,14 +916,14 @@ half3 specColor, float shininess, float roughness, float intensity, float diffus
     float3 f0 = lerp(surface.SpecularKsNonMetal, surface.color, metallic);
     float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - HoV, 5.0);
 
-    half3 lightColor = light.color * light.shadowAttenuation;
-    half3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, surface.SpecularKsMetal, metallic);
+    float3 lightColor = light.color * light.shadowAttenuation;
+    float3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, surface.SpecularKsMetal, metallic);
     
     return specular * intensity * surface.specularIntensity;
 }
 
-half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
-    half3 specColor, float shininess, float roughness, float intensity, float diffuseFac)
+float3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS, float3 normalWS, 
+    float3 specColor, float shininess, float roughness, float intensity, float diffuseFac)
 {
     float metallic = step(abs(GetRampLineIndex(surface.materialId) - GetMetalIndex()), 0.001);
     return CalculateSpecular(surface, light, viewDirWS, normalWS, specColor, shininess, roughness, intensity, diffuseFac, metallic);
