@@ -107,7 +107,6 @@ Shader "Custom/SRUniversal"
         _NoseLinePower("Nose Line Power", Range(0, 8)) = 1
 
         [Header(Expression)]
-        [Toggle(_Expression_ON)] _UseFaceExpression("Use Face Expression (Default NO)", Float) = 0
         _ExCheekColor("Cheek Color (Default white)", Color) = (1, 1, 1, 1)
         _ExCheekIntensity("Cheek Intensity (Default 0)", Range(0, 1)) = 0
         _ExShyColor("Shy Color (Default white)", Color) = (1, 1, 1, 1)
@@ -350,7 +349,6 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _AUTO_Brightness_ON
         #pragma shader_feature_local_fragment _USE_NORMAL_MAP
         #pragma shader_feature _CUSTOM_RAMP_MAPPING
-        #pragma shader_feature_local _Expression_ON
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON

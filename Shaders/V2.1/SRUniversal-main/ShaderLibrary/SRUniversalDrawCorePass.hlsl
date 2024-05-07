@@ -121,7 +121,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #endif
 
     // Expression(Face Only)
-    #if _AREA_FACE && _Expression_ON
+    #if _AREA_FACE
         {
             float4 exprMap = SAMPLE_TEXTURE2D(_ExpressionMap, sampler_ExpressionMap, input.uv.xy);
             float3 exCheek = lerp(baseColor.rgb, baseColor.rgb * _ExCheekColor.rgb, exprMap.r);

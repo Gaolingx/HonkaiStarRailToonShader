@@ -143,6 +143,9 @@ float _ShadowBoost;
 // FaceShadow
 float _FaceShadowOffset;
 float _FaceShadowTransitionSoftness;
+
+
+// Nose Line
 float4 _NoseLineColor;
 float _NoseLinePower;
 

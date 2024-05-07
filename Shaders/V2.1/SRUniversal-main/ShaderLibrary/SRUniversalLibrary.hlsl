@@ -532,8 +532,12 @@ float GetFaceMainLightShadow(FaceShadowData shadowData, HeadDirections headDirWS
 
     float4 faceMap = SAMPLE_TEXTURE2D(FaceMap, sampler_FaceMap, uv);
     //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
-    mainLightShadow = lerp(faceMap.g, 1 - sdfShadow, step(faceMap.r, 0.5));
-    mainLightShadow *= light.shadowAttenuation;
+    float faceShadow = (1 - sdfShadow) * light.shadowAttenuation;
+
+    //Eye shadow
+    float eyeShadow = smoothstep(0.3, 0.5, FoL01) * light.shadowAttenuation;
+
+    mainLightShadow = lerp(faceShadow, eyeShadow, faceMap.r);
     return mainLightShadow;
 }
 
