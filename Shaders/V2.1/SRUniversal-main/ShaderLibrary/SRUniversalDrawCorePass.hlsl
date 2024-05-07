@@ -85,6 +85,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     float NoV = dot(normalize(normalWS), normalize(GetWorldSpaceViewDir(positionWS)));
     float NoL = dot(normalize(normalWS), normalize(mainLight.direction));
 
+    // Head Vector
+    HeadDirections headDirWS = WORLD_SPACE_CHAR_HEAD_DIRECTIONS();
+
     // BaseColor
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv).rgb;
@@ -111,7 +114,13 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         faceMap = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, input.uv);
     #endif
 
-    // Expression
+    // Nose Line(Face Only)
+    #if _AREA_FACE
+        float3 FdotV = pow(abs(dot(headDirWS.forward, viewDirectionWS)), _NoseLinePower);
+        baseColor.rgb = lerp(baseColor.rgb, baseColor.rgb * _NoseLineColor.rgb, step(1.03 - faceMap.b, FdotV));
+    #endif
+
+    // Expression(Face Only)
     #if _AREA_FACE && _Expression_ON
         {
             float4 exprMap = SAMPLE_TEXTURE2D(_ExpressionMap, sampler_ExpressionMap, input.uv.xy);
@@ -146,12 +155,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     #elif _AREA_FACE
         {
             FaceShadowData faceShadowData;
-            faceShadowData.headForward = _HeadForward;
-            faceShadowData.headRight = _HeadRight;
             faceShadowData.faceShadowOffset = _FaceShadowOffset;
             faceShadowData.shadowTransitionSoftness = _FaceShadowTransitionSoftness;
 
-            mainLightShadow = GetFaceMainLightShadow(faceShadowData, mainLight, TEXTURE2D_ARGS(_FaceMap, sampler_FaceMap), input.uv, lightDirectionWS);
+            mainLightShadow = GetFaceMainLightShadow(faceShadowData, headDirWS, mainLight, TEXTURE2D_ARGS(_FaceMap, sampler_FaceMap), input.uv, lightDirectionWS);
         }
     #endif
 
@@ -313,24 +320,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
         }
     #endif
 
-    // Fake Outline
-    float fakeOutlineEffect = 0;
-    float3 fakeOutlineColor = 0;
-    #if _AREA_FACE && _FAKE_OUTLINE_ON
-        {
-            float fakeOutline = faceMap.b;
-            float3 headForward = normalize(_HeadForward);
-            fakeOutlineEffect = smoothstep(0.0, 0.25, pow(saturate(dot(headForward, viewDirectionWS)), 20) * fakeOutline);
-
-            float3 OutlineRamp = 0;
-            #ifdef _CUSTOMOUTLINEVARENUM_CUSTOM
-                OutlineRamp = _FakeOutlineColor.rgb;
-            #else
-                OutlineRamp = rampColor;
-            #endif
-            fakeOutlineColor = OutlineRamp;
-        }
-    #endif
 
     // TotalColor
     float3 albedo = 0;
@@ -341,13 +330,12 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
     albedo += rimLightColor;
     albedo += emissionColor;
     albedo *= rimShadowColor;
-    albedo = lerp(albedo, fakeOutlineColor, fakeOutlineEffect);
 
     float alpha = _Alpha;
 
     #if _DRAW_OVERLAY_ON
         {
-            float3 headForward = normalize(_HeadForward);
+            float3 headForward = normalize(headDirWS.forward);
             alpha = lerp(1, alpha, saturate(dot(headForward, viewDirectionWS)));
         }
     #endif

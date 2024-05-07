@@ -3,9 +3,9 @@ Shader "Custom/SRUniversal"
     Properties
     {
         [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 0
-        [HideInInspector] _HeadForward("", Vector) = (0, 0, 1)
-        [HideInInspector] _HeadUp("", Vector) = (0, 1, 0)
-        [HideInInspector] _HeadRight("", Vector) = (1, 0, 0)
+        [HideInInspector] _MMDHeadBoneForward("", Float) = (0, 0, 0, 0)
+        [HideInInspector] _MMDHeadBoneUp("", Float) = (0, 0, 0, 0)
+        [HideInInspector] _MMDHeadBoneRight("", Float) = (0, 0, 0, 0)
 
         [Header(Base Color)]
         [HideinInspector] _BaseMap("", 2D) = "white" { }
@@ -28,6 +28,9 @@ Shader "Custom/SRUniversal"
 
         [Header(Dither Alpha)]
         _DitherAlpha("Dither alpha (Default 1)", Range(0, 1)) = 1
+
+        [Header(Head Bone)]
+        [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Specular Color State", Float) = 1
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" { }
@@ -96,8 +99,12 @@ Shader "Custom/SRUniversal"
         [Header(Face)]
         [NoScaleOffset] _FaceMap("Face map (Default black)", 2D) = "black" { }
         [NoScaleOffset] _ExpressionMap("Expression Map (Default white)", 2D) = "white" { }
-        _FaceShadowOffset("Face shadow offset (Default -0.01)", Range(-1, 1)) = -0.01
+        _FaceShadowOffset("Face shadow offset (Default -0.01)", Range(-1, 1)) = 0
         _FaceShadowTransitionSoftness("Face shadow transition softness (Default 0.05)", Range(0, 1)) = 0.05
+
+        [Header(Nose Line)]
+        _NoseLineColor("Nose Line Color", Color) = (1, 0.635, 0.635, 1)
+        _NoseLinePower("Nose Line Power", Range(0, 8)) = 1
 
         [Header(Expression)]
         [Toggle(_Expression_ON)] _UseFaceExpression("Use Face Expression (Default NO)", Float) = 0
@@ -153,7 +160,6 @@ Shader "Custom/SRUniversal"
         _SpecularKsNonMetal("Specular KS non-metal (Default 0.04)", Range(0, 1)) = 0.04
         _SpecularKsMetal("Specular KS metal (Default 1)", Range(0, 1)) = 1
         _MetalSpecularMetallic("Metal Specular Metallic (Default 0.52)", Range(0, 1)) = 0.52
-
 
         [Header(Stockings)]
         [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)", Float) = 0
@@ -297,8 +303,6 @@ Shader "Custom/SRUniversal"
         _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
         [ToggleUI] _IsFace("Use Clip Pos With ZOffset (face material)", Float) = 0
         _OutlineZOffset("_OutlineZOffset (View Space)", Range(0, 1)) = 0.0001
-        [Toggle(_FAKE_OUTLINE_ON)] _UseFakeOutline("Use face fake outline (Default YES)", Float) = 1
-        _FakeOutlineColor("Fake Outline Color", Color) = (0.5, 0.5, 0.5, 1)
 
         [Header(Surface Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode (Default Back)", Float) = 2
@@ -352,9 +356,9 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _RIM_LIGHTING_ON
         #pragma shader_feature_local _RIM_SHADOW_ON
         #pragma shader_feature_local _IS_FACE
-        #pragma shader_feature_local _FAKE_OUTLINE_ON
         #pragma shader_feature _USE_LUT_MAP
         #pragma shader_feature _USE_LUT_MAP_OUTLINE
+        #pragma shader_feature _CUSTOMHEADBONEMODEVARENUM_DEFAULT _CUSTOMHEADBONEMODEVARENUM_GAME _CUSTOMHEADBONEMODEVARENUM_MMD
         #pragma shader_feature _CUSTOMSPECULARCOLORVARENUM_DISABLE _CUSTOMSPECULARCOLORVARENUM_TINT _CUSTOMSPECULARCOLORVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE _CUSTOMRIMLIGHTCOLORVARENUM_TINT _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY

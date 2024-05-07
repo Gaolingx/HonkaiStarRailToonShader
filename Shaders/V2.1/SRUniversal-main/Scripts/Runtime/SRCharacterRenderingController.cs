@@ -200,9 +200,9 @@ namespace HSR.NPRShader
                     Vector4 up = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneUp);
                     Vector4 right = GetTransformDirection(m_MMDHeadBone, m_MMDHeadBoneRight);
 
-                    vectors.Add((PropertyIds._HeadForward, forward));
-                    vectors.Add((PropertyIds._HeadUp, up));
-                    vectors.Add((PropertyIds._HeadRight, right));
+                    vectors.Add((PropertyIds._MMDHeadBoneForward, forward));
+                    vectors.Add((PropertyIds._MMDHeadBoneUp, up));
+                    vectors.Add((PropertyIds._MMDHeadBoneRight, right));
                 }
 
                 RendererUtility.SetMaterialPropertiesPerRenderer(m_Renderers, m_PropertyBlock, floats, vectors);
@@ -282,9 +282,9 @@ namespace HSR.NPRShader
             public static readonly int _ColorSaturation = StringHelpers.ShaderPropertyIDFromMemberName();
             public static readonly int _AutoBrightnessOffset = StringHelpers.ShaderPropertyIDFromMemberName();
 
-            public static readonly int _HeadForward = StringHelpers.ShaderPropertyIDFromMemberName();
-            public static readonly int _HeadUp = StringHelpers.ShaderPropertyIDFromMemberName();
-            public static readonly int _HeadRight = StringHelpers.ShaderPropertyIDFromMemberName();
+            public static readonly int _MMDHeadBoneForward = StringHelpers.ShaderPropertyIDFromMemberName();
+            public static readonly int _MMDHeadBoneUp = StringHelpers.ShaderPropertyIDFromMemberName();
+            public static readonly int _MMDHeadBoneRight = StringHelpers.ShaderPropertyIDFromMemberName();
         }
     }
 }

@@ -58,9 +58,9 @@ SAMPLER(sampler_LUTMap);
 // put all your uniforms(usually things inside .shader file's properties{}) inside this CBUFFER, in order to make SRP batcher compatible
 // see -> https://blogs.unity3d.com/2019/02/28/srp-batcher-speed-up-your-rendering/
 CBUFFER_START(UnityPerMaterial);
-float3 _HeadForward;
-float3 _HeadUp;
-float3 _HeadRight;
+float4 _MMDHeadBoneForward;
+float4 _MMDHeadBoneUp;
+float4 _MMDHeadBoneRight;
 
 float4 _BaseMap_ST;
 
@@ -143,6 +143,8 @@ float _ShadowBoost;
 // FaceShadow
 float _FaceShadowOffset;
 float _FaceShadowTransitionSoftness;
+float4 _NoseLineColor;
+float _NoseLinePower;
 
 
 // Expression
@@ -304,7 +306,6 @@ float4 _OutlineColor4;
 float4 _OutlineColor5;
 float4 _OutlineColor6;
 float4 _OutlineColor7;
-float4 _FakeOutlineColor;
 float _OutlineWidth;
 float _OutlineWidthMin;
 float _OutlineWidthMax;

@@ -114,6 +114,45 @@ void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold)
 }
 
 
+// HeadDirections ------------------------------------------------------------------------------------------------- // 
+// ---------------------------------------------------------------------------------------------------------------- //
+struct HeadDirections
+{
+    float3 forward;
+    float3 right;
+    float3 up;
+};
+
+HeadDirections GetWorldSpaceCharHeadDirectionsImpl(
+    float4 mmdHeadBoneForward,
+    float4 mmdHeadBoneUp,
+    float4 mmdHeadBoneRight)
+{
+    HeadDirections dirWS;
+
+    #if defined(_CUSTOMHEADBONEMODEVARENUM_GAME)
+        // 游戏模型的头骨骼是旋转过的
+        dirWS.forward = normalize(UNITY_MATRIX_M._m01_m11_m21); // +Y 是 Forward
+        dirWS.right = normalize(-UNITY_MATRIX_M._m02_m12_m22);  // -Z 是 Right
+        dirWS.up = normalize(-UNITY_MATRIX_M._m00_m10_m20);     // -X 是 Up
+    #elif defined(_CUSTOMHEADBONEMODEVARENUM_MMD)
+        // MMD 模型只有一个根骨骼上的 Renderer，头骨骼信息需要额外获取
+        dirWS.forward = mmdHeadBoneForward.xyz;
+        dirWS.right = mmdHeadBoneRight.xyz;
+        dirWS.up = mmdHeadBoneUp.xyz;
+    #else
+        dirWS.forward = normalize(UNITY_MATRIX_M._m02_m12_m22); // 其他情况下是 +Z
+        dirWS.right = normalize(UNITY_MATRIX_M._m00_m10_m20);   // 其他情况下是 +X
+        dirWS.up = normalize(UNITY_MATRIX_M._m01_m11_m21);      // 其他情况下是 +Y
+    #endif
+
+    return dirWS;
+}
+
+#define WORLD_SPACE_CHAR_HEAD_DIRECTIONS() \
+    GetWorldSpaceCharHeadDirectionsImpl(_MMDHeadBoneForward, _MMDHeadBoneUp, _MMDHeadBoneRight)
+
+
 // DitherAlpha ---------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
 void DoDitherAlphaEffect(float4 svPosition, float ditherAlpha)
@@ -469,21 +508,16 @@ float GetBodyMainLightShadow(BodyShadowData shadowData, Light light, float4 ligh
 
 struct FaceShadowData
 {
-    float3 headForward;
-    float3 headRight;
     float faceShadowOffset;
     float shadowTransitionSoftness;
 };
 
-float GetFaceMainLightShadow(FaceShadowData shadowData, Light light, TEXTURE2D_PARAM(FaceMap, sampler_FaceMap), float2 uv, float3 lightDirWS)
+float GetFaceMainLightShadow(FaceShadowData shadowData, HeadDirections headDirWS, Light light, TEXTURE2D_PARAM(FaceMap, sampler_FaceMap), float2 uv, float3 lightDirWS)
 {
     float mainLightShadow = 1;
-    float3 headForward = normalize(shadowData.headForward).xyz;
-    float3 headRight = normalize(shadowData.headRight).xyz;
-    float3 headUp = normalize(cross(headForward, headRight));
-    float3 lightDir = normalize(lightDirWS - dot(lightDirWS, headUp) * headUp);
+    float3 lightDirProj = normalize(lightDirWS - dot(lightDirWS, headDirWS.up) * headDirWS.up); // 做一次投影
     //光照在左脸的时候。左脸的uv采样左脸，右脸的uv采样右脸，而光照在右脸的时候，左脸的uv采样右脸，右脸的uv采样左脸，因为SDF贴图明暗变化在右脸
-    float isRight = step(0, dot(lightDir, headRight));
+    bool isRight = dot(lightDirProj, headDirWS.right) > 0;
     //相当于float sdfUVx=isRight?1-input.uv.x:input.uv.x;
     //即打在右脸的时候，反转uv的u坐标
     float sdfUVx = lerp(uv.x, 1 - uv.x, isRight);
@@ -492,13 +526,13 @@ float GetFaceMainLightShadow(FaceShadowData shadowData, Light light, TEXTURE2D_P
     float sdfValue = SAMPLE_TEXTURE2D(FaceMap, sampler_FaceMap, sdfUV).a;
     sdfValue += shadowData.faceShadowOffset;
     //dot(lightDir,headForward)的范围是[1,-1]映射到[0,1]
-    float sdfThreshold = 1 - (dot(lightDir, headForward) * 0.5 + 0.5);
+    float FoL01 = (dot(headDirWS.forward, lightDirProj) * 0.5 + 0.5);
     //采样结果大于点乘结果，不在阴影，小于则处于阴影
-    float sdf = smoothstep(sdfThreshold - shadowData.shadowTransitionSoftness, sdfThreshold + shadowData.shadowTransitionSoftness, sdfValue);
+    float sdfShadow = smoothstep(FoL01 - shadowData.shadowTransitionSoftness, FoL01 + shadowData.shadowTransitionSoftness, 1 - sdfValue);
 
     float4 faceMap = SAMPLE_TEXTURE2D(FaceMap, sampler_FaceMap, uv);
     //AO中常暗的区域，step提取大于0.5的部分，使用g通道的阴影形状（常亮/常暗），其他部分使用sdf贴图
-    mainLightShadow = lerp(faceMap.g, sdf, step(faceMap.r, 0.5));
+    mainLightShadow = lerp(faceMap.g, 1 - sdfShadow, step(faceMap.r, 0.5));
     mainLightShadow *= light.shadowAttenuation;
     return mainLightShadow;
 }
