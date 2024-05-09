@@ -285,7 +285,6 @@ Shader "Custom/SRUniversal"
         [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
         _OutlineDefaultColor("Outline Default Color", Color) = (0.5, 0.5, 0.5, 1)
         [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
-        [Toggle(_IS_FACE)] _IsFaceOutlineMode("Is face outline (Default NO)", Float) = 0
         [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
         [KeywordEnum(Disable, Multiply, Tint, Overlay, Custom)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
         _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
@@ -353,7 +352,6 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
         #pragma shader_feature_local _RIM_SHADOW_ON
-        #pragma shader_feature_local _IS_FACE
         #pragma shader_feature _USE_LUT_MAP
         #pragma shader_feature _USE_LUT_MAP_OUTLINE
         #pragma shader_feature _CUSTOMHEADBONEMODEVARENUM_DEFAULT _CUSTOMHEADBONEMODEVARENUM_GAME _CUSTOMHEADBONEMODEVARENUM_MMD

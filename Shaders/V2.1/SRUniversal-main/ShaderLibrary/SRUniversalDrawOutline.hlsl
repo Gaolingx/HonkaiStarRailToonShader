@@ -28,9 +28,7 @@ struct CharOutlineVaryings
     half3 sh : TEXCOORD9;
 
     float2 packSmoothNormal : TEXCOORD10;
-    float4 positionCSNoJitter : TEXCOORD11;
-    float4 previousPositionCSNoJitter : TEXCOORD12;
-    float fogFactor : TEXCOORD13;
+    float fogFactor : TEXCOORD11;
 };
 
 float3 GetSmoothNormalWS(CharOutlineAttributes input)
@@ -90,9 +88,7 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     float3 positionVS = TransformWorldToView(positionWS);
     float4 positionCS = TransformWorldToHClip(positionWS);
 
-    #if defined(_IS_FACE)
     positionCS = NiloGetNewClipPosWithZOffset(positionCS, _OutlineZOffset + 0.03 * _IsFace);
-    #endif
 
     CharOutlineVaryings output = (CharOutlineVaryings)0;
     output.positionCS = positionCS;
