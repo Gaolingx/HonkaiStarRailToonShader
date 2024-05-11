@@ -201,8 +201,9 @@ Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
 float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor, float brightnessThresholdMin, float brightnessThresholdMax, float brightnessOffset)
 {
     float3 LightColor = inputMainLightColor.rgb * brightnessFactor;
+    float3 AddLightColor = LightColor * (1 + brightnessOffset.xxx);
     #if _AUTO_Brightness_ON
-        LightColor = clamp(CombineColorPreserveLuminance(LightColor, brightnessOffset.xxx), brightnessThresholdMin, brightnessThresholdMax);
+        LightColor = clamp(CombineColorPreserveLuminance(LightColor, AddLightColor), brightnessThresholdMin, brightnessThresholdMax);
     #endif
     return float4(LightColor, 1);
 }
