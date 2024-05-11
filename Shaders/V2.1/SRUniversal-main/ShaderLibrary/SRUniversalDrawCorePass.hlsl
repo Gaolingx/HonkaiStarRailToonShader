@@ -111,8 +111,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     // Nose Line(Face Only)
     #if _AREA_FACE
-        float3 FdotV = pow(abs(dot(headDirWS.forward, viewDirectionWS)), _NoseLinePower);
-        baseColor.rgb = lerp(baseColor.rgb, baseColor.rgb * _NoseLineColor.rgb, step(1.03 - faceMap.b, FdotV));
+        {
+            float3 FdotV = pow(abs(dot(headDirWS.forward, viewDirectionWS)), _NoseLinePower);
+            baseColor.rgb = lerp(baseColor.rgb, baseColor.rgb * _NoseLineColor.rgb, step(1.03 - faceMap.b, FdotV));
+        }
     #endif
 
     // Expression(Face Only)

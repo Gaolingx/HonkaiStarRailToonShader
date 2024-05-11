@@ -202,7 +202,7 @@ float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor
 {
     float3 LightColor = inputMainLightColor.rgb * brightnessFactor;
     #if _AUTO_Brightness_ON
-        LightColor = clamp(pow(LightColor, 0.5), brightnessThresholdMin, brightnessThresholdMax) + brightnessOffset;
+        LightColor = clamp(CombineColorPreserveLuminance(LightColor, brightnessOffset.xxx), brightnessThresholdMin, brightnessThresholdMax);
     #endif
     return float4(LightColor, 1);
 }

@@ -192,7 +192,7 @@ namespace HSR.NPRShader
                 floats.Add((PropertyIds._ExShyIntensity, m_ExShyIntensity));
                 floats.Add((PropertyIds._ExShadowIntensity, m_ExShadowIntensity));
                 floats.Add((PropertyIds._ColorSaturation, m_ColorSaturation));
-                floats.Add((PropertyIds._AutoBrightnessOffset, m_AutoBrightnessOffset));
+                floats.Add((PropertyIds._BrightnessOffset, m_AutoBrightnessOffset));
 
                 if (m_MMDHeadBone != null)
                 {
@@ -280,7 +280,7 @@ namespace HSR.NPRShader
             public static readonly int _ExShyIntensity = StringHelpers.ShaderPropertyIDFromMemberName();
             public static readonly int _ExShadowIntensity = StringHelpers.ShaderPropertyIDFromMemberName();
             public static readonly int _ColorSaturation = StringHelpers.ShaderPropertyIDFromMemberName();
-            public static readonly int _AutoBrightnessOffset = StringHelpers.ShaderPropertyIDFromMemberName();
+            public static readonly int _BrightnessOffset = StringHelpers.ShaderPropertyIDFromMemberName();
 
             public static readonly int _MMDHeadBoneForward = StringHelpers.ShaderPropertyIDFromMemberName();
             public static readonly int _MMDHeadBoneUp = StringHelpers.ShaderPropertyIDFromMemberName();
