@@ -53,17 +53,12 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
 
     //阴影坐标
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
-
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
     Light mainLight = GetCharacterMainLightStruct(shadowCoord, positionWS);
     //获取主光源颜色
-    float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor);
-    #if _AUTO_Brightness_ON
-        LightColor = clamp(pow(LightColor, 0.5), _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax) + _BrightnessOffset;
-    #endif
+    float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor, _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax, _BrightnessOffset);
     //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
     float3 mainLightColor = GetMainLightColor(LightColor.rgb, _MainLightColorUsage);
-
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
 
@@ -214,7 +209,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, bool isFrontFace)
                 specularData.color = baseColor;
                 specularData.specularIntensity = lightMap.r;
                 specularData.specularThreshold = lightMap.b;
-                specularData.materialId = lightMap.a;
+                specularData.materialId = _MetalSpecularMetallic;
                 specularData.SpecularKsNonMetal = _SpecularKsNonMetal;
                 specularData.SpecularKsMetal = _SpecularKsMetal;
                 //specularData.MetalSpecularMetallic = _MetalSpecularMetallic;

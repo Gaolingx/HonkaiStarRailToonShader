@@ -82,9 +82,7 @@ float3 RGBAdjustment(float3 color, float ColorSaturation)
 
 float3 LinearColorMix(float3 OriginalColor, float3 EnhancedColor, float mixFactor)
 {
-    OriginalColor = clamp(OriginalColor, 0.0, 1.0);
-    EnhancedColor = clamp(EnhancedColor, 0.0, 1.0);
-    float3 finalColor = lerp(OriginalColor, EnhancedColor, mixFactor);
+    float3 finalColor = lerp(saturate(OriginalColor), saturate(EnhancedColor), mixFactor);
     return finalColor;
 }
 
@@ -200,11 +198,13 @@ Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
     return light;
 }
 
-float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor)
+float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor, float brightnessThresholdMin, float brightnessThresholdMax, float brightnessOffset)
 {
-    float3 scaledMainLightColor = inputMainLightColor.rgb * brightnessFactor;
-    float4 scaledMainLight = float4(scaledMainLightColor, 1);
-    return scaledMainLight;
+    float3 LightColor = inputMainLightColor.rgb * brightnessFactor;
+    #if _AUTO_Brightness_ON
+        LightColor = clamp(pow(LightColor, 0.5), brightnessThresholdMin, brightnessThresholdMax) + brightnessOffset;
+    #endif
+    return float4(LightColor, 1);
 }
 
 float3 GetMainLightColor(float3 inputMainLightColor, float mainLightColorUsage)
