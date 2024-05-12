@@ -1,8 +1,4 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
-#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
-
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // CBUFFER and Uniforms 
@@ -64,6 +60,7 @@ float4 _MMDHeadBoneRight;
 
 float4 _BaseMap_ST;
 
+float4 _Maps_ST;
 
 // MainTex
 float4 _FaceColorMapColor;

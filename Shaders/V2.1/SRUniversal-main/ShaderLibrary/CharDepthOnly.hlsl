@@ -37,16 +37,16 @@ struct CharDepthOnlyVaryings
 {
     float4 positionHCS  : SV_POSITION;
     float3 normalWS     : NORMAL;
-    float2 uv           : TEXCOORD0;
+    float4 uv           : TEXCOORD0;
 };
 
-CharDepthOnlyVaryings CharDepthOnlyVertex(CharDepthOnlyAttributes i)
+CharDepthOnlyVaryings CharDepthOnlyVertex(CharDepthOnlyAttributes i, float4 mapST)
 {
     CharDepthOnlyVaryings o;
 
     o.positionHCS = TransformObjectToHClip(i.positionOS.xyz);
     o.normalWS = TransformObjectToWorldNormal(i.normalOS);
-    o.uv = TRANSFORM_TEX(i.uv1, _BaseMap);
+    o.uv = CombineAndTransformDualFaceUV(i.uv1, i.uv2, mapST);
 
     return o;
 }

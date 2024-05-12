@@ -7,8 +7,8 @@ struct CharOutlineAttributes
     float3 normalOS     : NORMAL;
     float4 tangentOS    : TANGENT;
     float4 color        : COLOR;
-    float2 baseUV       : TEXCOORD0;
-    float2 addUV        : TEXCOORD1;
+    float2 uv1          : TEXCOORD0;
+    float2 uv2          : TEXCOORD1;
     float2 packSmoothNormal : TEXCOORD2;
 };
 
@@ -18,12 +18,11 @@ struct CharOutlineVaryings
     float3 positionVS : TEXCOORD0;
     float3 positionWS : TEXCOORD1;
     float4 positionNDC : TEXCOORD2;
-    float2 baseUV : TEXCOORD3;
-    float2 addUV : TEXCOORD4;
-    half3 color : TEXCOORD5;
-    half3 normalWS : TEXCOORD6;
-    half3 tangentWS : TEXCOORD7;
-    half3 bitangentWS : TEXCOORD8;
+    float4 baseUV : TEXCOORD3;
+    half3 color : TEXCOORD4;
+    half3 normalWS : TEXCOORD5;
+    half3 tangentWS : TEXCOORD6;
+    half3 bitangentWS : TEXCOORD7;
 
     half3 sh : TEXCOORD9;
 
@@ -95,7 +94,7 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     output.positionVS = positionVS;
     output.positionWS = positionWS;
     //output.positionNDC = positionNDC;
-    output.baseUV = input.baseUV;
+    output.baseUV = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
     output.color = input.color.rgb;
     output.normalWS = normalInput.normalWS;
     output.tangentWS = normalInput.tangentWS;
@@ -193,22 +192,22 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     float4 lightMap = 0;
     #if _AREA_HAIR
         {
-            mainTex = SAMPLE_TEXTURE2D(_HairColorMap, sampler_HairColorMap, input.baseUV);
-            lightMap = SAMPLE_TEXTURE2D(_HairLightMap, sampler_HairLightMap, input.baseUV);
+            mainTex = SAMPLE_TEXTURE2D(_HairColorMap, sampler_HairColorMap, input.baseUV.xy);
+            lightMap = SAMPLE_TEXTURE2D(_HairLightMap, sampler_HairLightMap, input.baseUV.xy);
         }
     #elif _AREA_UPPERBODY || _AREA_LOWERBODY
         {
             #if _AREA_UPPERBODY
-                mainTex = SAMPLE_TEXTURE2D(_UpperBodyColorMap, sampler_UpperBodyColorMap, input.baseUV);
-                lightMap = SAMPLE_TEXTURE2D(_UpperBodyLightMap, sampler_UpperBodyLightMap, input.baseUV);
+                mainTex = SAMPLE_TEXTURE2D(_UpperBodyColorMap, sampler_UpperBodyColorMap, input.baseUV.xy);
+                lightMap = SAMPLE_TEXTURE2D(_UpperBodyLightMap, sampler_UpperBodyLightMap, input.baseUV.xy);
             #elif _AREA_LOWERBODY
-                mainTex = SAMPLE_TEXTURE2D(_LowerBodyColorMap, sampler_LowerBodyColorMap, input.baseUV);
-                lightMap = SAMPLE_TEXTURE2D(_LowerBodyLightMap, sampler_LowerBodyLightMap, input.baseUV);
+                mainTex = SAMPLE_TEXTURE2D(_LowerBodyColorMap, sampler_LowerBodyColorMap, input.baseUV.xy);
+                lightMap = SAMPLE_TEXTURE2D(_LowerBodyLightMap, sampler_LowerBodyLightMap, input.baseUV.xy);
             #endif
         }
     #elif _AREA_FACE
         {
-            mainTex = SAMPLE_TEXTURE2D(_FaceColorMap, sampler_FaceColorMap, input.baseUV);
+            mainTex = SAMPLE_TEXTURE2D(_FaceColorMap, sampler_FaceColorMap, input.baseUV.xy);
             lightMap = float4(1, 1, 1, 1);
         }
     #endif

@@ -1,5 +1,5 @@
 /*
-* StarRailNPRShader - Fan-made shaders for Unity URP attempting to replicate
+ * StarRailNPRShader - Fan-made shaders for Unity URP attempting to replicate
  * the shading of Honkai: Star Rail.
  * https://github.com/stalomeow/StarRailNPRShader
  *
@@ -43,10 +43,10 @@ struct CharMotionVectorsVaryings
     float4 positionHCSNoJitter         : TEXCOORD0;
     float4 previousPositionHCSNoJitter : TEXCOORD1;
     float3 normalWS                    : NORMAL;
-    float2 uv                          : TEXCOORD2;
+    float4 uv                          : TEXCOORD2;
 };
 
-CharMotionVectorsVaryings CharMotionVectorsVertex(CharMotionVectorsAttributes i)
+CharMotionVectorsVaryings CharMotionVectorsVertex(CharMotionVectorsAttributes i, float4 mapST)
 {
     CharMotionVectorsVaryings o;
 
@@ -68,7 +68,7 @@ CharMotionVectorsVaryings CharMotionVectorsVertex(CharMotionVectorsAttributes i)
     o.previousPositionHCSNoJitter = mul(_PrevViewProjMatrix, mul(UNITY_PREV_MATRIX_M, prevPos));
 
     o.normalWS = TransformObjectToWorldNormal(i.normalOS);
-    o.uv = TRANSFORM_TEX(i.uv1, _BaseMap);
+    o.uv = CombineAndTransformDualFaceUV(i.uv1, i.uv2, mapST);
 
     return o;
 }

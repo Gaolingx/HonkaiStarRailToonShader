@@ -20,9 +20,13 @@ Shader "Custom/SRUniversal"
         _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0, 3)) = 1
         _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1, 1)
         _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1, 1)
+        [Toggle(_BACKFACEUV2_ON)] _UseBackFaceUV2("Use Back Face UV2 (Default NO)", Float) = 0
+
+        [Header(TextureScale Offset)]
+        [TextureScaleOffset] _Maps_ST("Maps Scale Offset", Vector) = (1, 1, 0, 0)
 
         [Header(Alpha Test)]
-        [Toggle(_UseAlphaClipping)] _UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
+        [Toggle(_ALPHATEST_ON)] _UseAlphaClipping("Use alpha clipping (Default NO)", Float) = 0
         _Alpha("Alpha (Default 1)", Range(0, 1)) = 1
         _AlphaTestThreshold("Alpha clip (Default 0.1)", Range(0, 1)) = 0.1
 
@@ -343,11 +347,10 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature_local _AREA_HAIR
         #pragma shader_feature_local _AREA_UPPERBODY
         #pragma shader_feature_local _AREA_LOWERBODY
-        #pragma shader_feature_local_fragment _UseAlphaClipping
         #pragma shader_feature_local _DayTime_MANUAL_ON
         #pragma shader_feature_local _AUTO_Brightness_ON
         #pragma shader_feature_local_fragment _USE_NORMAL_MAP
-        #pragma shader_feature _CUSTOM_RAMP_MAPPING
+        #pragma shader_feature_local _CUSTOM_RAMP_MAPPING
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
@@ -366,6 +369,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
         #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
+        #pragma shader_feature_local _ENABLE_OUTLINE
         #pragma shader_feature_local _DRAW_OVERLAY_ON
         #pragma shader_feature_local _EMISSION_ON
         #pragma shader_feature_local _AdditionalLighting_ON
@@ -405,6 +409,10 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile _ _LIGHT_LAYERS
 
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
             #pragma vertex SRUniversalVertex
             #pragma fragment SRUniversalFragment
 
@@ -439,6 +447,10 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile _ _LIGHT_LAYERS
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #pragma vertex SRUniversalVertex
             #pragma fragment SRUniversalFragment
@@ -491,7 +503,9 @@ Shader "Custom/SRUniversal"
             #pragma multi_compile_fog
             // ---------------------------------------------------------------------------------------------
 
-            #pragma shader_feature _ENABLE_OUTLINE
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
             
             #pragma vertex CharacterOutlinePassVertex
             #pragma fragment CharacterOutlinePassFragment

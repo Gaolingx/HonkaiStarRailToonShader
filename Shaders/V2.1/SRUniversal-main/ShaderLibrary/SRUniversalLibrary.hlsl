@@ -1,9 +1,9 @@
 // include -------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
-#include "../ShaderLibrary/CharShadow.hlsl"
-#include "../ShaderLibrary/CharDepthOnly.hlsl"
-#include "../ShaderLibrary/CharDepthNormals.hlsl"
-#include "../ShaderLibrary/CharMotionVectors.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 #include "../ShaderLibrary/SRUniversalBloomHelper.hlsl"
 
 
@@ -58,6 +58,30 @@ float3 SampleGradient(Gradient Gradient, float Time)
 
 // utils ---------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
+float4 CombineAndTransformDualFaceUV(float2 uv1, float2 uv2, float4 mapST)
+{
+    return float4(uv1, uv2) * mapST.xyxy + mapST.zwzw;
+}
+
+void SetupDualFaceRendering(inout float3 normalWS, inout float4 uv, FRONT_FACE_TYPE isFrontFace)
+{
+    #if defined(_MODEL_GAME)
+        if (IS_FRONT_VFACE(isFrontFace, 1, 0))
+            return;
+
+        // 游戏内的部分模型用了双面渲染
+        // 渲染背面的时候需要调整一些值，这样就不需要修改之后的计算了
+
+        // 反向法线
+        normalWS *= -1;
+
+        // 交换 uv1 和 uv2
+        #if defined(_BACKFACEUV2_ON)
+            uv.xyzw = uv.zwxy;
+        #endif
+    #endif
+}
+
 float3 desaturation(float3 color)
 {
     float3 grayXfer = float3(0.3, 0.59, 0.11);
@@ -106,7 +130,7 @@ float GetLinearEyeDepthAnyProjection(float4 svPosition)
 
 void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
 {
-    #if _UseAlphaClipping
+    #if _ALPHATEST_ON
         clip(alpha - alphaTestThreshold);
     #endif
 }
@@ -746,10 +770,10 @@ struct RimLightData
     float intensityBackFace;
 };
 
-float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light, bool isFrontFace)
+float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light, FRONT_FACE_TYPE isFrontFace)
 {
     float attenuation = saturate(NoL * light.shadowAttenuation * light.distanceAttenuation);
-    float intensity = lerp(rimData.intensityBackFace, rimData.intensityFrontFace, isFrontFace);
+    float intensity = IS_FRONT_VFACE(isFrontFace, rimData.intensityFrontFace, rimData.intensityBackFace);
     return rimMask * (lerp(rimData.darkenValue, 1, attenuation) * max(0, intensity));
 }
 
