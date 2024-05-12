@@ -200,7 +200,6 @@ float _SpecularIntensity7;
 
 float _SpecularKsNonMetal;
 float _SpecularKsMetal;
-float _MetalSpecularMetallic;
 
 
 // Stockings

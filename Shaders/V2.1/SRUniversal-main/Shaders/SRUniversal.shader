@@ -162,7 +162,6 @@ Shader "Custom/SRUniversal"
         _SpecularRoughness7("Specular Roughness 7", Range(0, 1)) = 0.02
         _SpecularKsNonMetal("Specular KS non-metal (Default 0.04)", Range(0, 1)) = 0.04
         _SpecularKsMetal("Specular KS metal (Default 1)", Range(0, 1)) = 1
-        _MetalSpecularMetallic("Metal Specular Metallic (Default 0.52)", Range(0, 1)) = 0.52
 
         [Header(Stockings)]
         [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)", Float) = 0

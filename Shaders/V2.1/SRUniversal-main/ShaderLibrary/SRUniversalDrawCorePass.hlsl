@@ -216,10 +216,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
                 specularData.color = baseColor;
                 specularData.specularIntensity = lightMap.r;
                 specularData.specularThreshold = lightMap.b;
-                specularData.materialId = _MetalSpecularMetallic;
+                specularData.materialId = lightMap.a;
                 specularData.SpecularKsNonMetal = _SpecularKsNonMetal;
                 specularData.SpecularKsMetal = _SpecularKsMetal;
-                //specularData.MetalSpecularMetallic = _MetalSpecularMetallic;
 
                 specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirectionWS, normalWS, SpecularColor, SpecularShininess, SpecularRoughness, SpecularIntensity, diffuseFac);
 
