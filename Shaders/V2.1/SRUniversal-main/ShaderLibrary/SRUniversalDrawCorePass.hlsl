@@ -96,7 +96,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
     TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
+    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
     
@@ -386,7 +386,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
     TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
+    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -415,7 +415,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
     TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
+    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -446,7 +446,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
     TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
+    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 
@@ -477,7 +477,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
     TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
     TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
-    baseColor = RGBAdjustment(baseColor, _ColorSaturation);
+    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
 

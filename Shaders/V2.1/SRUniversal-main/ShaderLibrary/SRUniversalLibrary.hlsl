@@ -96,7 +96,14 @@ float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
     return HsvToRgb(hsv);
 }
 
-float3 RGBAdjustment(float3 color, float ColorSaturation)
+float3 ColorBrightnessAdjustment(float3 color, float brightnessAdd, float brightnessThresholdMin, float brightnessThresholdMax)
+{
+    float3 hsv = RgbToHsv(color);
+    hsv.z = clamp(hsv.z + brightnessAdd, brightnessThresholdMin, brightnessThresholdMax);
+    return HsvToRgb(hsv);
+}
+
+float3 ColorSaturationAdjustment(float3 color, float ColorSaturation)
 {
     float luminance = 0.2125 * color.r + 0.7154 * color.g + 0.0721 * color.b;
     float3 luminanceColor = float3(luminance, luminance, luminance);
@@ -225,9 +232,8 @@ Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
 float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor, float brightnessThresholdMin, float brightnessThresholdMax, float brightnessOffset)
 {
     float3 LightColor = inputMainLightColor.rgb * brightnessFactor;
-    float3 AddLightColor = LightColor * (1 + brightnessOffset.xxx);
     #if _AUTO_Brightness_ON
-        LightColor = clamp(CombineColorPreserveLuminance(LightColor, AddLightColor), brightnessThresholdMin, brightnessThresholdMax);
+        LightColor = ColorBrightnessAdjustment(LightColor, brightnessOffset, brightnessThresholdMin, brightnessThresholdMax);
     #endif
     return float4(LightColor, 1);
 }
