@@ -286,8 +286,9 @@ Shader "Custom/SRUniversal"
 
         [Header(Outline)]
         [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
+        [ToggleUI] _UseSelfOutline("Outline Mode (Use Model Self Outline Setting)", Float) = 0
+        [KeywordEnum(Normal, Tangent)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         _OutlineDefaultColor("Outline Default Color", Color) = (0.5, 0.5, 0.5, 1)
-        [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
         [KeywordEnum(Disable, Multiply, Tint, Overlay, Custom)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
         _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
@@ -299,9 +300,11 @@ Shader "Custom/SRUniversal"
         _OutlineColor5("Outline Color 5", Color) = (0, 0, 0, 1)
         _OutlineColor6("Outline Color 6", Color) = (0, 0, 0, 1)
         _OutlineColor7("Outline Color 7", Color) = (0, 0, 0, 1)
-        _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
-        _OutlineWidthMin("Outline Width Min (SS)(pixel)", Range(0, 10)) = 2
-        _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
+        _OutlineWidth("Outline Width", Range(0, 0.1)) = 0.01
+        _OutlineExtdStart("Outline Extd Start", Range(0, 10)) = 6.5
+        _OutlineExtdMax("Outline Extd Max", Range(0, 30)) = 18.0
+        _OutlineScale("Outline Scale", Range(0, 1)) = 0.015
+        _OutlineOffset("Outline Offset", Range(0, 10)) = 0
         [ToggleUI] _IsFace("Use Clip Pos With ZOffset (face material)", Float) = 0
         _OutlineZOffset("_OutlineZOffset (View Space)", Range(0, 1)) = 0.0001
 
@@ -365,7 +368,7 @@ Shader "Custom/SRUniversal"
         #pragma shader_feature _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMBLOOMVARENUM_DISABLE _CUSTOMBLOOMVARENUM_MULTIPLY _CUSTOMBLOOMVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMBLOOMCOLORVARENUM_DISABLE _CUSTOMBLOOMCOLORVARENUM_TINT _CUSTOMBLOOMCOLORVARENUM_OVERLAY
-        #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
+        #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT
         #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _ENABLE_OUTLINE

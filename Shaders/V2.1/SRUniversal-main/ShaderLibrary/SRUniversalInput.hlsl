@@ -305,9 +305,12 @@ float4 _OutlineColor4;
 float4 _OutlineColor5;
 float4 _OutlineColor6;
 float4 _OutlineColor7;
+float _UseSelfOutline;
 float _OutlineWidth;
-float _OutlineWidthMin;
-float _OutlineWidthMax;
+float _OutlineOffset;
+float _OutlineScale;
+float _OutlineExtdStart;
+float _OutlineExtdMax;
 float _IsFace;
 float _OutlineZOffset;
 

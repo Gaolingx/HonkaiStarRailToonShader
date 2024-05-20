@@ -3,105 +3,89 @@
 
 struct CharOutlineAttributes
 {
-    float3 positionOS   : POSITION;
-    float3 normalOS     : NORMAL;
-    float4 tangentOS    : TANGENT;
-    float4 color        : COLOR;
-    float2 uv1          : TEXCOORD0;
-    float2 uv2          : TEXCOORD1;
-    float2 packSmoothNormal : TEXCOORD2;
+    float4 positionOS : POSITION;
+    float4 color : COLOR;
+    float3 normalOS : NORMAL;
+    float3 tangentOS : TANGENT;
+    float2 uv1 : TEXCOORD0;
+    float2 uv2 : TEXCOORD1;
 };
 
 struct CharOutlineVaryings
 {
     float4 positionCS : SV_POSITION;
-    float3 positionVS : TEXCOORD0;
-    float3 positionWS : TEXCOORD1;
-    float4 positionNDC : TEXCOORD2;
-    float4 baseUV : TEXCOORD3;
-    half3 color : TEXCOORD4;
-    half3 normalWS : TEXCOORD5;
-    half3 tangentWS : TEXCOORD6;
-    half3 bitangentWS : TEXCOORD7;
-
-    half3 sh : TEXCOORD9;
-
-    float2 packSmoothNormal : TEXCOORD10;
-    float fogFactor : TEXCOORD11;
+    float4 baseUV : TEXCOORD0;
+    float4 color : COLOR;
+    float3 normalWS : TEXCOORD1;
+    float3 positionWS : TEXCOORD2;
+    float fogFactor : TEXCOORD3;
 };
 
 float3 GetSmoothNormalWS(CharOutlineAttributes input)
 {
     float3 smoothNormalOS = input.normalOS;
-    
+
     #ifdef _OUTLINENORMALCHANNEL_NORMAL
         smoothNormalOS = input.normalOS;
     #elif _OUTLINENORMALCHANNEL_TANGENT
         smoothNormalOS = input.tangentOS.xyz;
-    #elif _OUTLINENORMALCHANNEL_UV2
-        float3 normalOS = normalize(input.normalOS);
-        float3 tangentOS = normalize(input.tangentOS.xyz);
-        float3 bitangentOS = normalize(cross(normalOS, tangentOS) * (input.tangentOS.w * GetOddNegativeScale()));
-        float3 smoothNormalTS = UnpackNormalOctQuadEncode(input.packSmoothNormal);
-        smoothNormalOS = mul(smoothNormalTS, float3x3(tangentOS, bitangentOS, normalOS));
     #endif
 
-    return TransformObjectToWorldNormal(smoothNormalOS);
+    return smoothNormalOS;
 }
-
-float CalculateExtendWidthWS(float3 positionWS, float3 extendVectorWS, float extendWS, float minExtendSS, float maxExtendSS)
-{
-    float4 positionCS = TransformWorldToHClip(positionWS);
-    float4 extendPositionCS = TransformWorldToHClip(positionWS + extendVectorWS * extendWS);
-
-    float2 delta = extendPositionCS.xy / extendPositionCS.w - positionCS.xy / positionCS.w;
-    delta *= GetScaledScreenParams().xy / GetScaledScreenParams().y * 1080.0f;
-
-    const float extendLen = length(delta);
-    float width = extendWS * min(1.0, maxExtendSS / extendLen) * max(1.0, minExtendSS / extendLen);
-
-    return width;
-}
-
-float3 ExtendOutline(float3 positionWS, float3 smoothNormalWS, float width, float widthMin, float widthMax)
-{
-    float offsetLen = CalculateExtendWidthWS(positionWS, smoothNormalWS, width, widthMin, widthMax);
-
-    return positionWS + smoothNormalWS * offsetLen;
-}
-
 
 CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 {
-    VertexPositionInputs vertexPositionInput = GetVertexPositionInputs(input.positionOS);
-    VertexNormalInputs normalInput = GetVertexNormalInputs(input.normalOS, input.tangentOS);
+    CharOutlineVaryings output;
 
-    float3 smoothNormalWS = GetSmoothNormalWS(input);
-    float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+    VertexPositionInputs vertexPositionInput = GetVertexPositionInputs(input.positionOS.xyz);
+    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normalOS);
 
-    float outlineWidth = input.color.a;
-    
-    positionWS = ExtendOutline(positionWS, smoothNormalWS,
-        _OutlineWidth * outlineWidth, _OutlineWidthMin * outlineWidth, _OutlineWidthMax * outlineWidth);
+    if (_UseSelfOutline == 1)
+    {
+        float outlineWidth = _OutlineScale * _OutlineWidth * input.color.w;
+        input.positionOS.xyz += normalize(GetSmoothNormalWS(input)) * outlineWidth;
+        output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+        output.positionCS = NiloGetNewClipPosWithZOffset(output.positionCS, _OutlineZOffset + 0.03 * _IsFace);
+    }
+    else
+    {
+        //---------------! ! ! IMPORTANT:This Mode Only Working In Game Model ! ! !-----------------//
+        float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, GetSmoothNormalWS(input));
+        viewNormal.z = -0.1f;
+        viewNormal = normalize(viewNormal);
 
-    float3 positionVS = TransformWorldToView(positionWS);
-    float4 positionCS = TransformWorldToHClip(positionWS);
+        float3 positionVS = mul(UNITY_MATRIX_MV, float4(input.positionOS.xyz, 1)).xyz;
 
-    positionCS = NiloGetNewClipPosWithZOffset(positionCS, _OutlineZOffset + 0.03 * _IsFace);
+        float offset = input.color.z * _OutlineOffset;
+        float offsetZ = positionVS.z - offset * 0.01;
+        offset = offsetZ / unity_CameraProjection[1].y;
+        offset = abs(offset) / _OutlineScale;
+        offset = 1 / rsqrt(offset);
 
-    CharOutlineVaryings output = (CharOutlineVaryings)0;
-    output.positionCS = positionCS;
-    output.positionVS = positionVS;
-    output.positionWS = positionWS;
-    //output.positionNDC = positionNDC;
+        float outlineWidth = _OutlineScale * _OutlineWidth * input.color.w;
+        offset = offset * outlineWidth;
+
+        float3 viewDir = vertexPositionInput.positionWS - GetCurrentViewPosition();
+        float dist = length(viewDir);
+
+        dist = smoothstep(_OutlineExtdStart, _OutlineExtdMax, dist);
+
+        dist = min(dist, 0.5);
+        dist = dist + 1.0;
+        offset = offset * dist;
+
+        viewNormal = viewNormal * offset.xxx + float3(positionVS.xy, offsetZ);
+        output.positionCS = TransformWViewToHClip(viewNormal);
+        // Apply ZOffset(for face material)
+        output.positionCS = NiloGetNewClipPosWithZOffset(output.positionCS, _OutlineZOffset + 0.03 * _IsFace);
+    }
+
     output.baseUV = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
-    output.color = input.color.rgb;
-    output.normalWS = normalInput.normalWS;
-    output.tangentWS = normalInput.tangentWS;
-    output.bitangentWS = normalInput.bitangentWS;
-
-    output.sh = 0;
-    output.packSmoothNormal = input.packSmoothNormal;
+    output.color = input.color;
+    float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+    output.positionWS = positionWS;
+    output.normalWS = normalInputs.normalWS;
 
     output.fogFactor = ComputeFogFactor(vertexPositionInput.positionCS.z);
 
@@ -228,8 +212,8 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
 }
 
 void CharacterOutlinePassFragment(
-    CharOutlineVaryings input,
-    out float4 colorTarget      : SV_Target0)
+CharOutlineVaryings input,
+out float4 colorTarget      : SV_Target0)
 {
     float4 outputColor = colorFragmentTarget(input);
 
