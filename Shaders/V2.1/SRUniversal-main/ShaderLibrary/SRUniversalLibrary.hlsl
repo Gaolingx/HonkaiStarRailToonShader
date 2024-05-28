@@ -525,7 +525,7 @@ float GetBodyMainLightShadow(BodyShadowData shadowData, Light light, float4 ligh
     float remappedNoL = NoL * 0.5 + 0.5;
     //lightmap的G通道直接光阴影的形状，值越小，越容易进入阴影，有些刺的效果就是这里出来的
     float shadowThreshold = lightMap.g;
-    //应用AO
+    //应用顶点色AO
     shadowThreshold *= lerp(1, vertexColor.r, shadowData.aoIntensity);
     //加个过渡，这里 shadowSoftness=0.1
     mainLightShadow = smoothstep(
@@ -534,6 +534,9 @@ float GetBodyMainLightShadow(BodyShadowData shadowData, Light light, float4 ligh
     remappedNoL + shadowData.shadowCenterOffset) + shadowData.mainLightShadowOffset;
 
     mainLightShadow = lerp(0.20, mainLightShadow, saturate(light.shadowAttenuation + HALF_EPS));
+    mainLightShadow = lerp(0, mainLightShadow, step(0.05, shadowThreshold));
+    mainLightShadow = lerp(1, mainLightShadow, step(shadowThreshold, 0.95));
+
     return mainLightShadow;
 }
 
