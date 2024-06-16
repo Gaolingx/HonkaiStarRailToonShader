@@ -163,16 +163,18 @@ Shader "Custom/SRUniversal"
 
         [Header(Stockings)]
         [Toggle(_STOCKINGS_ON)] _UseStockings("Use Stockings (Default NO)", Float) = 0
-        _UpperBodyStockings("Upper body stockings (Default black)", 2D) = "black" { }
-        _LowerBodyStockings("Lower body stockings (Default black)", 2D) = "black" { }
-        _stockingsMapBChannelUVScale("Stockings texture channel B UV Scale (Default 20)", Range(1, 50)) = 20
-        _StockingsDarkColor("Stockings dark color (Default black)", Color) = (0, 0, 0, 1)
-        [HDR] _StockingsLightColor("Stockings light color (Default 1.8, 1.48299, 0.856821)", Color) = (1.8, 1.48299, 0.856821)
-        _StockingsTransitionColor("Stockings transition color (Default 0.360381, 0.242986, 0.358131)", Color) = (0.360381, 0.242986, 0.358131)
-        _StockingsTransitionThreshold("Stockings transition threshold (Default 0.58)", Range(0, 1)) = 0.58
-        _StockingsTransitionPower("Stockings transition power (Default 1)", Range(0, 50)) = 1
-        _StockingsTransitionHardness("Stockings transition hardness (Default 0.4)", Range(0, 1)) = 0.4
-        _StockingsTextureUsage("Stockings texture usage (Default 0.1)", Range(0, 1)) = 0.1
+        [HideInInspector] m_start_stockings("Stockings", Float) = 0
+        _StockRangeTex ("Stocking Range Texture", 2D) = "black" {}
+        _Stockcolor ("Stocking Color", Color) = (1, 1, 1, 1)
+        _StockDarkcolor ("Stocking Darkened Color", Color) = (1, 1, 1, 1)
+        _Stockpower ("Stockings Power", Range(0.04, 1)) = 1
+        _StockDarkWidth ("Stockings Rim Width", Range(0, 0.96)) = 0.5
+        _StockSP ("Stockings Lighted Intensity", Range(0, 1)) = 0.25
+        //_StockTransparency ("Stockings Transparency", Range(0, 1)) = 0
+        _StockRoughness ("Stockings Texture Intensity", Range(0, 1)) = 1
+		_Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
+		// _Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
+        [HideInInspector] m_end_stockings("", Float) = 0
 
         [Header(Rim Lighting)]
         [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)", Float) = 1

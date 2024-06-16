@@ -235,20 +235,18 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
         #if _AREA_UPPERBODY || _AREA_LOWERBODY
             {
                 StockingsData stockingsData;
-                stockingsData.stockingsMapBChannelUVScale = _stockingsMapBChannelUVScale;
-                stockingsData.stockingsTransitionPower = _StockingsTransitionPower;
-                stockingsData.stockingsTransitionHardness = _StockingsTransitionHardness;
-                stockingsData.stockingsTextureUsage = _StockingsTextureUsage;
-                stockingsData.stockingsTransitionThreshold = _StockingsTransitionThreshold;
-                stockingsData.stockingsDarkColor = _StockingsDarkColor;
-                stockingsData.stockingsTransitionColor = _StockingsTransitionColor;
-                stockingsData.stockingsLightColor = _StockingsLightColor;
+                stockingsData.StockRangeTex_ST = _StockRangeTex_ST;
+                stockingsData.Stockcolor = _Stockcolor;
+                stockingsData.StockDarkcolor = _StockDarkcolor;
+                stockingsData.StockDarkWidth = _StockDarkWidth;
+                stockingsData.Stockpower = _Stockpower;
+                stockingsData.Stockpower1 = _Stockpower1;
+                stockingsData.StockSP = _StockSP;
+                stockingsData.StockRoughness = _StockRoughness;
 
-                stockingsEffect = CalculateStockingsEffect(stockingsData, NoV, input.uv.xy, TEXTURE2D_ARGS(_UpperBodyStockings, sampler_UpperBodyStockings), TEXTURE2D_ARGS(_LowerBodyStockings, sampler_LowerBodyStockings));
+                FinalDiffuse = CalculateStockingsEffect(stockingsData, FinalDiffuse, NoV, input.uv.xy, TEXTURE2D_ARGS(_StockRangeTex, sampler_StockRangeTex));
             }
         #endif
-    #else
-        stockingsEffect = 1;
     #endif
     
     // Rim Light
@@ -327,7 +325,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     albedo += indirectLightColor;
     albedo += FinalDiffuse;
     albedo += specularColor;
-    albedo *= stockingsEffect;
     albedo += rimLightColor;
     albedo += emissionColor;
     albedo *= rimShadowColor;

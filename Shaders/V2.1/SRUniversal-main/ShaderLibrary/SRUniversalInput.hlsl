@@ -43,10 +43,8 @@ SAMPLER(sampler_BodyCoolRamp);
 TEXTURE2D(_BodyWarmRamp);
 SAMPLER(sampler_BodyWarmRamp);
 
-TEXTURE2D(_UpperBodyStockings);
-SAMPLER(sampler_UpperBodyStockings);
-TEXTURE2D(_LowerBodyStockings);
-SAMPLER(sampler_LowerBodyStockings);
+TEXTURE2D(_StockRangeTex);
+SAMPLER(sampler_StockRangeTex);
 
 TEXTURE2D(_MaterialValuesPackLUT);
 SAMPLER(sampler_MaterialValuesPackLUT);
@@ -200,14 +198,16 @@ float _SpecularIntensity7;
 
 
 // Stockings
-float _stockingsMapBChannelUVScale;
-float4 _StockingsDarkColor;
-float4 _StockingsLightColor;
-float4 _StockingsTransitionColor;
-float _StockingsTransitionThreshold;
-float _StockingsTransitionPower;
-float _StockingsTransitionHardness;
-float _StockingsTextureUsage;
+float4 _StockRangeTex_ST;
+float4 _Stockcolor;
+float4 _StockDarkcolor;
+float _StockTransparency;
+float _StockDarkWidth;
+float _Stockpower;
+float _Stockpower1;
+float _StockSP;
+float _StockRoughness;
+float _Stockthickness;
 
 
 // RimLight

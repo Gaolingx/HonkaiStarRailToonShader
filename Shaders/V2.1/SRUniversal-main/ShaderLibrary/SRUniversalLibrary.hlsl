@@ -15,47 +15,6 @@ const static float4 f4zero = float4(0.0, 0.0, 0.0, 0.0);
 const static float4 f4one = float4(1.0, 1.0, 1.0, 1.0);
 
 
-// Gradient ------------------------------------------------------------------------------------------------------- // 
-// ---------------------------------------------------------------------------------------------------------------- //
-struct Gradient
-{
-    int colorsLength;
-    float4 colors[8];
-
-};
-
-Gradient GradientConstruct()
-{
-    Gradient g;
-    g.colorsLength = 2;
-    g.colors[0] = float4(1, 1, 1, 0); //第四位不是alpha，而是它在轴上的坐标
-    g.colors[1] = float4(1, 1, 1, 1);
-    g.colors[2] = float4(0, 0, 0, 0);
-    g.colors[3] = float4(0, 0, 0, 0);
-    g.colors[4] = float4(0, 0, 0, 0);
-    g.colors[5] = float4(0, 0, 0, 0);
-    g.colors[6] = float4(0, 0, 0, 0);
-    g.colors[7] = float4(0, 0, 0, 0);
-    return g;
-}
-
-float3 SampleGradient(Gradient Gradient, float Time)
-{
-    float3 color = Gradient.colors[0].rgb;
-
-    for (int c = 1; c < Gradient.colorsLength; c++)
-    {
-        float colorPos = saturate((Time - Gradient.colors[c - 1].w) / (Gradient.colors[c].w - Gradient.colors[c - 1].w)) * step(c, Gradient.colorsLength - 1);
-        color = lerp(color, Gradient.colors[c].rgb, colorPos);
-    }
-    #ifdef UNITY_COLORSPACE_GAMMA
-        color = LinearToSRGB(color);
-    #endif
-    return color;
-
-}
-
-
 // utils ---------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
 float4 CombineAndTransformDualFaceUV(float2 uv1, float2 uv2, float4 mapST)
@@ -453,14 +412,14 @@ LutMapData GetMaterialValuesPackLUT(float material_ID)
 {
     LutMapData data;
     // sample the various mluts
-    float4 lut_speccol = _MaterialValuesPackLUT.Load(float4(material_ID, 0, 0, 0)); // xyz : color
-    float4 lut_specval = _MaterialValuesPackLUT.Load(float4(material_ID, 1, 0, 0)); // x: shininess, y : roughness, z : intensity
-    float4 lut_edgecol = _MaterialValuesPackLUT.Load(float4(material_ID, 2, 0, 0)); // xyz : color
-    float4 lut_rimcol  = _MaterialValuesPackLUT.Load(float4(material_ID, 3, 0, 0)); // xyz : color
-    float4 lut_rimval  = _MaterialValuesPackLUT.Load(float4(material_ID, 4, 0, 0)); // x : rim type, y : softness , z : dark
-    float4 lut_rimscol = _MaterialValuesPackLUT.Load(float4(material_ID, 5, 0, 0)); // xyz : color
-    float4 lut_rimsval = _MaterialValuesPackLUT.Load(float4(material_ID, 6, 0, 0)); // x: rim shadow width, y: rim shadow feather z: bloom intensity
-    float4 lut_bloomval = _MaterialValuesPackLUT.Load(float4(material_ID, 7, 0, 0)); // xyz : color
+    float4 lut_speccol = _MaterialValuesPackLUT.Load(float3(material_ID, 0, 0)); // xyz : color
+    float4 lut_specval = _MaterialValuesPackLUT.Load(float3(material_ID, 1, 0)); // x: shininess, y : roughness, z : intensity
+    float4 lut_edgecol = _MaterialValuesPackLUT.Load(float3(material_ID, 2, 0)); // xyz : color
+    float4 lut_rimcol  = _MaterialValuesPackLUT.Load(float3(material_ID, 3, 0)); // xyz : color
+    float4 lut_rimval  = _MaterialValuesPackLUT.Load(float3(material_ID, 4, 0)); // x : rim type, y : softness , z : dark
+    float4 lut_rimscol = _MaterialValuesPackLUT.Load(float3(material_ID, 5, 0)); // xyz : color
+    float4 lut_rimsval = _MaterialValuesPackLUT.Load(float3(material_ID, 6, 0)); // x: rim shadow width, y: rim shadow feather z: bloom intensity
+    float4 lut_bloomval = _MaterialValuesPackLUT.Load(float3(material_ID, 7, 0)); // xyz : color
 
     data.lut_speccol = lut_speccol;
     data.lut_specval = lut_specval;
@@ -1126,8 +1085,10 @@ float3 specular_base(Light light, float shadow_area, float ndoth, float lightmap
     specular_thresh = saturate((1.0f / specular_thresh) * specular);
     specular = (specular_thresh * - 2.0f + 3.0f) * pow(specular_thresh, 2.0f);
     specular = specular_color * specular * (specular_values.z * 0.35f);
+    
     float attenuation = light.shadowAttenuation * saturate(light.distanceAttenuation);
     float3 lightColor = light.color * attenuation;
+
     float3 FinalSpecular = specular * lightColor;
     return FinalSpecular;
 }
@@ -1144,46 +1105,54 @@ float3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS
 // ---------------------------------------------------------------------------------------------------------------- //
 struct StockingsData
 {
-    float stockingsMapBChannelUVScale;
-    float stockingsTransitionPower;
-    float stockingsTransitionHardness;
-    float stockingsTextureUsage;
-    float stockingsTransitionThreshold;
-    float4 stockingsDarkColor;
-    float4 stockingsTransitionColor;
-    float4 stockingsLightColor;
+    float4 StockRangeTex_ST;
+    float4 Stockcolor;
+    float4 StockDarkcolor;
+    float StockDarkWidth;
+    float Stockpower;
+    float Stockpower1;
+    float StockSP;
+    float StockRoughness;
 };
 
-float3 CalculateStockingsEffect(StockingsData stockingsData, float NoV, float2 uv, TEXTURE2D_PARAM(UpperBodyStockings, sampler_UpperBodyStockings), TEXTURE2D_PARAM(LowerBodyStockings, sampler_LowerBodyStockings))
+float3 CalculateStockingsEffect(StockingsData stockingsData, float3 diffuse, float ndotv, float2 uv, TEXTURE2D_PARAM(StockRangeTex, sampler_StockRangeTex))
 {
-    float2 stockingsMapRG = 0;
-    float stockingsMapB = 0;
-    #if _AREA_UPPERBODY
-        stockingsMapRG = SAMPLE_TEXTURE2D(UpperBodyStockings, sampler_UpperBodyStockings, uv).rg;
-        stockingsMapB = SAMPLE_TEXTURE2D(UpperBodyStockings, sampler_UpperBodyStockings, uv * stockingsData.stockingsMapBChannelUVScale).b;
-    #elif _AREA_LOWERBODY
-        stockingsMapRG = SAMPLE_TEXTURE2D(LowerBodyStockings, sampler_LowerBodyStockings, uv).rg;
-        stockingsMapB = SAMPLE_TEXTURE2D(LowerBodyStockings, sampler_LowerBodyStockings, uv * stockingsData.stockingsMapBChannelUVScale).b;
-    #endif
-    //用法线点乘视角向量模拟皮肤透过丝袜
-    float fac = NoV;
-    //做一次幂运算，调整亮区大小
-    fac = pow(saturate(fac), stockingsData.stockingsTransitionPower);
-    //调整亮暗过渡的硬度
-    fac = saturate((fac - stockingsData.stockingsTransitionHardness / 2) / (1 - stockingsData.stockingsTransitionHardness));
-    fac = fac * (stockingsMapB * stockingsData.stockingsTextureUsage + (1 - stockingsData.stockingsTextureUsage)); // 细节纹理
-    fac = lerp(fac, 1, stockingsMapRG.g); // 厚度插值亮区
-    Gradient curve = GradientConstruct();
-    curve.colorsLength = 3;
-    curve.colors[0] = float4(stockingsData.stockingsDarkColor.rgb, 0);
-    curve.colors[1] = float4(stockingsData.stockingsTransitionColor.rgb, stockingsData.stockingsTransitionThreshold);
-    curve.colors[2] = float4(stockingsData.stockingsLightColor.rgb, 1);
-    float3 stockingsColor = SampleGradient(curve, fac); // 将亮区的系数映射成颜色
+    float2 tile_uv = uv.xy * stockingsData.StockRangeTex_ST.xy + stockingsData.StockRangeTex_ST.zw;
 
-    float3 stockingsEffect = 1;
-    stockingsEffect = lerp(f3one, stockingsColor, stockingsMapRG.r);
+    float stock_tile = SAMPLE_TEXTURE2D(StockRangeTex, sampler_StockRangeTex, tile_uv).z; 
+    // blue channel is a tiled texture that when used adds the rough mesh textured feel
+    stock_tile = stock_tile * 0.5f - 0.5f;
+    stock_tile = stockingsData.StockRoughness * stock_tile + 1.0f;
+    // extract and remap 
 
-    return stockingsEffect;
+    // sample untiled texture 
+    float4 stocking_tex = SAMPLE_TEXTURE2D(StockRangeTex, sampler_StockRangeTex, uv.xy);
+    // determine which areas area affected by the stocking
+    float stock_area = (stocking_tex.x > 0.001f) ? 1.0f : 0.0f;
+
+    //float offset_ndotv = dot(normal, normalize(view - _RimOffset));
+    // i dont remember where i got this from but its in my mmd shader so it must be right... right? 
+    float stock_rim = max(0.001f, ndotv);
+
+    stockingsData.Stockpower = max(0.039f, stockingsData.Stockpower);
+        
+    stock_rim = smoothstep(stockingsData.Stockpower, stockingsData.StockDarkWidth * stockingsData.Stockpower, stock_rim) * stockingsData.StockSP;
+
+    stocking_tex.x = stocking_tex.x * stock_area * stock_rim;
+    float3 stock_dark_area = (float3)-1.0f * stockingsData.StockDarkcolor.rgb;
+    stock_dark_area = stocking_tex.x * stock_dark_area + (float3)1.0f;
+    stock_dark_area = diffuse.xyz * stock_dark_area + (float3)-1.0f;
+    stock_dark_area = stocking_tex.x * stock_dark_area + (float3)1.0f;
+    float3 stock_darkened = stock_dark_area * diffuse.xyz;
+
+    float stock_spec = (1.0f - stockingsData.StockSP) * (stocking_tex.y * stock_tile);
+
+    stock_rim = saturate(max(0.004f, pow(ndotv, stockingsData.Stockpower1)) * stock_spec);
+
+    float3 stocking = -diffuse.xyz * stock_dark_area + stockingsData.Stockcolor.rgb;
+    stocking = stock_rim * stocking + stock_darkened;
+
+    return stocking;
 }
 
 
