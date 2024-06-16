@@ -213,14 +213,14 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
                 float SpecularRoughness = specularAreaData.roughness;
 
                 SpecularData specularData;
-                specularData.color = baseColor;
-                specularData.specularIntensity = lightMap.r;
+                specularData.color = SpecularColor;
                 specularData.specularThreshold = lightMap.b;
+                specularData.shininess = SpecularShininess;
+                specularData.roughness = SpecularRoughness;
+                specularData.intensity = SpecularIntensity;
                 specularData.materialId = lightMap.a;
-                specularData.SpecularKsNonMetal = _SpecularKsNonMetal;
-                specularData.SpecularKsMetal = _SpecularKsMetal;
 
-                specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirectionWS, normalWS, SpecularColor, SpecularShininess, SpecularRoughness, SpecularIntensity, diffuseFac);
+                specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirectionWS, normalWS, diffuseFac);
 
                 //specularColor *= mainLight.shadowAttenuation;
             }

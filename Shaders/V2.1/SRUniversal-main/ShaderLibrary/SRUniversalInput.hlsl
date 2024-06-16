@@ -198,9 +198,6 @@ float _SpecularIntensity5;
 float _SpecularIntensity6;
 float _SpecularIntensity7;
 
-float _SpecularKsNonMetal;
-float _SpecularKsMetal;
-
 
 // Stockings
 float _stockingsMapBChannelUVScale;
