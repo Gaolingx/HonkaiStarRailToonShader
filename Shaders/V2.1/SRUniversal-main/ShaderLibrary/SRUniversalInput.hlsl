@@ -48,8 +48,8 @@ SAMPLER(sampler_UpperBodyStockings);
 TEXTURE2D(_LowerBodyStockings);
 SAMPLER(sampler_LowerBodyStockings);
 
-TEXTURE2D(_LUTMap);
-SAMPLER(sampler_LUTMap);
+TEXTURE2D(_MaterialValuesPackLUT);
+SAMPLER(sampler_MaterialValuesPackLUT);
 
 // put all your uniforms(usually things inside .shader file's properties{}) inside this CBUFFER, in order to make SRP batcher compatible
 // see -> https://blogs.unity3d.com/2019/02/28/srp-batcher-speed-up-your-rendering/

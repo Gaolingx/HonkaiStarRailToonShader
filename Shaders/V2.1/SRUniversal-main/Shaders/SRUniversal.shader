@@ -59,7 +59,7 @@ Shader "Custom/SRUniversal"
 
         [Header(LutMap)]
         [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map (Default NO)", Float) = 0
-        _LUTMap("LUT Map (Default black)", 2D) = "black" { }
+        _MaterialValuesPackLUT("LUT Map (Default black)", 2D) = "black" { }
 
         [Header(Normal)]
         [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0

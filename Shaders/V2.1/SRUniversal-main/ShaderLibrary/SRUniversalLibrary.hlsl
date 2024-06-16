@@ -437,75 +437,121 @@ float2 GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, bool
 
 // LutMap --------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
-half4 SampleLUTMap(int materialId, int renderType)
+struct LutMapData
 {
-    return _LUTMap.Load(int3(materialId, renderType, 0));
+    float4 lut_speccol;
+    float4 lut_specval;
+    float4 lut_edgecol;
+    float4 lut_rimcol;
+    float4 lut_rimval;
+    float4 lut_rimscol;
+    float4 lut_rimsval;
+    float4 lut_bloomval;
+};
+
+LutMapData GetMaterialValuesPackLUT(float material_ID)
+{
+    LutMapData data;
+    // sample the various mluts
+    float4 lut_speccol = _MaterialValuesPackLUT.Load(float4(material_ID, 0, 0, 0)); // xyz : color
+    float4 lut_specval = _MaterialValuesPackLUT.Load(float4(material_ID, 1, 0, 0)); // x: shininess, y : roughness, z : intensity
+    float4 lut_edgecol = _MaterialValuesPackLUT.Load(float4(material_ID, 2, 0, 0)); // xyz : color
+    float4 lut_rimcol  = _MaterialValuesPackLUT.Load(float4(material_ID, 3, 0, 0)); // xyz : color
+    float4 lut_rimval  = _MaterialValuesPackLUT.Load(float4(material_ID, 4, 0, 0)); // x : rim type, y : softness , z : dark
+    float4 lut_rimscol = _MaterialValuesPackLUT.Load(float4(material_ID, 5, 0, 0)); // xyz : color
+    float4 lut_rimsval = _MaterialValuesPackLUT.Load(float4(material_ID, 6, 0, 0)); // x: rim shadow width, y: rim shadow feather z: bloom intensity
+    float4 lut_bloomval = _MaterialValuesPackLUT.Load(float4(material_ID, 7, 0, 0)); // xyz : color
+
+    data.lut_speccol = lut_speccol;
+    data.lut_specval = lut_specval;
+    data.lut_edgecol = lut_edgecol;
+    data.lut_rimcol = lut_rimcol;
+    data.lut_rimval = lut_rimval;
+    data.lut_rimscol = lut_rimscol;
+    data.lut_rimsval = lut_rimsval;
+    data.lut_bloomval = lut_bloomval;
+
+    return data;
 }
 
 // LutMap Specular
 half3 GetLUTMapSpecularColor(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 0).rgb;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_speccol.xyz;
 }
 half GetLUTMapSpecularShininess(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 1).r;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_specval.x;
 }
 half GetLUTMapSpecularRoughness(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 1).g;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_specval.y;
 }
 half GetLUTMapSpecularIntensity(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 1).b;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_specval.z;
 }
 
 // LutMap Outline
 half3 GetLUTMapOutlineColor(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 2).rgb;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_edgecol.xyz;
 }
 
 // LutMap RimLight
 half3 GetLUTMapRimLightColor(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 3).rgb;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimcol.xyz;
 }
 half GetLUTMapRimLightWidth(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 4).r;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimval.x;
 }
 half GetLUTMapRimLightEdgeSoftness(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 4).g;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimval.y;
 }
 half GetLUTMapRimLightDark(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 4).b;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimval.z;
 }
 
 // LutMap RimShadow
 half3 GetLUTMapRimShadowColor(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 5).rgb;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimscol.xyz;
 }
 half GetLUTMapRimShadowWidth(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 6).r;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimsval.x;
 }
 half GetLUTMapRimShadowFeather(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 6).g;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimsval.y;
 }
 
 // LutMap Bloom
 half GetLUTMapBloomIntensity(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 6).b;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_rimsval.z;
 }
 half3 GetLUTMapBloomColor(int materialId)
 {
-    return SampleLUTMap((int)(materialId), 7).rgb;
+    LutMapData data = GetMaterialValuesPackLUT(materialId);
+    return data.lut_bloomval.xyz;
 }
 
 
