@@ -1074,7 +1074,7 @@ struct SpecularData
 
 float3 specular_base(Light light, float shadow_area, float ndoth, float lightmap_spec, float3 specular_color, float3 specular_values)
 {
-    float3 specular = ndoth;
+    float specular = ndoth;
     specular = pow(max(specular, 0.01f), specular_values.x);
     specular_values.y = max(specular_values.y, 0.001f);
 
@@ -1084,12 +1084,12 @@ float3 specular_base(Light light, float shadow_area, float ndoth, float lightmap
     specular = shadow_area * specular - rough_thresh; 
     specular_thresh = saturate((1.0f / specular_thresh) * specular);
     specular = (specular_thresh * - 2.0f + 3.0f) * pow(specular_thresh, 2.0f);
-    specular = specular_color * specular * (specular_values.z * 0.35f);
-    
+    float3 specularColor = specular_color * specular * (specular_values.z * 0.35f);
+
     float attenuation = light.shadowAttenuation * saturate(light.distanceAttenuation);
     float3 lightColor = light.color * attenuation;
 
-    float3 FinalSpecular = specular * lightColor;
+    float3 FinalSpecular = specularColor * lightColor;
     return FinalSpecular;
 }
 
