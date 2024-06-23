@@ -302,14 +302,18 @@ float4 _OutlineColor4;
 float4 _OutlineColor5;
 float4 _OutlineColor6;
 float4 _OutlineColor7;
-float _UseSelfOutline;
+float _FaceMaterial;
+
+float _EnableFOVWidth;
 float _OutlineWidth;
-float _OutlineOffset;
 float _OutlineScale;
-float _OutlineExtdStart;
-float _OutlineExtdMax;
-float _IsFace;
-float _OutlineZOffset;
+float _OutlineFixFront;
+float _OutlineFixSide;
+float _OutlineFixRange1;
+float _OutlineFixRange2;
+float _OutlineFixRange3;
+float _OutlineFixRange4;
+float _FixLipOutline;
 
 
 // Bloom

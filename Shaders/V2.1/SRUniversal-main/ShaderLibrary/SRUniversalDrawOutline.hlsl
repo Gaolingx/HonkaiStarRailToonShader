@@ -1,5 +1,4 @@
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
-#include "../ShaderLibrary/NiloZOffset.hlsl"
 
 struct CharOutlineAttributes
 {
@@ -41,45 +40,86 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     VertexPositionInputs vertexPositionInput = GetVertexPositionInputs(input.positionOS.xyz);
     VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normalOS);
 
-    if (_UseSelfOutline == 1)
-    {
-        float outlineWidth = _OutlineScale * _OutlineWidth * input.color.w;
-        input.positionOS.xyz += normalize(GetSmoothNormalWS(input)) * outlineWidth;
-        output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
-        output.positionCS = NiloGetNewClipPosWithZOffset(output.positionCS, _OutlineZOffset + 0.03 * _IsFace);
-    }
-    else
-    {
-        //---------------! ! ! IMPORTANT:This Mode Only Working In Game Model ! ! !-----------------//
-        float3 viewNormal = mul((float3x3)UNITY_MATRIX_IT_MV, GetSmoothNormalWS(input));
-        viewNormal.z = -0.1f;
-        viewNormal = normalize(viewNormal);
+    if(_FaceMaterial) // sigh is this even going to work in vr? 
+        {
+            float4 tmp0;
+            float4 tmp1;
+            float4 tmp2;
+            float4 tmp3;
+            tmp0.xy = float2(-0.206, 0.961);
+            tmp0.z = _OutlineFixSide;
+            tmp1.xyz = mul(input.positionOS.xyz, (float3x3)unity_ObjectToWorld).xyz;
+            tmp2.xyz = _WorldSpaceCameraPos - tmp1.xyz;
+            tmp1.xyz = mul(tmp1.xyz, (float3x3)unity_ObjectToWorld).xyz;
+            tmp0.w = length(tmp1.xyz);
+            tmp1.yzw = tmp0.w * tmp1.xyz;
+            tmp0.w = tmp1.x * tmp0.w + -0.1;
+            tmp0.x = dot(tmp0.xyz, tmp1.xyz); 
+            tmp2.yz = float2(-0.206, 0.961);
+            tmp2.xw = -float2(_OutlineFixSide.x, _OutlineFixFront.x);
+            tmp0.y = dot(tmp2.xyz, tmp1.xyz);
+            tmp0.z = dot(float2(0.076, 0.961), tmp1.xy);
+            tmp0.x = max(tmp0.y, tmp0.x);
+            tmp0.x = 0.1 - tmp0.x;
+            tmp0.x = tmp0.x * 9.999998;
+            tmp0.x = max(tmp0.x, 0.0);
+            tmp0.y = tmp0.x * -2.0 + 3.0;
+            tmp0.x = tmp0.x * tmp0.x;
+            tmp0.x = tmp0.x * tmp0.y;
+            tmp0.x = min(tmp0.x, 1.0);
+            tmp0.y = saturate(tmp0.z);
+            tmp0.z = 1.0 - tmp0.z;
+            tmp0.y = tmp2.x + tmp0.y;
+            tmp0.yw = saturate(tmp0.yw * float2(20.0, 5.0));
+            tmp1.x = tmp0.y * -2.0 + 3.0;
+            tmp0.y = tmp0.y * tmp0.y;
+            tmp0.y = tmp0.y * tmp1.x;
+            tmp0.x = max(tmp0.x, tmp0.y);
+            tmp0.x = min(tmp0.x, 1.0);
+            tmp0.x = tmp0.x - 1.0;
+            tmp0.x = input.color.y * tmp0.x + 1.0;
+            tmp0.x = tmp0.x * _OutlineWidth;
+            tmp0.x = tmp0.x * _OutlineScale;
+            tmp0.y = tmp0.w * -2.0 + 3.0;
+            tmp0.w = tmp0.w * tmp0.w;
+            tmp0.y = tmp0.w * tmp0.y;
+            tmp1.xy = -float2(_OutlineFixRange1.x, _OutlineFixRange2.x) + float2(_OutlineFixRange3.x, _OutlineFixRange4.x);
+            tmp0.yw = tmp0.yy * tmp1.xy + float2(_OutlineFixRange1.x, _OutlineFixRange2.x);
 
-        float3 positionVS = mul(UNITY_MATRIX_MV, float4(input.positionOS.xyz, 1)).xyz;
+            tmp0.y = smoothstep(tmp0.y, tmp0.w, tmp0.z);
 
-        float offset = input.color.z * _OutlineOffset;
-        float offsetZ = positionVS.z - offset * 0.01;
-        offset = offsetZ / unity_CameraProjection[1].y;
-        offset = abs(offset) / _OutlineScale;
-        offset = 1 / rsqrt(offset);
+            tmp0.y = tmp0.y * input.color.z;
+            tmp0.zw = input.color.zy > float2(0.0, 0.0);
+            tmp0.y = tmp0.z ? tmp0.y : input.color.w;
+            tmp0.z = input.color.y < 1.0;
+            tmp0.z = tmp0.w ? tmp0.z : 0.0;
+            tmp0.z = tmp0.z ? 1.0 : 0.0;
+            tmp0.y = tmp0.z * _FixLipOutline + tmp0.y;
+            tmp0.x = tmp0.y * tmp0.x;
 
-        float outlineWidth = _OutlineScale * _OutlineWidth * input.color.w;
-        offset = offset * outlineWidth;
 
-        float3 viewDir = vertexPositionInput.positionWS - GetCurrentViewPosition();
-        float dist = length(viewDir);
-
-        dist = smoothstep(_OutlineExtdStart, _OutlineExtdMax, dist);
-
-        dist = min(dist, 0.5);
-        dist = dist + 1.0;
-        offset = offset * dist;
-
-        viewNormal = viewNormal * offset.xxx + float3(positionVS.xy, offsetZ);
-        output.positionCS = TransformWViewToHClip(viewNormal);
-        // Apply ZOffset(for face material)
-        output.positionCS = NiloGetNewClipPosWithZOffset(output.positionCS, _OutlineZOffset + 0.03 * _IsFace);
-    }
+            float3 outline_normal;
+            outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, GetSmoothNormalWS(input).xyz);
+            outline_normal.z = -1;
+            outline_normal.xyz = normalize(outline_normal.xyz);
+            float4 wv_pos = mul(UNITY_MATRIX_MV, input.positionOS);
+            float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
+            if(!_EnableFOVWidth) fov_width = 1;
+            wv_pos.xyz = wv_pos.xyz + (outline_normal * fov_width * tmp0.x);
+            output.positionCS = mul(UNITY_MATRIX_P, wv_pos);
+        }
+        else
+        {
+            float3 outline_normal;
+            outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, GetSmoothNormalWS(input).xyz);
+            outline_normal.z = -1;
+            outline_normal.xyz = normalize(outline_normal.xyz);
+            float4 wv_pos = mul(UNITY_MATRIX_MV, input.positionOS);
+            float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
+            if(!_EnableFOVWidth)fov_width = 1;
+            wv_pos.xyz = wv_pos.xyz + (outline_normal * fov_width * (input.color.w * _OutlineWidth * _OutlineScale));
+            output.positionCS = mul(UNITY_MATRIX_P, wv_pos);
+        }
 
     output.baseUV = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
     output.color = input.color;

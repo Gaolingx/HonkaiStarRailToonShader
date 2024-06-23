@@ -1,4 +1,4 @@
-Shader "Custom/SRUniversal"
+Shader "HonkaiStarRailToon/Character"
 {
     Properties
     {
@@ -182,42 +182,42 @@ Shader "Custom/SRUniversal"
         _RimIntensity("Rim Intensity (Front Face)", Float) = 0.5
         _RimIntensityBackFace("Rim Intensity (Back Face)", Float) = 0
         [KeywordEnum(Disable, Tint, Overlay)] _CustomRimLightColorVarEnum("Custom Rim Light Color State", Float) = 0
-        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimLightVarEnum("Custom Rim Light Var State", Float) = 0
         _RimColor("Rim Color", Color) = (1, 1, 1, 1)
-        _RimWidth("Rim Width", Float) = 1
-        _RimDark("Rim Darken Value", Range(0, 1)) = 0.5
-        _RimEdgeSoftness("Rim Edge Softness", Float) = 0.05
         _RimColor0("Rim Color 0", Color) = (1, 1, 1, 1)
-        _RimWidth0("Rim Width 0", Float) = 1
-        _RimDark0("Rim Darken Value 0", Range(0, 1)) = 0.5
-        _RimEdgeSoftness0("Rim Edge Softness 0", Float) = 0.05
         _RimColor1("Rim Color 1", Color) = (1, 1, 1, 1)
-        _RimWidth1("Rim Width 1", Float) = 1
-        _RimDark1("Rim Darken Value 1", Range(0, 1)) = 0.5
-        _RimEdgeSoftness1("Rim Edge Softness 1", Float) = 0.05
         _RimColor2("Rim Color 2", Color) = (1, 1, 1, 1)
-        _RimWidth2("Rim Width 2", Float) = 1
-        _RimDark2("Rim Darken Value 2", Range(0, 1)) = 0.5
-        _RimEdgeSoftness2("Rim Edge Softness 2", Float) = 0.05
         _RimColor3("Rim Color 3", Color) = (1, 1, 1, 1)
-        _RimWidth3("Rim Width 3", Float) = 1
-        _RimDark3("Rim Darken Value 3", Range(0, 1)) = 0.5
-        _RimEdgeSoftness3("Rim Edge Softness 3", Float) = 0.05
         _RimColor4("Rim Color 4", Color) = (1, 1, 1, 1)
-        _RimWidth4("Rim Width 4", Float) = 1
-        _RimDark4("Rim Darken Value 4", Range(0, 1)) = 0.5
-        _RimEdgeSoftness4("Rim Edge Softness 4", Float) = 0.05
         _RimColor5("Rim Color 5", Color) = (1, 1, 1, 1)
-        _RimWidth5("Rim Width 5", Float) = 1
-        _RimDark5("Rim Darken Value 5", Range(0, 1)) = 0.5
-        _RimEdgeSoftness5("Rim Edge Softness 5", Float) = 0.05
         _RimColor6("Rim Color 6", Color) = (1, 1, 1, 1)
-        _RimWidth6("Rim Width 6", Float) = 1
-        _RimDark6("Rim Darken Value 6", Range(0, 1)) = 0.5
-        _RimEdgeSoftness6("Rim Edge Softness 6", Float) = 0.05
         _RimColor7("Rim Color 7", Color) = (1, 1, 1, 1)
+        [KeywordEnum(Disable, Multiply, Overlay)] _CustomRimLightVarEnum("Custom Rim Light Var State", Float) = 0
+        _RimWidth("Rim Width", Float) = 1
+        _RimWidth0("Rim Width 0", Float) = 1
+        _RimWidth1("Rim Width 1", Float) = 1
+        _RimWidth2("Rim Width 2", Float) = 1
+        _RimWidth3("Rim Width 3", Float) = 1
+        _RimWidth4("Rim Width 4", Float) = 1
+        _RimWidth5("Rim Width 5", Float) = 1
+        _RimWidth6("Rim Width 6", Float) = 1
         _RimWidth7("Rim Width 7", Float) = 1
+        _RimDark("Rim Darken Value", Range(0, 1)) = 0.5
+        _RimDark0("Rim Darken Value 0", Range(0, 1)) = 0.5
+        _RimDark1("Rim Darken Value 1", Range(0, 1)) = 0.5
+        _RimDark2("Rim Darken Value 2", Range(0, 1)) = 0.5
+        _RimDark3("Rim Darken Value 3", Range(0, 1)) = 0.5
+        _RimDark4("Rim Darken Value 4", Range(0, 1)) = 0.5
+        _RimDark5("Rim Darken Value 5", Range(0, 1)) = 0.5
+        _RimDark6("Rim Darken Value 6", Range(0, 1)) = 0.5
         _RimDark7("Rim Darken Value 7", Range(0, 1)) = 0.5
+        _RimEdgeSoftness("Rim Edge Softness", Float) = 0.05
+        _RimEdgeSoftness0("Rim Edge Softness 0", Float) = 0.05
+        _RimEdgeSoftness1("Rim Edge Softness 1", Float) = 0.05
+        _RimEdgeSoftness2("Rim Edge Softness 2", Float) = 0.05
+        _RimEdgeSoftness3("Rim Edge Softness 3", Float) = 0.05
+        _RimEdgeSoftness4("Rim Edge Softness 4", Float) = 0.05
+        _RimEdgeSoftness5("Rim Edge Softness 5", Float) = 0.05
+        _RimEdgeSoftness6("Rim Edge Softness 6", Float) = 0.05
         _RimEdgeSoftness7("Rim Edge Softness 7", Float) = 0.05
 
         [Header(Rim Shadow)]
@@ -286,27 +286,31 @@ Shader "Custom/SRUniversal"
 
         [Header(Outline)]
         [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
-        [ToggleUI] _UseSelfOutline("Outline Mode (Use Model Self Outline Setting)", Float) = 0
         [KeywordEnum(Normal, Tangent)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         _OutlineDefaultColor("Outline Default Color", Color) = (0.5, 0.5, 0.5, 1)
         [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
         [KeywordEnum(Disable, Multiply, Tint, Overlay, Custom)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
         _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
-        _OutlineColor0("Outline Color 0", Color) = (0, 0, 0, 1)
-        _OutlineColor1("Outline Color 1", Color) = (0, 0, 0, 1)
-        _OutlineColor2("Outline Color 2", Color) = (0, 0, 0, 1)
-        _OutlineColor3("Outline Color 3", Color) = (0, 0, 0, 1)
-        _OutlineColor4("Outline Color 4", Color) = (0, 0, 0, 1)
-        _OutlineColor5("Outline Color 5", Color) = (0, 0, 0, 1)
-        _OutlineColor6("Outline Color 6", Color) = (0, 0, 0, 1)
-        _OutlineColor7("Outline Color 7", Color) = (0, 0, 0, 1)
-        _OutlineWidth("Outline Width", Range(0, 0.1)) = 0.01
-        _OutlineExtdStart("Outline Extd Start", Range(0, 10)) = 6.5
-        _OutlineExtdMax("Outline Extd Max", Range(0, 30)) = 18.0
-        _OutlineScale("Outline Scale", Range(0, 1)) = 0.015
-        _OutlineOffset("Outline Offset", Range(0, 10)) = 0
-        [ToggleUI] _IsFace("Use Clip Pos With ZOffset (face material)", Float) = 0
-        _OutlineZOffset("_OutlineZOffset (View Space)", Range(0, 1)) = 0.0001
+		_OutlineColor0("Outline Color 0", Color) = (0, 0, 0, 1)
+		_OutlineColor1("Outline Color 1", Color) = (0, 0, 0, 1)
+		_OutlineColor2("Outline Color 2", Color) = (0, 0, 0, 1)
+		_OutlineColor3("Outline Color 3", Color) = (0, 0, 0, 1)
+		_OutlineColor4("Outline Color 4", Color) = (0, 0, 0, 1)
+		_OutlineColor5("Outline Color 5", Color) = (0, 0, 0, 1)
+		_OutlineColor6("Outline Color 6", Color) = (0, 0, 0, 1)
+		_OutlineColor7("Outline Color 7", Color) = (0, 0, 0, 1)
+
+        [Toggle] _FaceMaterial("Is Face Material Outline", Float) = 0
+        [Toggle] _EnableFOVWidth("Enable FOV Scaling", Float) = 1
+        _OutlineWidth("Outline Width", Range(0, 1)) = 0.1
+        _OutlineScale("Outline Scale", Range(0, 1)) = 0.187
+        _OutlineFixRange1("Lip _Outline Show Start", Range(0, 1)) = 0.1
+        _OutlineFixRange2("Lip _Outline Show Max", Range(0, 1)) = 0.1
+        _OutlineFixRange3("Lip _Outline Show Start", Range(0, 1)) = 0.1
+        _OutlineFixRange4("Lip _Outline Show Max", Range(0, 1)) = 0.1
+        _OutlineFixSide("Outline Fix Star Side", Range(0, 1)) = 0.6
+		_OutlineFixFront("Outline Fix Star Front", Range(0, 1)) = 0.05
+        _FixLipOutline("TurnOn Temp Lip Outline", Range(0, 1)) = 0
 
         [Header(Surface Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode (Default Back)", Float) = 2
