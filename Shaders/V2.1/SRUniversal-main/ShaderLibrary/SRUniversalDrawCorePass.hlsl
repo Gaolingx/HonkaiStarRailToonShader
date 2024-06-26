@@ -68,7 +68,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     float3 lightDirectionWS = normalize(mainLight.direction);
 
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
-    #if _USE_NORMAL_MAP
+    #if _NORMAL_MAP_ON
         float3x3 tangentToWorld = float3x3(input.tangentWS, input.bitangentWS, input.normalWS);
         float3 normalTS = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, input.uv));
         float3 normalFactor = float3(_BumpFactor, _BumpFactor, 1);
@@ -178,14 +178,18 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     TEXTURE2D_ARGS(_BodyWarmRamp, sampler_BodyWarmRamp), _BodyWarmRampColor.rgb, _BodyWarmRampColorMixFactor);
     coolRampCol = RC.coolRampCol;
     warmRampCol = RC.warmRampCol;
+
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
     float DayTime = 0;
-    #if _DayTime_MANUAL_ON
+    if (_DayTime_MANUAL_ON)
+    {
         DayTime = _DayTime;
-    #else
+    }
+    else
+    {
         DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
-    #endif
-    
+    }
+
     float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime, _ShadowBoost);
     
     float3 FinalDiffuse = mainLightColor * mainLight.distanceAttenuation * baseColor * rampColor;
@@ -221,8 +225,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
                 specularData.materialId = lightMap.a;
 
                 specularColor = CalculateBaseSpecular(specularData, mainLight, viewDirectionWS, normalWS, diffuseFac);
-
-                //specularColor *= mainLight.shadowAttenuation;
             }
         #endif
     #else

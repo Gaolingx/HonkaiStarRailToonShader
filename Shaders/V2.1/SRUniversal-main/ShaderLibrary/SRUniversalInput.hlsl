@@ -101,6 +101,7 @@ float _RampV7;
 
 
 // DayTime
+float _DayTime_MANUAL_ON;
 float _DayTime;
 
 

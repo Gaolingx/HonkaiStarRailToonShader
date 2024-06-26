@@ -204,7 +204,7 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 
 float4 colorFragmentTarget(inout CharOutlineVaryings input) 
 {
-    #ifndef _ENABLE_OUTLINE
+    #ifndef _OUTLINE_ON
         clip(-1.0);
     #endif
     
@@ -236,12 +236,15 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
         }
     #endif
 
-    half DayTime = 0;
-    #if _DayTime_MANUAL_ON
+    float DayTime = 0;
+    if (_DayTime_MANUAL_ON)
+    {
         DayTime = _DayTime;
-    #else
+    }
+    else
+    {
         DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
-    #endif
+    }
     
     float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb, DayTime), 1.0);
     FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);

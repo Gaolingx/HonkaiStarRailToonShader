@@ -353,8 +353,23 @@ float4 GetLightMapTex(float2 uv, TEXTURE2D_PARAM(HairLightMap, sampler_HairLight
 
 // RampIndex ------------------------------------------------------------------------------------------------------ // 
 // ---------------------------------------------------------------------------------------------------------------- //
+void OverrideRampLineIfNeed()
+{
+    #if !_CUSTOM_RAMP_MAPPING_ON
+        _RampV0 = 0;
+        _RampV1 = 1;
+        _RampV2 = 2;
+        _RampV3 = 3;
+        _RampV4 = 4;
+        _RampV5 = 5;
+        _RampV6 = 6;
+        _RampV7 = 7;
+    #endif
+}
+
 half GetRampV(half matId)
 {
+    OverrideRampLineIfNeed();
     return 0.0625 + 0.125 * lerp(lerp(lerp(lerp(lerp(lerp(lerp(
         _RampV0,
         _RampV1, step(0.125, matId)),
@@ -368,6 +383,7 @@ half GetRampV(half matId)
 
 half GetRampLineIndex(half matId)
 {
+    OverrideRampLineIfNeed();
     return lerp(lerp(lerp(lerp(lerp(lerp(lerp(
         _RampV0,
         _RampV1, step(0.125, matId)),
@@ -381,6 +397,7 @@ half GetRampLineIndex(half matId)
 
 half GetMetalIndex()
 {
+    OverrideRampLineIfNeed();
     return _RampV4;
 }
 

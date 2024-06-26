@@ -54,7 +54,7 @@ Shader "HonkaiStarRailToon/Character"
         [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)", 2D) = "white" { }
         _BodyWarmRampColorMixFactor("Body warm ramp color mix factor (Default 0)", Range(0, 1)) = 0
         _BodyWarmRampColor("Body warm ramp color (Default white)", Color) = (1, 1, 1, 1)
-        [Toggle(_DayTime_MANUAL_ON)] _DayTimeManualON("Use Day Time Manual (Default NO)", Float) = 0
+        [Toggle] _DayTime_MANUAL_ON("Use Day Time Manual (Default NO)", Float) = 0
         _DayTime("Day Time value (Default 12)", Range(0, 24)) = 12
 
         [Header(LutMap)]
@@ -62,13 +62,13 @@ Shader "HonkaiStarRailToon/Character"
         _MaterialValuesPackLUT("LUT Map (Default black)", 2D) = "black" { }
 
         [Header(Normal)]
-        [Toggle(_USE_NORMAL_MAP)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0
-        _BumpFactor("Bump Scale", Float) = 1.0
+        [Toggle(_NORMAL_MAP_ON)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0
+        _BumpFactor("Bump Scale (Default 1)", Float) = 1.0
         [Normal] _NormalMap("Normal Map (Default black)", 2D) = "bump" { }
 
-        [Header(Ramp Settings)][Space]
-        [Toggle(_CUSTOM_RAMP_MAPPING)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
-        [ToggleUI] _SingleMaterial("Is Single Material (Use Ramp Line of Mat0)", Float) = 0
+        [Header(Ramp Settings)]
+        [Toggle(_CUSTOM_RAMP_MAPPING_ON)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
+        [Toggle] _SingleMaterial("Is Single Material (Use Ramp Line of Mat0)", Float) = 0
         [IntRange] _RampV0("Ramp Line of Mat0 (Default 0)", Range(0, 7)) = 0
         [IntRange] _RampV1("Ramp Line of Mat1 (Default 1)", Range(0, 7)) = 1
     	[IntRange] _RampV2("Ramp Line of Mat2 (Default 2)", Range(0, 7)) = 2
@@ -121,7 +121,7 @@ Shader "HonkaiStarRailToon/Character"
 
         [Header(Specular)]
         [Toggle(_SPECULAR_ON)] _EnableSpecular("Enable Specular (Default YES)", Float) = 1
-        [Toggle(_ANISOTROPY_SPECULAR)] _AnisotropySpecularToggle("Is Anisotropy Specular (Default NO)", Float) = 0
+        [Toggle(_ANISOTROPY_SPECULAR_ON)] _AnisotropySpecularToggle("Is Anisotropy Specular (Default NO)", Float) = 0
         [KeywordEnum(Disable, Tint, Overlay)] _CustomSpecularColorVarEnum("Custom Specular Color State", Float) = 0
         _SpecularColor("Specular Color", Color) = (1, 1, 1, 1)
         _SpecularColor0("Specular Color 0", Color) = (1, 1, 1, 1)
@@ -285,7 +285,7 @@ Shader "HonkaiStarRailToon/Character"
         _EmissionThreshold("Emission threshold (Default 0.5)", Range(0, 1)) = 0.5
 
         [Header(Outline)]
-        [Toggle(_ENABLE_OUTLINE)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
+        [Toggle(_OUTLINE_ON)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
         [KeywordEnum(Normal, Tangent)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         _OutlineDefaultColor("Outline Default Color", Color) = (0.5, 0.5, 0.5, 1)
         [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
@@ -353,16 +353,15 @@ Shader "HonkaiStarRailToon/Character"
         #pragma shader_feature_local _AREA_HAIR
         #pragma shader_feature_local _AREA_UPPERBODY
         #pragma shader_feature_local _AREA_LOWERBODY
-        #pragma shader_feature_local _DayTime_MANUAL_ON
         #pragma shader_feature_local _AUTO_Brightness_ON
-        #pragma shader_feature_local_fragment _USE_NORMAL_MAP
-        #pragma shader_feature_local _CUSTOM_RAMP_MAPPING
+        #pragma shader_feature_local_fragment _NORMAL_MAP_ON
+        #pragma shader_feature_local _CUSTOM_RAMP_MAPPING_ON
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
         #pragma shader_feature_local _RIM_SHADOW_ON
-        #pragma shader_feature _USE_LUT_MAP
-        #pragma shader_feature _USE_LUT_MAP_OUTLINE
+        #pragma shader_feature_local _USE_LUT_MAP
+        #pragma shader_feature_local _USE_LUT_MAP_OUTLINE
         #pragma shader_feature _CUSTOMHEADBONEMODEVARENUM_DEFAULT _CUSTOMHEADBONEMODEVARENUM_GAME _CUSTOMHEADBONEMODEVARENUM_MMD
         #pragma shader_feature _CUSTOMSPECULARCOLORVARENUM_DISABLE _CUSTOMSPECULARCOLORVARENUM_TINT _CUSTOMSPECULARCOLORVARENUM_OVERLAY
         #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
@@ -375,7 +374,7 @@ Shader "HonkaiStarRailToon/Character"
         #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT
         #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
-        #pragma shader_feature_local _ENABLE_OUTLINE
+        #pragma shader_feature_local _OUTLINE_ON
         #pragma shader_feature_local _DRAW_OVERLAY_ON
         #pragma shader_feature_local _EMISSION_ON
         #pragma shader_feature_local _AdditionalLighting_ON
