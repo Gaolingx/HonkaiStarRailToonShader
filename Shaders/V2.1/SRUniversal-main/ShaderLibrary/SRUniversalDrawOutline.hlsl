@@ -246,10 +246,13 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
         DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
     }
     
-    float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb, DayTime), 1.0);
-    FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
-    DoClipTestToTargetAlphaValue(mainTex.a, _AlphaTestThreshold);
+    float alpha = _Alpha;
+    float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb, DayTime), alpha);
+
+    DoClipTestToTargetAlphaValue(FinalOutlineColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
+
+    FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
 
     return FinalOutlineColor;
 }

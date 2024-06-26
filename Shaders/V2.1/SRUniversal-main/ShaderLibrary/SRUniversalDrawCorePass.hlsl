@@ -343,6 +343,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     float4 FinalColor = float4(albedo, alpha);
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
+
     FinalColor.rgb = MixFog(FinalColor.rgb, input.positionWSAndFogFactor.w);
 
     return FinalColor;
