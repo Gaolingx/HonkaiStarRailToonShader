@@ -299,30 +299,26 @@ struct RampColor
     float3 warmRampCol;
 };
 
-RampColor RampColorConstruct(float2 rampUV, TEXTURE2D_PARAM(HairCoolRamp, sampler_HairCoolRamp), float3 HairCoolRampColor, float HairCoolRampColorMixFactor,
-TEXTURE2D_PARAM(HairWarmRamp, sampler_HairWarmRamp), float3 HairWarmRampColor, float HairWarmRampColorMixFactor,
-TEXTURE2D_PARAM(BodyCoolRamp, sampler_BodyCoolRamp), float3 BodyCoolRampColor, float BodyCoolRampColorMixFactor,
-TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp), float3 BodyWarmRampColor, float BodyWarmRampColorMixFactor)
+RampColor RampColorConstruct(float2 rampUV,
+TEXTURE2D_PARAM(HairCoolRamp, sampler_HairCoolRamp),
+TEXTURE2D_PARAM(HairWarmRamp, sampler_HairWarmRamp),
+TEXTURE2D_PARAM(BodyCoolRamp, sampler_BodyCoolRamp),
+TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp))
 {
     RampColor rampColor;
     float3 coolRampTexCol = 1;
     float3 warmRampTexCol = 1;
-    float3 coolRampCol = 1;
-    float3 warmRampCol = 1;
+
     //hair的Ramp贴图和身体或脸部的不一样，按照keyword采样
     #if _AREA_HAIR
         coolRampTexCol = SAMPLE_TEXTURE2D(HairCoolRamp, sampler_HairCoolRamp, rampUV).rgb;
         warmRampTexCol = SAMPLE_TEXTURE2D(HairWarmRamp, sampler_HairWarmRamp, rampUV).rgb;
-        coolRampCol = LinearColorMix(coolRampTexCol, HairCoolRampColor, HairCoolRampColorMixFactor);
-        warmRampCol = LinearColorMix(warmRampTexCol, HairWarmRampColor, HairWarmRampColorMixFactor);
     #elif _AREA_FACE || _AREA_UPPERBODY || _AREA_LOWERBODY
         coolRampTexCol = SAMPLE_TEXTURE2D(BodyCoolRamp, sampler_BodyCoolRamp, rampUV).rgb;
         warmRampTexCol = SAMPLE_TEXTURE2D(BodyWarmRamp, sampler_BodyWarmRamp, rampUV).rgb;
-        coolRampCol = LinearColorMix(coolRampTexCol, BodyCoolRampColor, BodyCoolRampColorMixFactor);
-        warmRampCol = LinearColorMix(warmRampTexCol, BodyWarmRampColor, BodyWarmRampColorMixFactor);
     #endif
-    rampColor.coolRampCol = coolRampCol;
-    rampColor.warmRampCol = warmRampCol;
+    rampColor.coolRampCol = coolRampTexCol;
+    rampColor.warmRampCol = warmRampTexCol;
     return rampColor;
 }
 
@@ -409,6 +405,69 @@ float2 GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, bool
     float rampU = diffuseFac * (1 - shadowRampOffset) + shadowRampOffset;
     rampUV = float2(rampU, GetRampV(material));
     return rampUV;
+}
+
+RampColor TintRampColor(float3 coolRamp, float3 warmRamp, float materialId)
+{
+    RampColor rampColor;
+
+    float warm_shadow_Factor_array[8] =
+    {
+        _WarmShadowMultColorFac0,
+        _WarmShadowMultColorFac1,
+        _WarmShadowMultColorFac2,
+        _WarmShadowMultColorFac3,
+        _WarmShadowMultColorFac4,
+        _WarmShadowMultColorFac5,
+        _WarmShadowMultColorFac6,
+        _WarmShadowMultColorFac7,
+    };
+    float cool_shadow_Factor_array[8] =
+    {
+        _CoolShadowMultColorFac0,
+        _CoolShadowMultColorFac1,
+        _CoolShadowMultColorFac2,
+        _CoolShadowMultColorFac3,
+        _CoolShadowMultColorFac4,
+        _CoolShadowMultColorFac5,
+        _CoolShadowMultColorFac6,
+        _CoolShadowMultColorFac7,
+    };
+
+    float4 warm_shadow_array[8] =
+    {
+        _WarmShadowMultColor0,
+        _WarmShadowMultColor1,
+        _WarmShadowMultColor2,
+        _WarmShadowMultColor3,
+        _WarmShadowMultColor4,
+        _WarmShadowMultColor5,
+        _WarmShadowMultColor6,
+        _WarmShadowMultColor7,
+    };
+    float4 cool_shadow_array[8] =
+    {
+        _CoolShadowMultColor0,
+        _CoolShadowMultColor1,
+        _CoolShadowMultColor2,
+        _CoolShadowMultColor3,
+        _CoolShadowMultColor4,
+        _CoolShadowMultColor5,
+        _CoolShadowMultColor6,
+        _CoolShadowMultColor7,
+    };
+
+    float warm_shadow_fac = warm_shadow_Factor_array[GetRampLineIndex(materialId)];
+    float cool_shadow_fac = cool_shadow_Factor_array[GetRampLineIndex(materialId)];
+    float3 warm_shadow_col = warm_shadow_array[GetRampLineIndex(materialId)].rgb;
+    float3 cool_shadow_col = cool_shadow_array[GetRampLineIndex(materialId)].rgb;
+
+    float3 cool_shadow = LinearColorMix(coolRamp, cool_shadow_col, cool_shadow_fac);
+    float3 warm_shadow = LinearColorMix(warmRamp, warm_shadow_col, warm_shadow_fac);
+
+    rampColor.coolRampCol = cool_shadow;
+    rampColor.warmRampCol = warm_shadow;
+    return rampColor;
 }
 
 // LutMap --------------------------------------------------------------------------------------------------------- // 

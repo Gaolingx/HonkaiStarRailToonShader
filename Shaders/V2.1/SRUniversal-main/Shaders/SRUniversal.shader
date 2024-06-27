@@ -43,19 +43,50 @@ Shader "HonkaiStarRailToon/Character"
 
         [Header(Ramp Map)]
         [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)", 2D) = "white" { }
-        _HairCoolRampColorMixFactor("Hair cool ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _HairCoolRampColor("Hair cool ramp color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _HairWarmRamp("Hair warm ramp (Default white)", 2D) = "white" { }
-        _HairWarmRampColorMixFactor("Hair warm ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _HairWarmRampColor("Hair warm ramp color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _BodyCoolRamp("Body cool ramp (Default white)", 2D) = "white" { }
-        _BodyCoolRampColorMixFactor("Body cool ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _BodyCoolRampColor("Body cool ramp color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _BodyWarmRamp("Body warm ramp (Default white)", 2D) = "white" { }
-        _BodyWarmRampColorMixFactor("Body warm ramp color mix factor (Default 0)", Range(0, 1)) = 0
-        _BodyWarmRampColor("Body warm ramp color (Default white)", Color) = (1, 1, 1, 1)
+
+        [Header(Ramp Color Mix)]
         [Toggle] _DayTime_MANUAL_ON("Use Day Time Manual (Default NO)", Float) = 0
         _DayTime("Day Time value (Default 12)", Range(0, 24)) = 12
+
+        [Header(Ramp Color Tint)]
+        _WarmShadowMultColorFac0("Warm Shadow Mult Color Factor 0", Range(0, 1)) = 0
+        _WarmShadowMultColorFac1("Warm Shadow Mult Color Factor 1", Range(0, 1)) = 0
+        _WarmShadowMultColorFac2("Warm Shadow Mult Color Factor 2", Range(0, 1)) = 0
+        _WarmShadowMultColorFac3("Warm Shadow Mult Color Factor 3", Range(0, 1)) = 0
+        _WarmShadowMultColorFac4("Warm Shadow Mult Color Factor 4", Range(0, 1)) = 0
+        _WarmShadowMultColorFac5("Warm Shadow Mult Color Factor 5", Range(0, 1)) = 0
+        _WarmShadowMultColorFac6("Warm Shadow Mult Color Factor 6", Range(0, 1)) = 0
+        _WarmShadowMultColorFac7("Warm Shadow Mult Color Factor 7", Range(0, 1)) = 0
+
+        _CoolShadowMultColorFac0("Cool Shadow Mult Color Factor 0", Range(0, 1)) = 0
+        _CoolShadowMultColorFac1("Cool Shadow Mult Color Factor 1", Range(0, 1)) = 0
+        _CoolShadowMultColorFac2("Cool Shadow Mult Color Factor 2", Range(0, 1)) = 0
+        _CoolShadowMultColorFac3("Cool Shadow Mult Color Factor 3", Range(0, 1)) = 0
+        _CoolShadowMultColorFac4("Cool Shadow Mult Color Factor 4", Range(0, 1)) = 0
+        _CoolShadowMultColorFac5("Cool Shadow Mult Color Factor 5", Range(0, 1)) = 0
+        _CoolShadowMultColorFac6("Cool Shadow Mult Color Factor 6", Range(0, 1)) = 0
+        _CoolShadowMultColorFac7("Cool Shadow Mult Color Factor 7", Range(0, 1)) = 0
+
+        _WarmShadowMultColor0("Warm Shadow Mult Color 0", Color) = (1, 1, 1, 1)
+        _WarmShadowMultColor1("Warm Shadow Mult Color 1", Color) = (1, 1, 1, 1)
+        _WarmShadowMultColor2("Warm Shadow Mult Color 2", Color) = (1, 1, 1, 1)
+        _WarmShadowMultColor3("Warm Shadow Mult Color 3", Color) = (1, 1, 1, 1)
+        _WarmShadowMultColor4("Warm Shadow Mult Color 4", Color) = (1, 1, 1, 1)
+        _WarmShadowMultColor5("Warm Shadow Mult Color 5", Color) = (1, 1, 1, 1)
+        _WarmShadowMultColor6("Warm Shadow Mult Color 6", Color) = (1, 1, 1, 1)
+        _WarmShadowMultColor7("Warm Shadow Mult Color 7", Color) = (1, 1, 1, 1)
+
+        _CoolShadowMultColor0("Cool Shadow Mult Color 0", Color) = (1, 1, 1, 1)
+        _CoolShadowMultColor1("Cool Shadow Mult Color 1", Color) = (1, 1, 1, 1)
+        _CoolShadowMultColor2("Cool Shadow Mult Color 2", Color) = (1, 1, 1, 1)
+        _CoolShadowMultColor3("Cool Shadow Mult Color 3", Color) = (1, 1, 1, 1)
+        _CoolShadowMultColor4("Cool Shadow Mult Color 4", Color) = (1, 1, 1, 1)
+        _CoolShadowMultColor5("Cool Shadow Mult Color 5", Color) = (1, 1, 1, 1)
+        _CoolShadowMultColor6("Cool Shadow Mult Color 6", Color) = (1, 1, 1, 1)
+        _CoolShadowMultColor7("Cool Shadow Mult Color 7", Color) = (1, 1, 1, 1)
 
         [Header(LutMap)]
         [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map (Default NO)", Float) = 0

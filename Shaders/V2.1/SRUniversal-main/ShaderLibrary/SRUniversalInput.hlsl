@@ -106,15 +106,41 @@ float _DayTime;
 
 
 // RampColor
-float4 _HairCoolRampColor;
-float4 _HairWarmRampColor;
-float _HairCoolRampColorMixFactor;
-float _HairWarmRampColorMixFactor;
+float _WarmShadowMultColorFac0;
+float _WarmShadowMultColorFac1;
+float _WarmShadowMultColorFac2;
+float _WarmShadowMultColorFac3;
+float _WarmShadowMultColorFac4;
+float _WarmShadowMultColorFac5;
+float _WarmShadowMultColorFac6;
+float _WarmShadowMultColorFac7;
 
-float4 _BodyCoolRampColor;
-float4 _BodyWarmRampColor;
-float _BodyCoolRampColorMixFactor;
-float _BodyWarmRampColorMixFactor;
+float _CoolShadowMultColorFac0;
+float _CoolShadowMultColorFac1;
+float _CoolShadowMultColorFac2;
+float _CoolShadowMultColorFac3;
+float _CoolShadowMultColorFac4;
+float _CoolShadowMultColorFac5;
+float _CoolShadowMultColorFac6;
+float _CoolShadowMultColorFac7;
+
+float4 _WarmShadowMultColor0;
+float4 _WarmShadowMultColor1;
+float4 _WarmShadowMultColor2;
+float4 _WarmShadowMultColor3;
+float4 _WarmShadowMultColor4;
+float4 _WarmShadowMultColor5;
+float4 _WarmShadowMultColor6;
+float4 _WarmShadowMultColor7;
+
+float4 _CoolShadowMultColor0;
+float4 _CoolShadowMultColor1;
+float4 _CoolShadowMultColor2;
+float4 _CoolShadowMultColor3;
+float4 _CoolShadowMultColor4;
+float4 _CoolShadowMultColor5;
+float4 _CoolShadowMultColor6;
+float4 _CoolShadowMultColor7;
 
 
 // Lighting

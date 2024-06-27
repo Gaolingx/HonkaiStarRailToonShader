@@ -171,13 +171,18 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     // Ramp Color
     float3 coolRampCol = 1;
     float3 warmRampCol = 1;
-    RampColor RC = RampColorConstruct(rampUV, 
-    TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp), _HairCoolRampColor.rgb, _HairCoolRampColorMixFactor,
-    TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp), _HairWarmRampColor.rgb, _HairWarmRampColorMixFactor,
-    TEXTURE2D_ARGS(_BodyCoolRamp, sampler_BodyCoolRamp), _BodyCoolRampColor.rgb, _BodyCoolRampColorMixFactor,
-    TEXTURE2D_ARGS(_BodyWarmRamp, sampler_BodyWarmRamp), _BodyWarmRampColor.rgb, _BodyWarmRampColorMixFactor);
+
+    RampColor RC = RampColorConstruct(rampUV,
+    TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp),
+    TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp),
+    TEXTURE2D_ARGS(_BodyCoolRamp, sampler_BodyCoolRamp),
+    TEXTURE2D_ARGS(_BodyWarmRamp, sampler_BodyWarmRamp));
     coolRampCol = RC.coolRampCol;
     warmRampCol = RC.warmRampCol;
+
+    RampColor RC1 = TintRampColor(coolRampCol, warmRampCol, lightMap.a);
+    coolRampCol = RC1.coolRampCol;
+    warmRampCol = RC1.warmRampCol;
 
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
     float DayTime = 0;
