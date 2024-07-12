@@ -1,6 +1,6 @@
 # HonkaiStarRailToonShader
   
-效果图：（更新于2024年1月10日）
+效果图：（更新于2024年7月13日）
   
 ![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/screenshot_2024_07_13_01.png)
   
@@ -14,7 +14,10 @@
 
 ## Installation & Usage
   
-只需将/Shaders路径下解压对应版本的文件夹到你的Assets即可在材质球中看到添加的shader。
+1. 打开Project Settings>Player>Other Settings，使用线性色彩空间。
+2. 找到项目使用的Universal Render Pipeline Asset，在Renderer List找到使用的Universal Renderer Data，确保RenderingPath为Forward/Forward+，关闭Depth Priming，点击Add Renderer Feature，将Honkai Star Rail的Renderer Feature添加进去。
+3. 最后，将TestModels目录下的测试模型拖入场景，将../SRUniversal-main/Scripts/Runtime下的SRCharacterRenderingController组件添加到模型上，检查渲染是否正常。
+
 在开始之前，你至少需要准备如下的贴图，如果不知道如何获取他们，可以参考B站 @小二今天吃啥啊 的这个教程，[链接](https://www.bilibili.com/video/BV1t34y1H7jt/)
   
 ![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/MapUsed.PNG)  
