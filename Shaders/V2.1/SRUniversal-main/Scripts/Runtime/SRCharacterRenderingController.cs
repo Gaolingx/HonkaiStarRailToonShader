@@ -47,18 +47,21 @@ namespace HSR.NPRShader
         }
 
         [Header("Day Time(Ramp Lerp Control)")]
-        [SerializeField][Range(0, 24)] private float m_DayTime = 12;
+        [SerializeField] [Range(0, 24)] private float m_DayTime = 12;
 
-        [Header("Shader Properties")]
-        [SerializeField][Range(0, 3)] private float m_ColorSaturation = 1;
-        [SerializeField][Range(-1, 1)] private float m_AutoBrightnessOffset = 0;
+        [Header("Character Misc")]
+        [SerializeField] [Range(0, 3)] private float m_ColorSaturation = 1;
+        [SerializeField] [Range(-1, 1)] private float m_AutoBrightnessOffset = 0;
 
         [SerializeField] [Range(0, 1)] private float m_DitherAlpha = 1;
         [SerializeField] [Range(0, 1)] private float m_ExCheekIntensity = 0;
         [SerializeField] [Range(0, 1)] private float m_ExShyIntensity = 0;
         [SerializeField] [Range(0, 1)] private float m_ExShadowIntensity = 0;
-        [SerializeField] private bool m_IsCastingShadow = true;
 
+        [Header("Character Shadow")]
+        [SerializeField] private bool m_IsCastingShadow = true;
+        
+        [Header("Character HeadVector")]
         [SerializeField] private Transform m_MMDHeadBone;
         [SerializeField] private TransformDirection m_MMDHeadBoneForward = TransformDirection.Forward;
         [SerializeField] private TransformDirection m_MMDHeadBoneUp = TransformDirection.Up;
