@@ -2,7 +2,7 @@
   
 效果图：（更新于2024年1月10日）
   
-![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/Final_20240110_02.PNG)
+![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/screenshot_2024_07_13_01.png)
   
 ## What's This?
   
@@ -31,7 +31,7 @@
   
 ![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/20230812_03.PNG)
   
-2、鉴于Ramp贴图的特殊性，需要在导入设置中关闭“生成MipMap”，并将压缩改为“高质量”以获得更高精度。
+2、鉴于Ramp贴图的特殊性，需要在导入设置中关闭“生成MipMap”（必选），将Wrap Mode设置为"Clamp"避免采样超出边界导致问题（必选），并将Compression改为“High Quality”以获得更高精度（可选）。
   
 ![图片](https://github.com/Gaolingx/HonkaiStarRailToonShader/raw/main/Pictures/20230812_04.PNG)
   

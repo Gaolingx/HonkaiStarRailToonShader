@@ -1,0 +1,90 @@
+{
+  "m_Shader": {
+    "m_FileID": 1,
+    "m_PathID": 3883215492012054971,
+    "IsNull": false
+  },
+  "m_SavedProperties": {
+    "m_TexEnvs": {
+      "_MainTex": {
+        "m_Texture": {
+          "m_FileID": 0,
+          "m_PathID": 3734046540574277460,
+          "IsNull": false
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      }
+    },
+    "m_Ints": null,
+    "m_Floats": {
+      "_DitherAlpha": 1.0,
+      "_EmissionIntensity": 0.5,
+      "_EmissionThreshold": 0.0,
+      "_OutlineWidth": 0.02,
+      "_ShadowFeather": 0.3,
+      "_ShadowThreshold": 0.3,
+      "_SpecularIntensity0": 0.0,
+      "_SpecularRoughness0": 0.02,
+      "_SpecularShininess0": 10.0,
+      "_SpecularThreshold": 0.0,
+      "_UsingAtlasFace": 0.0,
+      "_UsingDitherAlpha": 0.0,
+      "_mBloomIntensity0": 0.02
+    },
+    "m_Colors": {
+      "_AtlasDivision": {
+        "r": 3.0,
+        "g": 3.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_BrightDiffuseColor": {
+        "r": 0.9622642,
+        "g": 0.9622642,
+        "b": 0.9622642,
+        "a": 1.0
+      },
+      "_Color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "_MainMaps_ST": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_OutlineColor0": {
+        "r": 0.3490566,
+        "g": 0.21727555,
+        "b": 0.121840514,
+        "a": 1.0
+      },
+      "_ShadowDiffuseColor": {
+        "r": 0.7264151,
+        "g": 0.7264151,
+        "b": 0.7264151,
+        "a": 1.0
+      },
+      "_SpecularColor0": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      }
+    }
+  },
+  "m_StringTagMap": {
+    "Distortion": "None"
+  },
+  "m_Name": "FuXuan_LookAtPhone_00_Mat_Phone"
+}

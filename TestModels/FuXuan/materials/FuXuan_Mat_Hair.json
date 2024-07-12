@@ -1,0 +1,390 @@
+{
+  "m_Shader": {
+    "m_FileID": 1,
+    "m_PathID": -8335713502764873453,
+    "IsNull": false
+  },
+  "m_SavedProperties": {
+    "m_TexEnvs": {
+      "_DiffuseCoolRampMultiTex": {
+        "m_Texture": {
+          "m_FileID": 0,
+          "m_PathID": 2255483551384403156,
+          "IsNull": false
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      "_DiffuseRampMultiTex": {
+        "m_Texture": {
+          "m_FileID": 0,
+          "m_PathID": 6794838997406254804,
+          "IsNull": false
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      "_DissolveMap": {
+        "m_Texture": {
+          "m_FileID": 0,
+          "m_PathID": 0,
+          "IsNull": true
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      "_DissolveMask": {
+        "m_Texture": {
+          "m_FileID": 0,
+          "m_PathID": 0,
+          "IsNull": true
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      "_LightMap": {
+        "m_Texture": {
+          "m_FileID": 0,
+          "m_PathID": -394202119940328701,
+          "IsNull": false
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      "_MainTex": {
+        "m_Texture": {
+          "m_FileID": 9,
+          "m_PathID": 3675319825208023342,
+          "IsNull": false
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      },
+      "_TangentShifterTex": {
+        "m_Texture": {
+          "m_FileID": 0,
+          "m_PathID": 0,
+          "IsNull": true
+        },
+        "m_Scale": {
+          "X": 1.0,
+          "Y": 1.0
+        },
+        "m_Offset": {
+          "X": 0.0,
+          "Y": 0.0
+        }
+      }
+    },
+    "m_Ints": null,
+    "m_Floats": {
+      "_AddLightFeather": 0.03,
+      "_AddLightOffset": 0.5,
+      "_AddLightStrengthen": 0.3,
+      "_AlphaCutoff": 0.5,
+      "_AnisoN": 0.0,
+      "_AnisoT": 0.0,
+      "_BloomIntensity": 1.0,
+      "_CullMode": 0.0,
+      "_DissolveDistortionIntensity": 0.01,
+      "_DissolveOutlineOffset": 0.0,
+      "_DissolveOutlineSize1": 0.05,
+      "_DissolveOutlineSize2": 0.0,
+      "_DissolvePosMaskFilpOn": 0.0,
+      "_DissolvePosMaskOn": 0.0,
+      "_DissolvePosMaskWorldON": 0.0,
+      "_DissolveRate": 0.0,
+      "_DissolveUV": 0.0,
+      "_DissoveDirecMask": 2.0,
+      "_DissoveON": 0.0,
+      "_Dist": 1.0,
+      "_DitherAlpha": 1.0,
+      "_EmissionIntensity": 0.0,
+      "_EmissionThreshold": 1.0,
+      "_EnableAlphaCutoff": 0.0,
+      "_FresnelColorStrength": 1.0,
+      "_HairBlendOffset": -0.309,
+      "_HairBlendWeight": 0.548,
+      "_HairStencilComp": 6.0,
+      "_Outline": 0.0,
+      "_OutlineBlendOffset": 0.0,
+      "_OutlineBlendWeight": 1.0,
+      "_OutlineExtdMax": 18.0,
+      "_OutlineExtdMode": 0.0,
+      "_OutlineExtdStart": 6.5,
+      "_OutlineNormalFrom": 1.0,
+      "_OutlinePolygonOffsetFactor": 0.0,
+      "_OutlinePolygonOffsetUnits": 0.0,
+      "_OutlineWidth": 0.03,
+      "_PolygonOffsetFactor": 0.0,
+      "_PolygonOffsetUnits": 0.0,
+      "_ReceiveShadows": 0.0,
+      "_RimDark0": 0.5,
+      "_RimEdge": 0.015,
+      "_RimEdgeSoftness0": 0.9,
+      "_RimLight": 0.0,
+      "_RimLightMode": 1.0,
+      "_RimShadow": 1.0,
+      "_RimShadowCt": 1.0,
+      "_RimShadowFeather0": 0.99,
+      "_RimShadowIntensity": 1.0,
+      "_RimShadowWidth0": 1.0,
+      "_RimType0": 1.0,
+      "_RimWeight": 1.0,
+      "_RimWidth": 2.5,
+      "_RimWidth0": 1.0,
+      "_Rimintensity": 2.5,
+      "_ShadowRamp": 1.0,
+      "_SpecularColor": 1.0,
+      "_SpecularIntensity": 0.3,
+      "_SpecularIntensity0": 0.1,
+      "_SpecularRoughness": 0.0,
+      "_SpecularRoughness0": 0.0,
+      "_SpecularShadowIntensity": 0.086,
+      "_SpecularShadowOffset": 0.8,
+      "_SpecularShininess": 8.0,
+      "_SpecularShininess0": 10.0,
+      "_StencilEye": 17.0,
+      "_UsingAniso": 0.0,
+      "_UsingDitherAlpha": 0.0,
+      "_UsingTagnetShfit": 0.0,
+      "_UsingTextureShfit": 0.0,
+      "_fix": 1.0,
+      "_mBloomIntensity0": 0.02
+    },
+    "m_Colors": {
+      "_BackColor": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "_Color": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "_Dirfix": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_DissolveComponent": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_DissolveOutlineColor1": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "_DissolveOutlineColor2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_DissolveOutlineSmoothStep": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_DissolvePosMaskPos": {
+        "r": 1.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_DissolvePosMaskRootOffset": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_DissolveST": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_DissolveUVSpeed": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_DistortionST": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_EnvColor": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "_Fix": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_FresnelBSI": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 0.0
+      },
+      "_FresnelColor": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_MainMaps_ST": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_OutlineColor0": {
+        "r": 0.475,
+        "g": 0.3253937,
+        "b": 0.39458662,
+        "a": 1.0
+      },
+      "_OutlineColor1": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_OutlineColor2": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_OutlineColor3": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_OutlineColor4": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_OutlineColor5": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_OutlineColor6": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_OutlineColor7": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 1.0
+      },
+      "_RimColor0": {
+        "r": 1.0,
+        "g": 0.8443396,
+        "b": 0.8520345,
+        "a": 1.0
+      },
+      "_RimOffset": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_RimShadowColor0": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      },
+      "_RimShadowOffset": {
+        "r": 0.0,
+        "g": 0.0,
+        "b": 0.0,
+        "a": 0.0
+      },
+      "_SpecularColor": {
+        "r": 1.0,
+        "g": 0.97711563,
+        "b": 0.8349056,
+        "a": 1.0
+      },
+      "_SpecularColor0": {
+        "r": 1.0,
+        "g": 0.8066038,
+        "b": 0.8417273,
+        "a": 1.0
+      },
+      "_VertexShadowColor": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 1.0
+      }
+    }
+  },
+  "m_StringTagMap": {
+    "Distortion": "None"
+  },
+  "m_Name": "FuXuan_Mat_Hair"
+}
