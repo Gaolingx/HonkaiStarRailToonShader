@@ -70,6 +70,10 @@ float4 _LowerBodyColorMapColor;
 // NormalMap
 float _BumpFactor;
 
+// Self Shadow Caster
+float _SelfShadowDepthBias;
+float _SelfShadowNormalBias;
+
 
 // ColorSaturation
 float _ColorSaturation;

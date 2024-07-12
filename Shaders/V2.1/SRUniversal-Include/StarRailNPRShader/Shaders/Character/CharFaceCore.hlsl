@@ -31,13 +31,13 @@
 #include "Shared/CharOutline.hlsl"
 #include "Shared/CharShadow.hlsl"
 #include "Shared/CharMotionVectors.hlsl"
+#include "Shared/CharHairDepthTexture.hlsl"
 
 TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
 TEXTURE2D(_FaceMap); SAMPLER(sampler_FaceMap);
 TEXTURE2D(_ExpressionMap); SAMPLER(sampler_ExpressionMap);
 
 CBUFFER_START(UnityPerMaterial)
-    float _ModelScale;
     float _AlphaTestThreshold;
 
     float4 _Color;
@@ -45,6 +45,10 @@ CBUFFER_START(UnityPerMaterial)
 
     float4 _ShadowColor;
     float4 _EyeShadowColor;
+    float _EyeAlwaysLit;
+    float _HairShadowDistance;
+
+    float _MaxEyeHairDistance;
 
     float4 _EmissionColor;
     float _EmissionThreshold;
@@ -53,25 +57,25 @@ CBUFFER_START(UnityPerMaterial)
     float _mmBloomIntensity0;
     float4 _BloomColor0;
 
+    float4 _ExCheekColor;
+    float4 _ExShyColor;
+    float4 _ExShadowColor;
+    float4 _ExEyeColor;
+
     float _OutlineWidth;
     float _OutlineZOffset;
     float4 _OutlineColor0;
-
     float4 _NoseLineColor;
     float _NoseLinePower;
 
-    float _MaxEyeHairDistance;
+    float _SelfShadowDepthBias;
+    float _SelfShadowNormalBias;
 
-    float4 _ExCheekColor;
+    float _ModelScale;
     float _ExCheekIntensity;
-    float4 _ExShyColor;
     float _ExShyIntensity;
-    float4 _ExShadowColor;
-    float4 _ExEyeColor;
     float _ExShadowIntensity;
-
     float _DitherAlpha;
-
     float4 _MMDHeadBoneForward;
     float4 _MMDHeadBoneUp;
     float4 _MMDHeadBoneRight;
@@ -105,7 +109,40 @@ float3 GetFaceOrEyeDiffuse(
     // 被阴影挡住时没有伦勃朗光
     float3 faceShadow = lerp(_ShadowColor.rgb, 1, step(1 - threshold, FoL01) * light.shadowAttenuation); // SDF Shadow
     float3 eyeShadow = lerp(_EyeShadowColor.rgb, 1, smoothstep(0.3, 0.5, FoL01) * light.shadowAttenuation);
-    return baseColor * light.color * (lerp(faceShadow, eyeShadow, faceMap.r) * light.distanceAttenuation);
+    float3 shadow = lerp(faceShadow, eyeShadow, faceMap.r);
+
+    // 眼睛的遮罩，没有眼白和白色高光的部分
+    float eyeMask = step(0.1, faceMap.r) - step(0.8, faceMap.r);
+    return baseColor * lerp(shadow * light.color * light.distanceAttenuation, 1, eyeMask * _EyeAlwaysLit);
+}
+
+float GetHairShadow(float4 svPosition, Directions dirWS)
+{
+    float2 width = _HairShadowDistance * 0.04;
+
+    if (IsPerspectiveProjection())
+    {
+        // unity_CameraProjection._m11: cot(FOV / 2)
+        // 2.414 是 FOV 为 45 度时的值
+        width *= unity_CameraProjection._m11 / 2.414; // FOV 越小，角色越大，偏移量越大
+    }
+    else
+    {
+        // unity_CameraProjection._m11: (1 / Size)
+        // 1.5996 纯 Magic Number
+        width *= unity_CameraProjection._m11 / 1.5996; // Size 越小，角色越大，偏移量越大
+    }
+
+    float depth = GetLinearEyeDepthAnyProjection(svPosition);
+    width *= rcp(depth / _ModelScale); // 近大远小
+
+    // 纵向分辨率越大，角色横向占有的 uv 越多，横向偏移量越大。纵向占有的 uv 始终不变
+    width.x *= log10(_ScaledScreenParams.y) / 3.33; // 3.33=log10(2160)，4K 分辨率高度
+
+    float3 offsetDir = TransformWorldToViewDir(dirWS.L, true);
+    float2 offsetUV = (svPosition.xy / _ScaledScreenParams.xy) + (offsetDir.xy * width);
+    float offsetDepth = GetLinearEyeDepthAnyProjection(SampleCharHairDepth(offsetUV));
+    return step(depth, offsetDepth);
 }
 
 void FaceOpaqueAndZFragment(
@@ -130,6 +167,11 @@ void FaceOpaqueAndZFragment(
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
     HeadDirections headDirWS = WORLD_SPACE_CHAR_HEAD_DIRECTIONS();
 
+    // 刘海阴影
+    #if defined(_MAIN_LIGHT_FRONT_HAIR_SHADOWS)
+        light.shadowAttenuation = min(light.shadowAttenuation, GetHairShadow(i.positionHCS, dirWS));
+    #endif
+
     // Nose Line
     float3 FdotV = pow(abs(dot(headDirWS.forward, dirWS.V)), _NoseLinePower);
     texColor.rgb = lerp(texColor.rgb, texColor.rgb * _NoseLineColor.rgb, step(1.03 - faceMap.b, FdotV));
@@ -153,7 +195,7 @@ void FaceOpaqueAndZFragment(
     emissionData.threshold = _EmissionThreshold;
     emissionData.intensity = _EmissionIntensity;
 
-    // 眼睛的高亮
+    // 自发光
     float3 emission = GetEmission(emissionData, texColor.rgb);
 
     // TODO: 嘴唇 Outline: 0.5 < faceMap.g < 0.95
@@ -213,7 +255,7 @@ CharOutlineVaryings FaceOutlineVertex(CharOutlineAttributes i)
         // 当嘴从侧面看在脸外面时再启用描边
         float3 viewDirWS = normalize(GetWorldSpaceViewDir(vertexInputs.positionWS));
         float FdotV = pow(max(0, dot(headDirWS.forward, viewDirWS)), 0.8);
-        outlineData.width *= smoothstep(-0.05, 0, 1 - FdotV - i.color.b);
+        outlineData.width *= smoothstep(-0.02, 0, 1 - FdotV - i.color.b);
 
         // TODO: Fix 脸颊的描边。大概是用 vertexColor.g
     #endif
@@ -239,7 +281,7 @@ float4 FaceOutlineFragment(CharOutlineVaryings i) : SV_Target0
 
 CharShadowVaryings FaceShadowVertex(CharShadowAttributes i)
 {
-    return CharShadowVertex(i, _Maps_ST);
+    return CharShadowVertex(i, _Maps_ST, _SelfShadowDepthBias, _SelfShadowNormalBias);
 }
 
 void FaceShadowFragment(CharShadowVaryings i)

@@ -25,7 +25,6 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
 
-
 // Shadow Casting Light geometric parameters. These variables are used when applying the shadow Normal Bias and are set by UnityEngine.Rendering.Universal.ShadowUtils.SetupShadowCasterConstantBuffer in com.unity.render-pipelines.universal/Runtime/ShadowUtils.cs
 // For Directional lights, _LightDirection is used when applying shadow Normal Bias.
 // For Spot lights and Point lights, _LightPosition is used to compute the actual light direction because it is different at each shadow caster geometry vertex.
@@ -47,18 +46,32 @@ struct CharShadowVaryings
     float4 uv           : TEXCOORD0;
 };
 
-float4 GetShadowPositionHClip(CharShadowAttributes input)
+float3 ApplySelfShadowBias(float3 positionWS, float3 normalWS, float3 lightDirection, float2 selfShadowBias)
 {
-    float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
-    float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
+    float invNdotL = 1.0 - saturate(dot(lightDirection, normalWS));
+    float scale = invNdotL * selfShadowBias.y;
 
-#if _CASTING_PUNCTUAL_LIGHT_SHADOW
+    // normal bias is negative since we want to apply an inset normal offset
+    positionWS = lightDirection * selfShadowBias.xxx + positionWS;
+    positionWS = normalWS * scale.xxx + positionWS;
+    return positionWS;
+}
+
+float4 GetShadowPositionHClip(float3 positionOS, float3 normalWS, float2 selfShadowBias)
+{
+    float3 positionWS = TransformObjectToWorld(positionOS);
+
+#if !_CASTING_SELF_SHADOW && _CASTING_PUNCTUAL_LIGHT_SHADOW
     float3 lightDirectionWS = normalize(_LightPosition - positionWS);
 #else
     float3 lightDirectionWS = _LightDirection;
 #endif
 
+#if _CASTING_SELF_SHADOW
+    float4 positionCS = TransformWorldToHClip(ApplySelfShadowBias(positionWS, normalWS, lightDirectionWS, selfShadowBias));
+#else
     float4 positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
+#endif
 
 #if UNITY_REVERSED_Z
     positionCS.z = min(positionCS.z, UNITY_NEAR_CLIP_VALUE);
@@ -69,14 +82,14 @@ float4 GetShadowPositionHClip(CharShadowAttributes input)
     return positionCS;
 }
 
-CharShadowVaryings CharShadowVertex(CharShadowAttributes i, float4 mapST)
+CharShadowVaryings CharShadowVertex(CharShadowAttributes i, float4 mapST, float selfShadowDepthBias, float selfShadowNormalBias)
 {
+    float2 selfShadowBias = float2(selfShadowDepthBias, selfShadowNormalBias);
+
     CharShadowVaryings o;
-
-    o.positionHCS = GetShadowPositionHClip(i);
     o.normalWS = TransformObjectToWorldNormal(i.normalOS);
+    o.positionHCS = GetShadowPositionHClip(i.positionOS.xyz, o.normalWS, selfShadowBias);
     o.uv = CombineAndTransformDualFaceUV(i.uv1, i.uv2, mapST);
-
     return o;
 }
 

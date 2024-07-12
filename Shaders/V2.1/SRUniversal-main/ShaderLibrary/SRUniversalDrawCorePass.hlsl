@@ -375,7 +375,7 @@ out float4 colorTarget      : SV_Target0)
 
 CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)
 {
-    return CharShadowVertex(input, _Maps_ST);
+    return CharShadowVertex(input, _Maps_ST, _SelfShadowDepthBias, _SelfShadowNormalBias);
 }
 
 void CharacterShadowFragment(

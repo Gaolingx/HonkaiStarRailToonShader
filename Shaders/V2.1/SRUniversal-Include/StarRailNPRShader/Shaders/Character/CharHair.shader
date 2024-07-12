@@ -24,13 +24,11 @@ Shader "Honkai Star Rail/Character/Hair"
     Properties
     {
         [KeywordEnum(Game, MMD)] _Model("Model Type", Float) = 0
-        _ModelScale("Model Scale", Float) = 1
 
-        [HeaderFoldout(Shader Options)]
+        [HeaderFoldout(Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _Cull("Cull", Float) = 0                    // 默认 Off
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendAlpha("Src Blend (A)", Float) = 0 // 默认 Zero
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendAlpha("Dst Blend (A)", Float) = 0 // 默认 Zero
-        [Space(5)]
         [Toggle] _AlphaTest("Alpha Test", Float) = 0
         [If(_ALPHATEST_ON)] [Indent] _AlphaTestThreshold("Threshold", Range(0, 1)) = 0.5
 
@@ -39,14 +37,15 @@ Shader "Honkai Star Rail/Character/Hair"
         [HideInInspector] _Color("Color", Color) = (1, 1, 1, 1)
         [SingleLineTextureNoScaleOffset] _LightMap("Light Map", 2D) = "white" {}
         [TextureScaleOffset] _Maps_ST("Maps Scale Offset", Vector) = (1, 1, 0, 0)
+        [Header(Ramps)] [Space(5)]
+        [RampTexture] _RampMapCool("Cool", 2D) = "white" {}
+        [RampTexture] _RampMapWarm("Warm", 2D) = "white" {}
         [Header(Overrides)] [Space(5)]
         [If(_MODEL_GAME)] _BackColor("Back Face Color", Color) = (1, 1, 1, 1)
         [If(_MODEL_GAME)] [Toggle] _BackFaceUV2("Back Face Use UV2", Float) = 0
 
-        [HeaderFoldout(Diffuse)]
-        [RampTexture] _RampMapCool("Ramp Map (Cool)", 2D) = "white" {}
-        [RampTexture] _RampMapWarm("Ramp Map (Warm)", 2D) = "white" {}
-        _RampCoolWarmLerpFactor("Cool / Warm", Range(0, 1)) = 1
+        [HeaderFoldout(Transparent Fron Hair)]
+        _HairBlendAlpha("Alpha", Range(0, 1)) = 0.6
 
         [HeaderFoldout(Specular)]
         _SpecularColor0("Color", Color) = (1,1,1,1)
@@ -77,9 +76,9 @@ Shader "Honkai Star Rail/Character/Hair"
         _RimShadowCt("Ct", Float) = 1
         _RimShadowIntensity("Intensity", Float) = 1
         _RimShadowOffset("Offset", Vector) = (0, 0, 0, 0)
-        _RimShadowColor0("Rim Shadow Color", Color) = (1, 1, 1, 1)
-        _RimShadowWidth0("Rim Shadow Width", Float) = 1
-        _RimShadowFeather0("Rim Shadow Feather", Range(0.01, 0.99)) = 0.01
+        _RimShadowColor0("Color", Color) = (1, 1, 1, 1)
+        _RimShadowWidth0("Width", Float) = 1
+        _RimShadowFeather0("Feather", Range(0.01, 0.99)) = 0.01
 
         [HeaderFoldout(Outline)]
         [KeywordEnum(Tangent, Normal)] _OutlineNormal("Normal Source", Float) = 0
@@ -87,13 +86,13 @@ Shader "Honkai Star Rail/Character/Hair"
         _OutlineZOffset("Z Offset", Float) = 0
         _OutlineColor0("Color", Color) = (0, 0, 0, 1)
 
-        [HeaderFoldout(Eye Hair Blend)]
-        _HairBlendAlpha("Hair Alpha", Range(0, 1)) = 0.6
+        [HeaderFoldout(Self Shadow Caster)]
+        _SelfShadowDepthBias("Depth Bias", Float) = -0.01
+        _SelfShadowNormalBias("Normal Bias", Float) = 0
 
-        [HeaderFoldout(Dither)]
-        _DitherAlpha("Alpha", Range(0, 1)) = 1
-
-        // Head Bone
+        [HideInInspector] _ModelScale("Model Scale", Float) = 1
+        [HideInInspector] _RampCoolWarmLerpFactor("Cool / Warm", Range(0, 1)) = 1
+        [HideInInspector] _DitherAlpha("Alpha", Range(0, 1)) = 1
         [HideInInspector] _MMDHeadBoneForward("MMD Head Bone Forward", Vector) = (0, 0, 1, 0)
         [HideInInspector] _MMDHeadBoneUp("MMD Head Bone Up", Vector) = (0, 1, 0, 0)
         [HideInInspector] _MMDHeadBoneRight("MMD Head Bone Right", Vector) = (1, 0, 0, 0)
@@ -115,17 +114,66 @@ Shader "Honkai Star Rail/Character/Hair"
 
             Tags
             {
-                "LightMode" = "HSRForward2"
+                "LightMode" = "HSRHair"
+            }
+
+            Stencil
+            {
+                Ref 3
+                ReadMask 2   // 眼睛位
+                WriteMask 1  // 角色
+                Comp Always  // 不管眼睛
+                Pass Replace // 写入角色位
+                Fail Keep
+            }
+
+            Cull [_Cull]
+            ZWrite On
+
+            Blend 0 One Zero, [_SrcBlendAlpha] [_DstBlendAlpha]
+
+            ColorMask RGBA 0
+
+            HLSLPROGRAM
+
+            #pragma vertex HairVertex
+            #pragma fragment HairOpaqueFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
+            #pragma multi_compile _ _FORWARD_PLUS
+
+            #include "CharHairCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "HairOpaque"
+
+            Tags
+            {
+                "LightMode" = "HSRHairPreserveEye"
             }
 
             // 没有遮住眼睛的部分
             Stencil
             {
                 Ref 3
-                ReadMask 2   // 眼睛位
-                WriteMask 1  // 角色
-                Comp NotEqual
-                Pass Replace // 写入角色位
+                ReadMask 2    // 眼睛位
+                WriteMask 1   // 角色
+                Comp NotEqual // 排除眼睛
+                Pass Replace  // 写入角色位
                 Fail Keep
             }
 
@@ -165,7 +213,7 @@ Shader "Honkai Star Rail/Character/Hair"
 
             Tags
             {
-                "LightMode" = "HSRForward3"
+                "LightMode" = "HSRHairFakeTransparent"
             }
 
             // 遮住眼睛的部分
@@ -281,6 +329,7 @@ Shader "Honkai Star Rail/Character/Hair"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
 
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            #pragma multi_compile_vertex _ _CASTING_SELF_SHADOW
 
             #include "CharHairCore.hlsl"
 
@@ -294,6 +343,32 @@ Shader "Honkai Star Rail/Character/Hair"
             Tags
             {
                 "LightMode" = "DepthOnly"
+            }
+
+            Cull [_Cull]
+            ZWrite On
+            ColorMask R
+
+            HLSLPROGRAM
+
+            #pragma vertex HairDepthOnlyVertex
+            #pragma fragment HairDepthOnlyFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+
+            #include "CharHairCore.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "HairDepthOnlyHSR"
+
+            Tags
+            {
+                "LightMode" = "HSRHairDepthOnly"
             }
 
             Cull [_Cull]

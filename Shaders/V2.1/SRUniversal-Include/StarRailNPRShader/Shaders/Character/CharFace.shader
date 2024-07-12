@@ -24,12 +24,10 @@ Shader "Honkai Star Rail/Character/Face"
     Properties
     {
         [KeywordEnum(Game, MMD)] _Model("Model Type", Float) = 0
-        _ModelScale("Model Scale", Float) = 1
 
-        [HeaderFoldout(Shader Options)]
+        [HeaderFoldout(Options)]
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendAlpha("Src Blend (A)", Float) = 0   // 默认 Zero
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendAlpha("Dst Blend (A)", Float) = 0   // 默认 Zero
-        [Space(5)]
         [Toggle] _AlphaTest("Alpha Test", Float) = 0
         [If(_ALPHATEST_ON)] [Indent] _AlphaTestThreshold("Threshold", Range(0, 1)) = 0.5
 
@@ -45,6 +43,12 @@ Shader "Honkai Star Rail/Character/Face"
         [HeaderFoldout(Diffuse)]
         _ShadowColor("Face Shadow Color", Color) = (0.5, 0.5, 0.5, 1)
         _EyeShadowColor("Eye Shadow Color", Color) = (1, 1, 1, 1)
+        _EyeAlwaysLit("Eye Always Lit", Range(0, 1)) = 0.2
+        [Header(Front Hair Shadow)][Space(5)]
+        _HairShadowDistance("Distance", Range(0, 1)) = 0.2
+
+        [HeaderFoldout(Transparent Front Hair)]
+        _MaxEyeHairDistance("Max Eye Hair Distance", Float) = 0.2
 
         [HeaderFoldout(Emission, Use Albedo.a as emission map)]
         _EmissionColor("Color", Color) = (1, 1, 1, 1)
@@ -55,34 +59,30 @@ Shader "Honkai Star Rail/Character/Face"
         _mmBloomIntensity0("Intensity", Float) = 0
         _BloomColor0("Color", Color) = (1, 1, 1, 1)
 
+        [HeaderFoldout(Expression)]
+        _ExCheekColor("Cheek Color", Color) = (1, 1, 1, 1)
+        _ExShyColor("Shy Color", Color) = (1, 1, 1, 1)
+        _ExShadowColor("Shadow Face Color", Color) = (1, 1, 1, 1)
+        _ExEyeColor("Shadow Eye Color", Color) = (1, 1, 1, 1)
+
         [HeaderFoldout(Outline)]
         [KeywordEnum(Tangent, Normal)] _OutlineNormal("Normal Source", Float) = 0
         _OutlineWidth("Width", Range(0, 4)) = 1
         _OutlineZOffset("Z Offset", Float) = 0
         _OutlineColor0("Color", Color) = (0, 0, 0, 1)
-
-        [HeaderFoldout(Nose Line)]
+        [Header(Nose Line)][Space(5)]
         _NoseLineColor("Color", Color) = (1, 1, 1, 1)
         _NoseLinePower("Power", Range(0, 8)) = 1
 
-        [HeaderFoldout(Eye Hair Blend)]
-        _MaxEyeHairDistance("Max Eye Hair Distance", Float) = 0.2
+        [HeaderFoldout(Self Shadow Caster)]
+        _SelfShadowDepthBias("Depth Bias", Float) = -0.01
+        _SelfShadowNormalBias("Normal Bias", Float) = 0
 
-        [HeaderFoldout(Expression)]
-        _ExCheekColor("Cheek Color", Color) = (1, 1, 1, 1)
-        _ExCheekIntensity("Cheek Intensity", Range(0, 1)) = 0
-        [Space(10)]
-        _ExShyColor("Shy Color", Color) = (1, 1, 1, 1)
-        _ExShyIntensity("Shy Intensity", Range(0, 1)) = 0
-        [Space(10)]
-        _ExShadowColor("Shadow Color", Color) = (1, 1, 1, 1)
-        _ExEyeColor("Eye Color", Color) = (1, 1, 1, 1)
-        _ExShadowIntensity("Shadow Intensity", Range(0, 1)) = 0
-
-        [HeaderFoldout(Dither)]
-        _DitherAlpha("Alpha", Range(0, 1)) = 1
-
-        // Head Bone
+        [HideInInspector] _ModelScale("Model Scale", Float) = 1
+        [HideInInspector] _ExCheekIntensity("Cheek Intensity", Range(0, 1)) = 0
+        [HideInInspector] _ExShyIntensity("Shy Intensity", Range(0, 1)) = 0
+        [HideInInspector] _ExShadowIntensity("Shadow Intensity", Range(0, 1)) = 0
+        [HideInInspector] _DitherAlpha("Alpha", Range(0, 1)) = 1
         [HideInInspector] _MMDHeadBoneForward("MMD Head Bone Forward", Vector) = (0, 0, 1, 0)
         [HideInInspector] _MMDHeadBoneUp("MMD Head Bone Up", Vector) = (0, 1, 0, 0)
         [HideInInspector] _MMDHeadBoneRight("MMD Head Bone Right", Vector) = (1, 0, 0, 0)
@@ -136,6 +136,7 @@ Shader "Honkai Star Rail/Character/Face"
             #pragma multi_compile_fog
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_FRONT_HAIR_SHADOWS
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
@@ -256,6 +257,7 @@ Shader "Honkai Star Rail/Character/Face"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
 
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            #pragma multi_compile_vertex _ _CASTING_SELF_SHADOW
 
             #include "CharFaceCore.hlsl"
 

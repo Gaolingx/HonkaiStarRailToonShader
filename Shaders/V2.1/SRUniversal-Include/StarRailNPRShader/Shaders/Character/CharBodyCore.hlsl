@@ -24,6 +24,7 @@
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.stalomeow.star-rail-npr-shader/Shaders/Shadow/PerObjectShadow.hlsl"
 #include "Shared/CharCore.hlsl"
 #include "Shared/CharDepthOnly.hlsl"
 #include "Shared/CharDepthNormals.hlsl"
@@ -42,19 +43,15 @@ TEXTURE2D(_RampMapWarm); SAMPLER(sampler_RampMapWarm);
 #endif
 
 CBUFFER_START(UnityPerMaterial)
-    float _ModelScale;
+    float _SingleMaterialID;
 
 #if !defined(CHAR_BODY_SHADER_TRANSPARENT)
     float _AlphaTestThreshold;
 #endif
 
-    float _SingleMaterialID;
-
     float4 _Color;
     float4 _BackColor;
     float4 _Maps_ST;
-
-    float _RampCoolWarmLerpFactor;
 
     DEF_CHAR_MAT_PROP(float4, _SpecularColor);
     DEF_CHAR_MAT_PROP(float, _SpecularShininess);
@@ -101,7 +98,13 @@ CBUFFER_START(UnityPerMaterial)
     float _OutlineZOffset;
     DEF_CHAR_MAT_PROP(float4, _OutlineColor);
 
+    float _SelfShadowDepthBias;
+    float _SelfShadowNormalBias;
+
+    float _ModelScale;
+    float _RampCoolWarmLerpFactor;
     float _DitherAlpha;
+    float _PerObjShadowCasterId;
 CBUFFER_END
 
 void ApplyStockings(inout float3 baseColor, float2 uv, float NoV)
@@ -186,6 +189,11 @@ void BodyColorFragment(
 
     Light light = GetCharacterMainLight(i.shadowCoord, i.positionWS);
     Directions dirWS = GetWorldSpaceDirections(light, i.positionWS, i.normalWS);
+
+    #if defined(_MAIN_LIGHT_SELF_SHADOWS)
+        float selfShadow = MainLightPerObjectSelfShadow(i.positionWS, _PerObjShadowCasterId);
+        light.shadowAttenuation = min(light.shadowAttenuation, selfShadow);
+    #endif
 
     ApplyStockings(texColor.rgb, i.uv.xy, dirWS.NoV);
 
@@ -322,7 +330,7 @@ void BodyOutlineFragment(
 
 CharShadowVaryings BodyShadowVertex(CharShadowAttributes i)
 {
-    return CharShadowVertex(i, _Maps_ST);
+    return CharShadowVertex(i, _Maps_ST, _SelfShadowDepthBias, _SelfShadowNormalBias);
 }
 
 void BodyShadowFragment(

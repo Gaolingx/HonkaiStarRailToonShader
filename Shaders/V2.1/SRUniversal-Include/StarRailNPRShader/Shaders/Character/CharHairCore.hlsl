@@ -38,14 +38,13 @@ TEXTURE2D(_RampMapCool); SAMPLER(sampler_RampMapCool);
 TEXTURE2D(_RampMapWarm); SAMPLER(sampler_RampMapWarm);
 
 CBUFFER_START(UnityPerMaterial)
-    float _ModelScale;
     float _AlphaTestThreshold;
 
     float4 _Color;
     float4 _BackColor;
     float4 _Maps_ST;
 
-    float _RampCoolWarmLerpFactor;
+    float _HairBlendAlpha;
 
     float4 _SpecularColor0;
     float _SpecularShininess0;
@@ -79,10 +78,12 @@ CBUFFER_START(UnityPerMaterial)
     float _OutlineZOffset;
     float4 _OutlineColor0;
 
-    float _HairBlendAlpha;
+    float _SelfShadowDepthBias;
+    float _SelfShadowNormalBias;
 
+    float _ModelScale;
+    float _RampCoolWarmLerpFactor;
     float _DitherAlpha;
-
     float4 _MMDHeadBoneForward;
     float4 _MMDHeadBoneUp;
     float4 _MMDHeadBoneRight;
@@ -263,7 +264,7 @@ float4 HairOutlineFragment(CharOutlineVaryings i) : SV_Target0
 
 CharShadowVaryings HairShadowVertex(CharShadowAttributes i)
 {
-    return CharShadowVertex(i, _Maps_ST);
+    return CharShadowVertex(i, _Maps_ST, _SelfShadowDepthBias, _SelfShadowNormalBias);
 }
 
 void HairShadowFragment(

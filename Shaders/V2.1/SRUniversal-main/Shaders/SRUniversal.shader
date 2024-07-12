@@ -97,6 +97,10 @@ Shader "HonkaiStarRailToon/Character"
         _BumpFactor("Bump Scale (Default 1)", Float) = 1.0
         [Normal] _NormalMap("Normal Map (Default black)", 2D) = "bump" { }
 
+        [Header(Self Shadow Caster)]
+        _SelfShadowDepthBias("Depth Bias", Float) = -0.01
+        _SelfShadowNormalBias("Normal Bias", Float) = 0
+
         [Header(Ramp Settings)]
         [Toggle(_CUSTOM_RAMP_MAPPING_ON)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
         [Toggle] _SingleMaterial("Is Single Material (Use Ramp Line of Mat0)", Float) = 0
@@ -131,7 +135,7 @@ Shader "HonkaiStarRailToon/Character"
         [Header(Additional Lighting)]
         [Toggle(_AdditionalLighting_ON)] _UseAdditionalLighting("Use Additional Lighting (Default NO)", Float) = 0
 
-        [Header(Face)]
+        [Header(Face Lighting)]
         [NoScaleOffset] _FaceMap("Face map (Default black)", 2D) = "black" { }
         [NoScaleOffset] _ExpressionMap("Expression Map (Default white)", 2D) = "white" { }
         _FaceShadowOffset("Face shadow offset (Default -0.01)", Range(-1, 1)) = 0
