@@ -29,7 +29,7 @@ using HSR.NPRShader.Utils;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace HSR.NPRShader
+namespace SRUniversal.Main
 {
     [ExecuteAlways]
     [DisallowMultipleComponent]

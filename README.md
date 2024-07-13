@@ -14,7 +14,7 @@
 
 ## Installation & Usage
 
-1. 点击Window>Package Manager，从包管理器的添加菜单中选择"Add package from git URL..."，导入https://github.com/stalomeow/StarRailNPRShader.git包（必要）。
+1. 点击Window>Package Manager，从包管理器的添加菜单中选择"Add package from git URL..."，导入<https://github.com/stalomeow/StarRailNPRShader.git>包（必要）。
 2. 打开Project Settings>Player>Other Settings，使用线性色彩空间。
 3. 找到项目使用的Universal Render Pipeline Asset，在Renderer List找到使用的Universal Renderer Data，确保RenderingPath为Forward/Forward+，关闭Depth Priming，点击Add Renderer Feature，将Honkai Star Rail的Renderer Feature添加进去。
 4. 最后，将TestModels目录下的测试模型拖入场景，将../SRUniversal-main/Scripts/Runtime下的SRCharacterRenderingController组件添加到模型上，检查渲染是否正常。
