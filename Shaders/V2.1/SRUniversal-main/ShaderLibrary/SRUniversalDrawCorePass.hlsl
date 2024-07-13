@@ -3,6 +3,7 @@
 #include "../ShaderLibrary/CharDepthOnly.hlsl"
 #include "../ShaderLibrary/CharDepthNormals.hlsl"
 #include "../ShaderLibrary/CharMotionVectors.hlsl"
+#include "../ShaderLibrary/CharShadowHelper.hlsl"
 
 struct CharCoreAttributes
 {
@@ -66,6 +67,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     float3 mainLightColor = GetMainLightColor(LightColor.rgb, _MainLightColorUsage);
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
+
+    // PerObjShadow
+    #if _AREA_UPPERBODY || _AREA_LOWERBODY
+        mainLight = GetCharPerObjectShadow(mainLight, positionWS, _PerObjShadowCasterId);
+    #endif
 
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
     #if _NORMAL_MAP_ON

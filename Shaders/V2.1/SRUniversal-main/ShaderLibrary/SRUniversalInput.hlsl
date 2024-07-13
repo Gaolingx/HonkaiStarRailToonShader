@@ -368,4 +368,6 @@ float4 _BloomColor5;
 float4 _BloomColor6;
 float4 _BloomColor7;
 
+float _PerObjShadowCasterId;
+
 CBUFFER_END

@@ -13,10 +13,11 @@
 此Shader根据 [Bilibili@给你柠檬椰果养乐多你会跟我玩吗](https://space.bilibili.com/32704665?spm_id_from=333.337.0.0) 大佬的视频制作，另外根据 [Github@stalomeow](https://github.com/stalomeow) 大佬的 [StarRailNPRShader](https://github.com/stalomeow/StarRailNPRShader) 工程加入了后处理部分（bloom、tonemapping），在此非常感谢各位大佬们无私的技术分享。
 
 ## Installation & Usage
-  
-1. 打开Project Settings>Player>Other Settings，使用线性色彩空间。
-2. 找到项目使用的Universal Render Pipeline Asset，在Renderer List找到使用的Universal Renderer Data，确保RenderingPath为Forward/Forward+，关闭Depth Priming，点击Add Renderer Feature，将Honkai Star Rail的Renderer Feature添加进去。
-3. 最后，将TestModels目录下的测试模型拖入场景，将../SRUniversal-main/Scripts/Runtime下的SRCharacterRenderingController组件添加到模型上，检查渲染是否正常。
+
+1. 点击Window>Package Manager，从包管理器的添加菜单中选择"Add package from git URL..."，导入https://github.com/stalomeow/StarRailNPRShader.git包（必要）。
+2. 打开Project Settings>Player>Other Settings，使用线性色彩空间。
+3. 找到项目使用的Universal Render Pipeline Asset，在Renderer List找到使用的Universal Renderer Data，确保RenderingPath为Forward/Forward+，关闭Depth Priming，点击Add Renderer Feature，将Honkai Star Rail的Renderer Feature添加进去。
+4. 最后，将TestModels目录下的测试模型拖入场景，将../SRUniversal-main/Scripts/Runtime下的SRCharacterRenderingController组件添加到模型上，检查渲染是否正常。
 
 在开始之前，你至少需要准备如下的贴图，如果不知道如何获取他们，可以参考B站 @小二今天吃啥啊 的这个教程，[链接](https://www.bilibili.com/video/BV1t34y1H7jt/)
   

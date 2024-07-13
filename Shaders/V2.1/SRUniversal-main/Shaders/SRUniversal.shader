@@ -98,8 +98,8 @@ Shader "HonkaiStarRailToon/Character"
         [Normal] _NormalMap("Normal Map (Default black)", 2D) = "bump" { }
 
         [Header(Self Shadow Caster)]
-        _SelfShadowDepthBias("Depth Bias", Float) = -0.01
-        _SelfShadowNormalBias("Normal Bias", Float) = 0
+        _SelfShadowDepthBias("Self Shadow Depth Bias", Float) = -0.01
+        _SelfShadowNormalBias("Self Shadow Normal Bias", Float) = 0
 
         [Header(Ramp Settings)]
         [Toggle(_CUSTOM_RAMP_MAPPING_ON)] _CustomRampMappingToggle("Use Custom ramp mapping (Default YES)", Float) = 1
@@ -373,6 +373,8 @@ Shader "HonkaiStarRailToon/Character"
         _StencilRefOverlay("Overlay Pass stencil reference (Default 0)", Range(0, 255)) = 0
         [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay Pass stencil comparison (Default disabled)", Int) = 0
 
+        [HideInInspector] _PerObjShadowCasterId("Per Object Shadow Caster Id", Float) = -1
+
     }
     SubShader
     {
@@ -397,17 +399,17 @@ Shader "HonkaiStarRailToon/Character"
         #pragma shader_feature_local _RIM_SHADOW_ON
         #pragma shader_feature_local _USE_LUT_MAP
         #pragma shader_feature_local _USE_LUT_MAP_OUTLINE
-        #pragma shader_feature _CUSTOMHEADBONEMODEVARENUM_DEFAULT _CUSTOMHEADBONEMODEVARENUM_GAME _CUSTOMHEADBONEMODEVARENUM_MMD
-        #pragma shader_feature _CUSTOMSPECULARCOLORVARENUM_DISABLE _CUSTOMSPECULARCOLORVARENUM_TINT _CUSTOMSPECULARCOLORVARENUM_OVERLAY
-        #pragma shader_feature _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
-        #pragma shader_feature _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE _CUSTOMRIMLIGHTCOLORVARENUM_TINT _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY
-        #pragma shader_feature _CUSTOMRIMLIGHTVARENUM_DISABLE _CUSTOMRIMLIGHTVARENUM_MULTIPLY _CUSTOMRIMLIGHTVARENUM_OVERLAY
-        #pragma shader_feature _CUSTOMRIMSHADOWCOLORVARENUM_DISABLE _CUSTOMRIMSHADOWCOLORVARENUM_TINT _CUSTOMRIMSHADOWCOLORVARENUM_OVERLAY
-        #pragma shader_feature _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
-        #pragma shader_feature _CUSTOMBLOOMVARENUM_DISABLE _CUSTOMBLOOMVARENUM_MULTIPLY _CUSTOMBLOOMVARENUM_OVERLAY
-        #pragma shader_feature _CUSTOMBLOOMCOLORVARENUM_DISABLE _CUSTOMBLOOMCOLORVARENUM_TINT _CUSTOMBLOOMCOLORVARENUM_OVERLAY
-        #pragma shader_feature _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT
-        #pragma shader_feature _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
+        #pragma shader_feature_local _CUSTOMHEADBONEMODEVARENUM_DEFAULT _CUSTOMHEADBONEMODEVARENUM_GAME _CUSTOMHEADBONEMODEVARENUM_MMD
+        #pragma shader_feature_local _CUSTOMSPECULARCOLORVARENUM_DISABLE _CUSTOMSPECULARCOLORVARENUM_TINT _CUSTOMSPECULARCOLORVARENUM_OVERLAY
+        #pragma shader_feature_local _CUSTOMSPECULARVARENUM_DISABLE _CUSTOMSPECULARVARENUM_MULTIPLY _CUSTOMSPECULARVARENUM_OVERLAY
+        #pragma shader_feature_local _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE _CUSTOMRIMLIGHTCOLORVARENUM_TINT _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY
+        #pragma shader_feature_local _CUSTOMRIMLIGHTVARENUM_DISABLE _CUSTOMRIMLIGHTVARENUM_MULTIPLY _CUSTOMRIMLIGHTVARENUM_OVERLAY
+        #pragma shader_feature_local _CUSTOMRIMSHADOWCOLORVARENUM_DISABLE _CUSTOMRIMSHADOWCOLORVARENUM_TINT _CUSTOMRIMSHADOWCOLORVARENUM_OVERLAY
+        #pragma shader_feature_local _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
+        #pragma shader_feature_local _CUSTOMBLOOMVARENUM_DISABLE _CUSTOMBLOOMVARENUM_MULTIPLY _CUSTOMBLOOMVARENUM_OVERLAY
+        #pragma shader_feature_local _CUSTOMBLOOMCOLORVARENUM_DISABLE _CUSTOMBLOOMCOLORVARENUM_TINT _CUSTOMBLOOMCOLORVARENUM_OVERLAY
+        #pragma shader_feature_local _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT
+        #pragma shader_feature_local _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _OUTLINE_ON
         #pragma shader_feature_local _DRAW_OVERLAY_ON
@@ -425,7 +427,8 @@ Shader "HonkaiStarRailToon/Character"
                 "LightMode" = "HSRForward2"
             }
             Cull [_CullMode]
-            Stencil{
+            Stencil
+            {
                 Ref [_StencilRef]
                 ReadMask [_StencilReadMask]
                 WriteMask [_StencilWriteMask]
@@ -443,8 +446,10 @@ Shader "HonkaiStarRailToon/Character"
             #pragma multi_compile_fog
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_FRONT_HAIR_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile _ _FORWARD_PLUS
             #pragma multi_compile _ _LIGHT_LAYERS
@@ -470,7 +475,8 @@ Shader "HonkaiStarRailToon/Character"
                 "LightMode" = "HSRForward3"
             }
             Cull [_CullMode]
-            Stencil{
+            Stencil
+            {
                 Ref [_StencilRefOverlay]
                 Comp [_StencilCompOverlay]
             }
@@ -482,6 +488,7 @@ Shader "HonkaiStarRailToon/Character"
             #pragma multi_compile_fog
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
@@ -583,6 +590,7 @@ Shader "HonkaiStarRailToon/Character"
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            #pragma multi_compile_vertex _ _CASTING_SELF_SHADOW
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
