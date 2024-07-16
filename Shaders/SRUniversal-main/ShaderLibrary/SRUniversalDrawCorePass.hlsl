@@ -210,7 +210,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
         #if _AdditionalLighting_ON
             CHAR_LIGHT_LOOP_BEGIN(positionWS, input.positionCS)
                 Light lightAdd = GetCharacterAdditionalLight(lightIndex, positionWS);
-                FinalDiffuse = CombineColorPreserveLuminance(FinalDiffuse, GetAdditionalLightDiffuse(baseColor.rgb, lightAdd));
+                FinalDiffuse = CombineColorPreserveLuminance(FinalDiffuse, GetAdditionalLightDiffuse(baseColor.rgb, lightAdd), _AdditionalLightIntensity);
             CHAR_LIGHT_LOOP_END
         #endif
     #endif

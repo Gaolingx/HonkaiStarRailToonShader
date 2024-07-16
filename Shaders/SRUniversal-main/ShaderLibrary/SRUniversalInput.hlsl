@@ -166,6 +166,10 @@ float _ShadowRampOffset;
 float _ShadowBoost;
 
 
+// Additional Light
+float _AdditionalLightIntensity;
+
+
 // FaceShadow
 float _FaceShadowOffset;
 float _FaceShadowTransitionSoftness;

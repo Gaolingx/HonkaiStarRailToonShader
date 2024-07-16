@@ -48,10 +48,10 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
+float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd, float thresholdMax)
 {
     float3 hsv = RgbToHsv(color + colorAdd);
-    hsv.z = max(RgbToHsv(color).z, RgbToHsv(colorAdd).z);
+    hsv.z = max(RgbToHsv(color).z, clamp(0, thresholdMax, RgbToHsv(colorAdd).z));
     return HsvToRgb(hsv);
 }
 

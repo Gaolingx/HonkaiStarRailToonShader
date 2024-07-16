@@ -119,7 +119,7 @@ Shader "HonkaiStarRailToon/Character"
         _IndirectLightUsage("Indirect light color usage (Default 0.5)", Range(0, 1)) = 0.5
 
         [Header(Main Lighting)]
-        [Toggle(_AUTO_Brightness_ON)] _UseAutoBrightness("Use Auto Brightness (Default NO)", Float) = 0
+        [Toggle(_AUTO_Brightness_ON)] _UseAutoBrightness("Use Auto Brightness (Default Yes)", Float) = 1
         _AutoBrightnessThresholdMin("Auto Brightness Threshold Min (Default 0.5)", Float) = 0.5
         _AutoBrightnessThresholdMax("Auto Brightness Threshold Max (Default 1.0)", Float) = 1.0
         _BrightnessOffset("Auto Brightness Offset (Default 0)", Float) = 0
@@ -134,6 +134,7 @@ Shader "HonkaiStarRailToon/Character"
 
         [Header(Additional Lighting)]
         [Toggle(_AdditionalLighting_ON)] _UseAdditionalLighting("Use Additional Lighting (Default NO)", Float) = 0
+        _AdditionalLightIntensity("Additional Light Intensity (Default 1)", Float) = 1.0
 
         [Header(Face Lighting)]
         [NoScaleOffset] _FaceMap("Face map (Default black)", 2D) = "black" { }
