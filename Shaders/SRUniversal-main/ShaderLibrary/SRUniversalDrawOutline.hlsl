@@ -1,3 +1,6 @@
+#ifndef _SR_UNIVERSAL_DRAW_OUTLINE_INCLUDED
+#define _SR_UNIVERSAL_DRAW_OUTLINE_INCLUDED
+
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
 
 struct CharOutlineAttributes
@@ -265,3 +268,5 @@ out float4 colorTarget      : SV_Target0)
 
     colorTarget = float4(outputColor.rgb, 1);
 }
+
+#endif

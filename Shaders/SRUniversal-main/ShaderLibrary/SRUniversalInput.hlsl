@@ -1,3 +1,6 @@
+#ifndef _SR_UNIVERSAL_INPUT_INCLUDED
+#define _SR_UNIVERSAL_INPUT_INCLUDED
+
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -375,3 +378,5 @@ float4 _BloomColor7;
 float _PerObjShadowCasterId;
 
 CBUFFER_END
+
+#endif

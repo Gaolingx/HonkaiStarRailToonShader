@@ -1,3 +1,6 @@
+#ifndef _SR_UNIVERSAL_LIBRARY_INCLUDED
+#define _SR_UNIVERSAL_LIBRARY_INCLUDED
+
 // include -------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -1333,3 +1336,5 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
 
     return bloomAreaData;
 }
+
+#endif

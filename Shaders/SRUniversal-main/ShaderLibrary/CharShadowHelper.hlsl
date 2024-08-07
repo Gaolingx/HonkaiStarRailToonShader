@@ -1,3 +1,6 @@
+#ifndef _CHAR_SHADOW_HELPER_INCLUDED
+#define _CHAR_SHADOW_HELPER_INCLUDED
+
 #include "Packages/com.stalomeow.star-rail-npr-shader/Shaders/Shadow/PerObjectShadow.hlsl"
 
 Light GetCharPerObjectShadow(Light light, float3 positionWS, float perObjShadowCasterId)
@@ -9,3 +12,5 @@ Light GetCharPerObjectShadow(Light light, float3 positionWS, float perObjShadowC
 
     return light;
 }
+
+#endif

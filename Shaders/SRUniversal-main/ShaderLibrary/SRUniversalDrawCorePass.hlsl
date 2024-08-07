@@ -1,3 +1,6 @@
+#ifndef _SR_UNIVERSAL_DRAW_CORE_PASS_INCLUDED
+#define _SR_UNIVERSAL_DRAW_CORE_PASS_INCLUDED
+
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
 #include "../ShaderLibrary/CharShadow.hlsl"
 #include "../ShaderLibrary/CharDepthOnly.hlsl"
@@ -10,8 +13,8 @@ struct CharCoreAttributes
     float3 positionOS   : POSITION;
     half3 normalOS      : NORMAL;
     half4 tangentOS     : TANGENT;
-    float2 uv1           : TEXCOORD0;
-    float2 uv2           : TEXCOORD1;
+    float2 uv1          : TEXCOORD0;
+    float2 uv2          : TEXCOORD1;
     float4 color        : COLOR;
 };
 
@@ -33,7 +36,7 @@ CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
     CharCoreVaryings output = (CharCoreVaryings)0;
 
     VertexPositionInputs vertexPositionInputs = GetVertexPositionInputs(input.positionOS);
-    VertexNormalInputs vertexNormalInputs = GetVertexNormalInputs(input.normalOS,input.tangentOS);
+    VertexNormalInputs vertexNormalInputs = GetVertexNormalInputs(input.normalOS, input.tangentOS);
 
     output.uv = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
     // 世界空间
@@ -144,9 +147,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     #endif
 
     // GI
-    float3 indirectLightColor = 0;
     //float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
-    indirectLightColor = CalculateGI(baseColor, lightMap.g, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
+    float3 indirectLightColor = CalculateGI(baseColor, lightMap.g, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
 
     // Shadow
     float mainLightShadow = 1;
@@ -192,7 +194,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
 
     //根据白天夜晚，插值获得最终的rampColor，_DayTime也可以用变量由C#脚本传入Shader
     float DayTime = 0;
-    if (_DayTime_MANUAL_ON)
+
+    [branch] if (_DayTime_MANUAL_ON)
     {
         DayTime = _DayTime;
     }
@@ -500,3 +503,5 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
 
     return CharMotionVectorsFragment(input);
 }
+
+#endif
