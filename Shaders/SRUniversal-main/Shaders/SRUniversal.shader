@@ -90,7 +90,7 @@ Shader "HonkaiStarRailToon/Character"
 
         [Header(LutMap)]
         [Toggle(_USE_LUT_MAP)] _UseLutMapToggle("Use LUT Map (Default NO)", Float) = 0
-        _MaterialValuesPackLUT("LUT Map (Default black)", 2D) = "black" { }
+        [NoScaleOffset] _MaterialValuesPackLUT("LUT Map (Default black)", 2D) = "black" { }
 
         [Header(Normal)]
         [Toggle(_NORMAL_MAP_ON)] _UseNormalMap("Use Normal Map (Default NO)", Float) = 0
@@ -130,7 +130,7 @@ Shader "HonkaiStarRailToon/Character"
         _ShadowThresholdCenter("Shadow threshold center (Default 0)", Range(-1, 1)) = 0
         _ShadowThresholdSoftness("Shadow threshold softness (Default 0.1)", Range(0, 1)) = 0.1
         _ShadowRampOffset("Shadow ramp offset (Default 0.75)", Range(0, 1)) = 0.75
-        _ShadowBoost("Shadow Boost (Default 1)", Range(0.0, 1.0)) = 1.0
+        _ShadowBoost("Shadow Boost (Default 1)", Range(0, 1)) = 1.0
 
         [Header(Additional Lighting)]
         [Toggle(_AdditionalLighting_ON)] _UseAdditionalLighting("Use Additional Lighting (Default NO)", Float) = 0
@@ -377,16 +377,20 @@ Shader "HonkaiStarRailToon/Character"
         [HideInInspector] _PerObjShadowCasterId("Per Object Shadow Caster Id", Float) = -1
 
     }
+
     SubShader
     {
         LOD 100
+
         Tags
         {
             "RenderPipeline" = "UniversalPipeline"
+            "RenderType" = "Opaque"
             "UniversalMaterialType" = "ComplexLit"
         }
 
         HLSLINCLUDE
+
         #pragma shader_feature_local _AREA_FACE
         #pragma shader_feature_local _AREA_HAIR
         #pragma shader_feature_local _AREA_UPPERBODY
@@ -421,13 +425,13 @@ Shader "HonkaiStarRailToon/Character"
 
         Pass
         {
-            Name "CharDrawCore"
+            Name "SRCharDrawCore"
+
             Tags
             {
-                "RenderType" = "Opaque"
-                "LightMode" = "HSRForward2"
+                "LightMode" = "HSRForward1"
             }
-            Cull [_CullMode]
+
             Stencil
             {
                 Ref [_StencilRef]
@@ -438,88 +442,87 @@ Shader "HonkaiStarRailToon/Character"
                 Fail [_StencilFailOp]
                 ZFail [_StencilZFailOp]
             }
+
+            Cull [_CullMode]
+            ZWrite [_ZWrite]
+
             Blend [_SrcBlendModeColor] [_DstBlendModeColor], [_SrcBlendModeAlpha] [_DstBlendModeAlpha]
             BlendOp [_BlendOp]
-            ZWrite [_ZWrite]
-            
+
+            ColorMask RGBA 0
 
             HLSLPROGRAM
-            #pragma multi_compile_fog
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _MAIN_LIGHT_FRONT_HAIR_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile _ _FORWARD_PLUS
-            #pragma multi_compile _ _LIGHT_LAYERS
+            #pragma vertex SRUniversalVertex
+            #pragma fragment SRUniversalFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma vertex SRUniversalVertex
-            #pragma fragment SRUniversalFragment
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
+            #pragma multi_compile _ _FORWARD_PLUS
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+
             ENDHLSL
         }
 
         Pass
         {
-            Name "CharDrawOverlay"
+            Name "SRCharDrawOverlay"
+
             Tags
             {
-                "RenderType" = "Opaque"
-                "LightMode" = "HSRForward3"
+                "LightMode" = "HSRForward2"
             }
-            Cull [_CullMode]
+
             Stencil
             {
                 Ref [_StencilRefOverlay]
                 Comp [_StencilCompOverlay]
             }
-            Blend [_SrcBlendModeColorOverlay] [_DstBlendModeColorOverlay], [_SrcBlendModeAlphaOverlay] [_DstBlendModeAlphaOverlay]
-            BlendOp [_BlendOpOverlay]
+
+            Cull [_CullMode]
             ZWrite [_ZWrite]
 
-            HLSLPROGRAM
-            #pragma multi_compile_fog
+            Blend [_SrcBlendModeColorOverlay] [_DstBlendModeColorOverlay], [_SrcBlendModeAlphaOverlay] [_DstBlendModeAlphaOverlay]
+            BlendOp [_BlendOpOverlay]
 
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            // #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile _ _FORWARD_PLUS
-            #pragma multi_compile _ _LIGHT_LAYERS
+            ColorMask RGBA 0
+
+            HLSLPROGRAM
+
+            #pragma vertex SRUniversalVertex
+            #pragma fragment SRUniversalFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma vertex SRUniversalVertex
-            #pragma fragment SRUniversalFragment
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
+            #pragma multi_compile _ _FORWARD_PLUS
 
             #if _DRAW_OVERLAY_ON
                 #include "../ShaderLibrary/SRUniversalInput.hlsl"
                 #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
             #else
-                struct Attributes {};
-                struct Varyings
-                {
-                    float4 positionCS : SV_POSITION;
-                };
-                Varyings SRUniversalVertex(Attributes input)
-                {
-                    return (Varyings)0;
-                }
-                float4 SRUniversalFragment(Varyings input) : SV_TARGET
-                {
-                    return 0;
-                }
+                #include "../ShaderLibrary/SRUniversalCommonPass.hlsl"
             #endif
 
             ENDHLSL
@@ -527,36 +530,29 @@ Shader "HonkaiStarRailToon/Character"
 
         Pass 
         {
-            Name "CharDrawOutline"
+            Name "SRCharDrawOutline"
+
             Tags 
             {
-                "RenderType" = "Opaque"
                 "LightMode" = "HSROutline"
-
             }
 
             Cull Front // Cull Front is a must for extra pass outline method
-            ZWrite [_ZWrite]
+            ZTest LEqual
+            ZWrite On
+
+            ColorMask RGBA 0
 
             HLSLPROGRAM
 
-            // Direct copy all keywords from "ForwardLit" pass
-            // ---------------------------------------------------------------------------------------------
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
-            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            // ---------------------------------------------------------------------------------------------
-            #pragma multi_compile_fog
-            // ---------------------------------------------------------------------------------------------
+            #pragma vertex CharacterOutlinePassVertex
+            #pragma fragment CharacterOutlinePassFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-            
-            #pragma vertex CharacterOutlinePassVertex
-            #pragma fragment CharacterOutlinePassFragment
+
+            #pragma multi_compile_fog
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawOutline.hlsl"
@@ -566,7 +562,7 @@ Shader "HonkaiStarRailToon/Character"
 
         Pass
         {
-            Name "PerObjectShadow"
+            Name "SRCharPerObjectShadow"
 
             Tags
             {
@@ -601,7 +597,7 @@ Shader "HonkaiStarRailToon/Character"
 
         Pass
         {
-            Name "CharDepthOnly"
+            Name "SRCharDepthOnly"
 
             Tags
             {
@@ -629,7 +625,7 @@ Shader "HonkaiStarRailToon/Character"
 
         Pass
         {
-            Name "CharDepthNormals"
+            Name "SRCharDepthNormals"
 
             Tags
             {
@@ -656,7 +652,7 @@ Shader "HonkaiStarRailToon/Character"
 
         Pass
         {
-            Name "CharMotionVectors"
+            Name "SRCharMotionVectors"
 
             Tags
             {
