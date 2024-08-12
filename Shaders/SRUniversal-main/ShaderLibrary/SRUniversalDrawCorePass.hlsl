@@ -1,6 +1,7 @@
 #ifndef _SR_UNIVERSAL_DRAW_CORE_PASS_INCLUDED
 #define _SR_UNIVERSAL_DRAW_CORE_PASS_INCLUDED
 
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
 #include "../ShaderLibrary/CharShadow.hlsl"
 #include "../ShaderLibrary/CharDepthOnly.hlsl"
@@ -30,8 +31,24 @@ struct CharCoreVaryings
     float4 positionCS               : SV_POSITION;
 };
 
+void InitializeInputData(CharCoreVaryings input, out InputData inputData)
+{
+    inputData = (InputData)0;
 
-CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
+    inputData.normalWS = NormalizeNormalPerPixel(input.normalWS);
+
+    inputData.positionWS = float3(0, 0, 0);
+    inputData.viewDirectionWS = half3(0, 0, 1);
+    inputData.shadowCoord = 0;
+    inputData.fogCoord = 0;
+    inputData.vertexLighting = half3(0, 0, 0);
+    inputData.bakedGI = half3(0, 0, 0);
+    inputData.normalizedScreenSpaceUV = 0;
+    inputData.shadowMask = half4(1, 1, 1, 1);
+}
+
+
+CharCoreVaryings SRUniversalCharVertex(CharCoreAttributes input)
 {
     CharCoreVaryings output = (CharCoreVaryings)0;
 
@@ -48,7 +65,7 @@ CharCoreVaryings SRUniversalVertex(CharCoreAttributes input)
     // 顶点色
     output.color = input.color;
     // 间接光 with 球谐函数
-    output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0, 0, 0), _IndirectLightFlattenNormal));
+    output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0,0,0), _IndirectLightFlattenNormal));
 
     output.positionCS = vertexPositionInputs.positionCS;
 
@@ -363,7 +380,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     return FinalColor;
 }
 
-void SRUniversalFragment(
+void SRUniversalCharFragment(
 CharCoreVaryings input,
 FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC,
 out float4 colorTarget      : SV_Target0)
@@ -380,6 +397,39 @@ out float4 colorTarget      : SV_Target0)
 
     colorTarget.rgb = MixBloomColor(outputColor.rgb, bloomColor, bloomIntensity);
     colorTarget.a = outputColor.a;
+}
+
+FragmentOutput SRUniversalCharGBufferFragment(CharCoreVaryings input, FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
+{
+    SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
+
+    float3 baseColor = 0;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv.xy).rgb;
+    baseColor = GetMainTexColor(input.uv.xy,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    //给背面填充颜色，对眼睛，丝袜很有用
+    baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
+
+    float alpha = _Alpha;
+    float4 FinalColor = float4(baseColor, alpha);
+
+    InputData inputData;
+    InitializeInputData(input, inputData);
+
+    SurfaceData surfaceData = (SurfaceData)0;
+    surfaceData.albedo = FinalColor.rgb;
+    surfaceData.alpha = alpha;
+
+    surfaceData.occlusion = 1;
+
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
+
+    return SurfaceDataToGbuffer(surfaceData, inputData, float3(0,0,0), kLightingInvalid);
 }
 
 CharShadowVaryings CharacterShadowVertex(CharShadowAttributes input)

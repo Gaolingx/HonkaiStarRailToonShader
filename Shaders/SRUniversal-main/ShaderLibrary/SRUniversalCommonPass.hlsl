@@ -11,12 +11,12 @@ struct Varyings
     float4 positionCS : SV_POSITION;
 };
 
-Varyings SRUniversalVertex(Attributes input)
+Varyings SRUniversalCharVertex(Attributes input)
 {
     return (Varyings)0;
 }
 
-float4 SRUniversalFragment(Varyings input) : SV_TARGET
+float4 SRUniversalCharFragment(Varyings input) : SV_TARGET
 {
     return 0;
 }

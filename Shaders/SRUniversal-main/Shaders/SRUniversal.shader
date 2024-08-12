@@ -453,8 +453,8 @@ Shader "HonkaiStarRailToon/Character"
 
             HLSLPROGRAM
 
-            #pragma vertex SRUniversalVertex
-            #pragma fragment SRUniversalFragment
+            #pragma vertex SRUniversalCharVertex
+            #pragma fragment SRUniversalCharFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
@@ -501,8 +501,8 @@ Shader "HonkaiStarRailToon/Character"
 
             HLSLPROGRAM
 
-            #pragma vertex SRUniversalVertex
-            #pragma fragment SRUniversalFragment
+            #pragma vertex SRUniversalCharVertex
+            #pragma fragment SRUniversalCharFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
@@ -524,6 +524,50 @@ Shader "HonkaiStarRailToon/Character"
             #else
                 #include "../ShaderLibrary/SRUniversalCommonPass.hlsl"
             #endif
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "SRCharDrawCoreGBuffer"
+
+            Tags
+            {
+                "LightMode" = "UniversalGBuffer"
+            }
+
+            Cull [_CullMode]
+            ZWrite [_ZWrite]
+
+            ColorMask RGBA 0
+
+            HLSLPROGRAM
+            #pragma target 4.5
+
+            // Deferred Rendering Path does not support the OpenGL-based graphics API:
+            // Desktop OpenGL, OpenGL ES 3.0, WebGL 2.0.
+            #pragma exclude_renderers gles3 glcore
+
+            #pragma vertex SRUniversalCharVertex
+            #pragma fragment SRUniversalCharGBufferFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #pragma multi_compile_fog
+
+            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
+            #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _LIGHT_LAYERS
+            #pragma multi_compile _ _FORWARD_PLUS
+
+            #include "../ShaderLibrary/SRUniversalInput.hlsl"
+            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
