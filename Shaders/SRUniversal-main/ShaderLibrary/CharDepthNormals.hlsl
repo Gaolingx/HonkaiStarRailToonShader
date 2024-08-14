@@ -23,7 +23,7 @@
 #define _CHAR_DEPTH_NORMALS_INCLUDED
 
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-
+#include "../ShaderLibrary/SRUniversalUtils.hlsl"
 
 struct CharDepthNormalsAttributes
 {

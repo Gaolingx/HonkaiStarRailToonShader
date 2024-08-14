@@ -1,6 +1,8 @@
 #ifndef _SR_UNIVERSAL_DRAW_CORE_PASS_INCLUDED
 #define _SR_UNIVERSAL_DRAW_CORE_PASS_INCLUDED
 
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/UnityGBuffer.hlsl"
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
 #include "../ShaderLibrary/CharShadow.hlsl"

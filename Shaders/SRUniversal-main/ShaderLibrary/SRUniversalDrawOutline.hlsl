@@ -1,6 +1,8 @@
 #ifndef _SR_UNIVERSAL_DRAW_OUTLINE_INCLUDED
 #define _SR_UNIVERSAL_DRAW_OUTLINE_INCLUDED
 
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
 
 struct CharOutlineAttributes
@@ -135,43 +137,22 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     return output;
 }
 
-half4 SampleCoolRampMapOutline(float2 uv)
-{
-    half4 color = 0;
-    #if _AREA_HAIR
-        color = SAMPLE_TEXTURE2D(_HairCoolRamp, sampler_HairCoolRamp, uv);
-    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
-        color = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, uv);
-    #elif _AREA_FACE
-        color = SAMPLE_TEXTURE2D(_BodyCoolRamp, sampler_BodyCoolRamp, uv);
-    #endif
-
-    return color;
-}
-
-half4 SampleWarmRampMapOutline(float2 uv)
-{
-    half4 color = 0;
-    #if _AREA_HAIR
-        color = SAMPLE_TEXTURE2D(_HairWarmRamp, sampler_HairWarmRamp, uv);
-    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
-        color = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, uv);
-    #elif _AREA_FACE
-        color = SAMPLE_TEXTURE2D(_BodyWarmRamp, sampler_BodyWarmRamp, uv);
-    #endif
-
-    return color;
-}
-
 half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 {
     half3 color = 0;
     #if _USE_LUT_MAP && _USE_LUT_MAP_OUTLINE
         color = GetLUTMapOutlineColor(GetRampLineIndex(materialId)).rgb;
     #else
-        half3 coolColor = SampleCoolRampMapOutline(float2(0, GetRampV(materialId))).rgb;
-        half3 warmColor = SampleWarmRampMapOutline(float2(0, GetRampV(materialId))).rgb;
-        color = mainColor * LerpRampColor(coolColor, warmColor, DayTime, _ShadowBoost);
+        float2 rampUV = float2(0, GetRampV(materialId));
+        RampColor RC = RampColorConstruct(rampUV,
+        TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp),
+        TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp),
+        TEXTURE2D_ARGS(_BodyCoolRamp, sampler_BodyCoolRamp),
+        TEXTURE2D_ARGS(_BodyWarmRamp, sampler_BodyWarmRamp));
+
+        half3 coolRampCol = RC.coolRampCol;
+        half3 warmRampCol = RC.warmRampCol;
+        color = mainColor * LerpRampColor(coolRampCol, warmRampCol, DayTime, 1);
     #endif
 
     const float4 overlayColors[8] = {
@@ -215,32 +196,20 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     Light mainLight = GetMainLight(shadowCoord);
     float3 lightDirectionWS = normalize(mainLight.direction);
 
-    float4 mainTex = 0;
+    float3 baseColor = 0;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.baseUV.xy).rgb;
+    baseColor = GetMainTexColor(input.baseUV.xy,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+
     float4 lightMap = 0;
-    #if _AREA_HAIR
-        {
-            mainTex = SAMPLE_TEXTURE2D(_HairColorMap, sampler_HairColorMap, input.baseUV.xy);
-            lightMap = SAMPLE_TEXTURE2D(_HairLightMap, sampler_HairLightMap, input.baseUV.xy);
-        }
-    #elif _AREA_UPPERBODY || _AREA_LOWERBODY
-        {
-            #if _AREA_UPPERBODY
-                mainTex = SAMPLE_TEXTURE2D(_UpperBodyColorMap, sampler_UpperBodyColorMap, input.baseUV.xy);
-                lightMap = SAMPLE_TEXTURE2D(_UpperBodyLightMap, sampler_UpperBodyLightMap, input.baseUV.xy);
-            #elif _AREA_LOWERBODY
-                mainTex = SAMPLE_TEXTURE2D(_LowerBodyColorMap, sampler_LowerBodyColorMap, input.baseUV.xy);
-                lightMap = SAMPLE_TEXTURE2D(_LowerBodyLightMap, sampler_LowerBodyLightMap, input.baseUV.xy);
-            #endif
-        }
-    #elif _AREA_FACE
-        {
-            mainTex = SAMPLE_TEXTURE2D(_FaceColorMap, sampler_FaceColorMap, input.baseUV.xy);
-            lightMap = float4(1, 1, 1, 1);
-        }
-    #endif
+    lightMap = GetLightMapTex(input.baseUV.xy, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
 
     float DayTime = 0;
-    if (_DayTime_MANUAL_ON)
+
+    [branch] if (_DayTime_MANUAL_ON)
     {
         DayTime = _DayTime;
     }
@@ -250,7 +219,7 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     }
     
     float alpha = _Alpha;
-    float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, mainTex.rgb, DayTime), alpha);
+    float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, baseColor.rgb, DayTime), alpha);
 
     DoClipTestToTargetAlphaValue(FinalOutlineColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
