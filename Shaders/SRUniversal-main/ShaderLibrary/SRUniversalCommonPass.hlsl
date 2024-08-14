@@ -16,7 +16,7 @@ Varyings SRUniversalCharVertex(Attributes input)
     return (Varyings)0;
 }
 
-float4 SRUniversalCharFragment(Varyings input) : SV_TARGET
+float4 SRUniversalCharOverlayFragment(Varyings input) : SV_TARGET
 {
     return 0;
 }

@@ -454,7 +454,7 @@ Shader "HonkaiStarRailToon/Character"
             HLSLPROGRAM
 
             #pragma vertex SRUniversalCharVertex
-            #pragma fragment SRUniversalCharFragment
+            #pragma fragment SRUniversalCharCoreFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
@@ -502,7 +502,7 @@ Shader "HonkaiStarRailToon/Character"
             HLSLPROGRAM
 
             #pragma vertex SRUniversalCharVertex
-            #pragma fragment SRUniversalCharFragment
+            #pragma fragment SRUniversalCharOverlayFragment
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON

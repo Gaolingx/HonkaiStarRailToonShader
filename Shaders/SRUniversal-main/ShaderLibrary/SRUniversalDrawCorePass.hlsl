@@ -9,44 +9,6 @@
 #include "../ShaderLibrary/CharMotionVectors.hlsl"
 #include "../ShaderLibrary/CharShadowHelper.hlsl"
 
-struct CharCoreAttributes
-{
-    float3 positionOS   : POSITION;
-    half3 normalOS      : NORMAL;
-    half4 tangentOS     : TANGENT;
-    float2 uv1          : TEXCOORD0;
-    float2 uv2          : TEXCOORD1;
-    float4 color        : COLOR;
-};
-
-struct CharCoreVaryings
-{
-    float4 uv                       : TEXCOORD0;
-    float4 positionWSAndFogFactor   : TEXCOORD1;
-    float3 normalWS                 : TEXCOORD2;
-    float3 bitangentWS              : TEXCOORD3;
-    float3 tangentWS                : TEXCOORD4;
-    float3 SH                       : TEXCOORD5;
-    float4 color                    : COLOR;
-    float4 positionCS               : SV_POSITION;
-};
-
-void InitializeInputData(CharCoreVaryings input, out InputData inputData)
-{
-    inputData = (InputData)0;
-
-    inputData.normalWS = NormalizeNormalPerPixel(input.normalWS);
-
-    inputData.positionWS = float3(0, 0, 0);
-    inputData.viewDirectionWS = half3(0, 0, 1);
-    inputData.shadowCoord = 0;
-    inputData.fogCoord = 0;
-    inputData.vertexLighting = half3(0, 0, 0);
-    inputData.bakedGI = half3(0, 0, 0);
-    inputData.normalizedScreenSpaceUV = 0;
-    inputData.shadowMask = half4(1, 1, 1, 1);
-}
-
 
 CharCoreVaryings SRUniversalCharVertex(CharCoreAttributes input)
 {
@@ -380,7 +342,26 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     return FinalColor;
 }
 
-void SRUniversalCharFragment(
+void SRUniversalCharCoreFragment(
+CharCoreVaryings input,
+FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC,
+out float4 colorTarget      : SV_Target0)
+{
+    SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
+
+    float4 outputColor = colorFragmentTarget(input, isFrontFace);
+
+    float4 lightMap = GetLightMapTex(input.uv.xy, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
+
+    BloomAreaData bloomAreaData = GetBloomAreaData(lightMap.a, outputColor.rgb);
+    float3 bloomColor = bloomAreaData.color;
+    float bloomIntensity = bloomAreaData.intensity;
+
+    colorTarget.rgb = MixBloomColor(outputColor.rgb, bloomColor, bloomIntensity);
+    colorTarget.a = outputColor.a;
+}
+
+void SRUniversalCharOverlayFragment(
 CharCoreVaryings input,
 FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC,
 out float4 colorTarget      : SV_Target0)
