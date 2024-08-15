@@ -1,8 +1,8 @@
-Shader "HonkaiStarRailToon/Character"
+Shader "HonkaiStarRailToon/Character/UpperBody"
 {
     Properties
     {
-        [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 0
+        [HideInInspector] [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 3
         [HideInInspector] _MMDHeadBoneForward("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneUp("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneRight("", Float) = (0, 0, 0, 0)
@@ -32,6 +32,9 @@ Shader "HonkaiStarRailToon/Character"
 
         [Header(Dither Alpha)]
         _DitherAlpha("Dither alpha (Default 1)", Range(0, 1)) = 1
+
+        [Header(Transparent Fron Hair)]
+        _HairBlendAlpha("Hair Blend Alpha (Default 0.6)", Range(0, 1)) = 0.6
 
         [Header(Head Bone)]
         [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Specular Color State", Float) = 1
@@ -214,7 +217,6 @@ Shader "HonkaiStarRailToon/Character"
 
         [Header(Rim Lighting)]
         [Toggle(_RIM_LIGHTING_ON)] _UseRimLight("Use Rim light (Default YES)", Float) = 1
-        _ModelScale("Model Scale (Default 1)", Float) = 1
         _RimIntensity("Rim Intensity (Front Face)", Float) = 0.5
         _RimIntensityBackFace("Rim Intensity (Back Face)", Float) = 0
         [KeywordEnum(Disable, Tint, Overlay)] _CustomRimLightColorVarEnum("Custom Rim Light Color State", Float) = 0
@@ -354,26 +356,9 @@ Shader "HonkaiStarRailToon/Character"
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor("Core Pass dst blend mode color (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha("Core Pass src blend mode alpha (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha("Core Pass dst blend mode alpha (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOp("BlendOp (Default Add)", Float) = 0
         [Enum(Off, 0, On, 1)] _ZWrite("ZWrite (Default On)", Float) = 1
-        _StencilRef("Stencil reference (Default 0)", Range(0, 255)) = 0
-        _StencilReadMask("Stencil Read Mask (Default 255)", Range(0, 255)) = 255
-        _StencilWriteMask("Stencil Write Mask (Default 255)", Range(0, 255)) = 255
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp("Stencil comparison (Default disabled)", Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPassOp("Stencil pass comparison (Default keep)", Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilFailOp("Stencil fail comparison (Default keep)", Int) = 0
-        [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFailOp("Stencil z fail comparison (Default keep)", Int) = 0
 
-        [Header(Draw Overlay)]
-        [Toggle(_DRAW_OVERLAY_ON)] _UseDrawOverlay("Use draw overlay (Default NO)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeColorOverlay("Overlay Pass src blend mode color (Default One)", Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColorOverlay("Overlay Pass dst blend mode color (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlphaOverlay("Overlay Pass src blend mode alpha (Default One)", Float) = 1
-        [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlphaOverlay("Overlay Pass dst blend mode alpha (Default Zero)", Float) = 0
-        [Enum(UnityEngine.Rendering.BlendOp)] _BlendOpOverlay("Overlay Pass blend operation (Default Add)", Float) = 0
-        _StencilRefOverlay("Overlay Pass stencil reference (Default 0)", Range(0, 255)) = 0
-        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilCompOverlay("Overlay Pass stencil comparison (Default disabled)", Int) = 0
-
+        [HideInInspector] _ModelScale("Model Scale (Default 1)", Float) = 1
         [HideInInspector] _PerObjShadowCasterId("Per Object Shadow Caster Id", Float) = -1
 
     }
@@ -387,6 +372,7 @@ Shader "HonkaiStarRailToon/Character"
             "RenderPipeline" = "UniversalPipeline"
             "RenderType" = "Opaque"
             "UniversalMaterialType" = "ComplexLit"
+            "Queue" = "Geometry+30"  // 身体默认 +30，放在最后渲染
         }
 
         HLSLINCLUDE
@@ -417,7 +403,6 @@ Shader "HonkaiStarRailToon/Character"
         #pragma shader_feature_local _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _OUTLINE_ON
-        #pragma shader_feature_local _DRAW_OVERLAY_ON
         #pragma shader_feature_local _EMISSION_ON
         #pragma shader_feature_local _AdditionalLighting_ON
 
@@ -429,25 +414,24 @@ Shader "HonkaiStarRailToon/Character"
 
             Tags
             {
-                "LightMode" = "HSRForward1"
+                // 在头发的两个 Pass 之后绘制，避免干扰透明刘海对眼睛区域的判断
+                "LightMode" = "HSRForward3"
             }
 
+            // 角色的 Stencil
             Stencil
             {
-                Ref [_StencilRef]
-                ReadMask [_StencilReadMask]
-                WriteMask [_StencilWriteMask]
-                Comp [_StencilComp]
-                Pass [_StencilPassOp]
-                Fail [_StencilFailOp]
-                ZFail [_StencilZFailOp]
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
+                Fail Keep
             }
 
             Cull [_CullMode]
             ZWrite [_ZWrite]
 
-            Blend [_SrcBlendModeColor] [_DstBlendModeColor], [_SrcBlendModeAlpha] [_DstBlendModeAlpha]
-            BlendOp [_BlendOp]
+            Blend 0 [_SrcBlendModeColor] [_DstBlendModeColor], [_SrcBlendModeAlpha] [_DstBlendModeAlpha]
 
             ColorMask RGBA 0
 
@@ -472,58 +456,6 @@ Shader "HonkaiStarRailToon/Character"
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "SRCharDrawOverlay"
-
-            Tags
-            {
-                "LightMode" = "HSRForward2"
-            }
-
-            Stencil
-            {
-                Ref [_StencilRefOverlay]
-                Comp [_StencilCompOverlay]
-            }
-
-            Cull [_CullMode]
-            ZWrite [_ZWrite]
-
-            Blend [_SrcBlendModeColorOverlay] [_DstBlendModeColorOverlay], [_SrcBlendModeAlphaOverlay] [_DstBlendModeAlphaOverlay]
-            BlendOp [_BlendOpOverlay]
-
-            ColorMask RGBA 0
-
-            HLSLPROGRAM
-
-            #pragma vertex SRUniversalCharVertex
-            #pragma fragment SRUniversalCharOverlayFragment
-
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
-            #pragma multi_compile_fog
-
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile _ _LIGHT_LAYERS
-            #pragma multi_compile _ _FORWARD_PLUS
-
-            #if _DRAW_OVERLAY_ON
-                #include "../ShaderLibrary/SRUniversalInput.hlsl"
-                #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-            #else
-                #include "../ShaderLibrary/SRUniversalCommonPass.hlsl"
-            #endif
 
             ENDHLSL
         }

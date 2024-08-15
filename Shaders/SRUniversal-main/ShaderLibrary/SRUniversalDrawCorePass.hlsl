@@ -328,13 +328,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
 
     float alpha = _Alpha;
 
-    #if _DRAW_OVERLAY_ON
-        {
-            float3 headForward = normalize(headDirWS.forward);
-            alpha = lerp(1, alpha, saturate(dot(headForward, viewDirectionWS)));
-        }
-    #endif
-
     float4 FinalColor = float4(albedo, alpha);
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
@@ -363,14 +356,62 @@ out float4 colorTarget      : SV_Target0)
     colorTarget.a = outputColor.a;
 }
 
-void SRUniversalCharOverlayFragment(
+void FaceWriteEyeStencilFragment(
+CharCoreVaryings input,
+FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
+{
+    SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
+
+    float3 baseColor = 0;
+    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv.xy).rgb;
+    baseColor = GetMainTexColor(input.uv.xy,
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
+    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
+    //给背面填充颜色，对眼睛，丝袜很有用
+    baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
+
+    float alpha = _Alpha;
+    float4 FinalColor = float4(baseColor, alpha);
+
+    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
+
+    // （尽量）避免后一个角色的眼睛透过前一个角色的头发
+    float sceneDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(input.positionCS.xy - 0.5));
+    float eyeDepth = GetLinearEyeDepthAnyProjection(input.positionCS);
+    float depthMask = step(abs(sceneDepth - eyeDepth), 0.2 * _ModelScale);
+
+    // 眼睛、眼眶、眉毛的遮罩（不包括高光）
+    #if defined(_CUSTOMHEADBONEMODEVARENUM_GAME)
+        // 游戏模型使用 uv2 采样！！！景元和刃只有一边的眼睛需要写 Stencil，用 uv1 会把两只眼睛的都写进去
+        float eyeMask = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, input.uv.zw).g;
+    #else
+        // MMD 模型没办法，不管上面两个角色了
+        float eyeMask = SAMPLE_TEXTURE2D(_FaceMap, sampler_FaceMap, input.uv.xy).g;
+    #endif
+
+    clip(eyeMask * depthMask - 0.5);
+}
+
+void HairFakeTransparentFragment(
 CharCoreVaryings input,
 FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC,
 out float4 colorTarget      : SV_Target0)
 {
     SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
 
+    // 手动做一次深度测试，保证只有最上面一层头发和眼睛做 alpha 混合。这样看上去更加通透
+    float sceneDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(input.positionCS.xy - 0.5));
+    float hairDepth = GetLinearEyeDepthAnyProjection(input.positionCS);
+    // 部分安卓设备存在精度问题，加一个 EPSILON，避免 fighting
+    // EPSILON 取稍大的 HALF_EPS 而不是 FLT_EPS，解决 MSAA 导致的 fighting（画面上表现为黑点）
+    clip(sceneDepth - hairDepth + HALF_EPS); // if (hairDepth > sceneDepth) discard;
+
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
+    float alpha = GetTransparentFronHairAlphaValue(input.positionWSAndFogFactor.xyz, _HairBlendAlpha);
 
     float4 lightMap = GetLightMapTex(input.uv.xy, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
 
@@ -379,10 +420,12 @@ out float4 colorTarget      : SV_Target0)
     float bloomIntensity = bloomAreaData.intensity;
 
     colorTarget.rgb = MixBloomColor(outputColor.rgb, bloomColor, bloomIntensity);
-    colorTarget.a = outputColor.a;
+    colorTarget.a = alpha;
 }
 
-FragmentOutput SRUniversalCharGBufferFragment(CharCoreVaryings input, FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
+FragmentOutput SRUniversalCharGBufferFragment(
+CharCoreVaryings input,
+FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
 {
     SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
 

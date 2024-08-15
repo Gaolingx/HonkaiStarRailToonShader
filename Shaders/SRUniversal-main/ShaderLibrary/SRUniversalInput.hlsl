@@ -95,6 +95,10 @@ float _AlphaTestThreshold;
 float _DitherAlpha;
 
 
+// Transparent Fron Hair
+float _HairBlendAlpha;
+
+
 // Setting
 float _SingleMaterial;
 float _RampV0;

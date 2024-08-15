@@ -339,4 +339,24 @@ float2 GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, bool
     return rampUV;
 }
 
+// TransparentFronHair -------------------------------------------------------------------------------------------- // 
+// ---------------------------------------------------------------------------------------------------------------- //
+float GetTransparentFronHairAlphaValue(float3 positionWS, float blendAlpha)
+{
+    HeadDirections headDirWS = WORLD_SPACE_CHAR_HEAD_DIRECTIONS();
+    float3 viewDirWS = GetWorldSpaceViewDir(positionWS);
+
+    // Horizontal 70 度
+    float3 viewDirXZ = normalize(viewDirWS - dot(viewDirWS, headDirWS.up) * headDirWS.up);
+    float cosHorizontal = max(0, dot(viewDirXZ, headDirWS.forward));
+    float alpha1 = saturate((1 - cosHorizontal) / 0.658); // 0.658: 1 - cos70°
+
+    // Vertical 45 度
+    float3 viewDirYZ = normalize(viewDirWS - dot(viewDirWS, headDirWS.right) * headDirWS.right);
+    float cosVertical = max(0, dot(viewDirYZ, headDirWS.forward));
+    float alpha2 = saturate((1 - cosVertical) / 0.293); // 0.293: 1 - cos45°
+
+    return max(max(alpha1, alpha2), blendAlpha);
+}
+
 #endif
