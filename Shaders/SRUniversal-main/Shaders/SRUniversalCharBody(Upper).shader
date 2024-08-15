@@ -323,7 +323,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
         _EmissionThreshold("Emission threshold (Default 0.5)", Range(0, 1)) = 0.5
 
         [Header(Outline)]
-        [Toggle(_OUTLINE_ON)] _EnableOutlineToggle("Enable Outline (Default YES)", Float) = 1
+        [Toggle] _EnableOutline("Enable Outline (Default YES)", Float) = 1
         [KeywordEnum(Normal, Tangent)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         _OutlineDefaultColor("Outline Default Color", Color) = (0.5, 0.5, 0.5, 1)
         [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
@@ -402,7 +402,6 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
         #pragma shader_feature_local _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT
         #pragma shader_feature_local _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
-        #pragma shader_feature_local _OUTLINE_ON
         #pragma shader_feature_local _EMISSION_ON
         #pragma shader_feature_local _AdditionalLighting_ON
 

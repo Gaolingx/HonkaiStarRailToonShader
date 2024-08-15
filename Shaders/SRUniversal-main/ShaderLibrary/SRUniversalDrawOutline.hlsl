@@ -165,7 +165,7 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
         _OutlineColor6,
         _OutlineColor7,
     };
-    
+
     half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
 
     half3 outlineColor = 0;
@@ -188,10 +188,11 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 
 float4 colorFragmentTarget(inout CharOutlineVaryings input) 
 {
-    #ifndef _OUTLINE_ON
+    [branch] if (_EnableOutline == 0)
+    {
         clip(-1.0);
-    #endif
-    
+    }
+
     float4 shadowCoord = TransformWorldToShadowCoord(input.positionWS);
     Light mainLight = GetMainLight(shadowCoord);
     float3 lightDirectionWS = normalize(mainLight.direction);
@@ -217,7 +218,7 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     {
         DayTime = (lightDirectionWS.y * 0.5 + 0.5) * 12;
     }
-    
+
     float alpha = _Alpha;
     float4 FinalOutlineColor = float4(GetOutlineColor(lightMap.a, baseColor.rgb, DayTime), alpha);
 

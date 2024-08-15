@@ -334,6 +334,7 @@ float _EmissionMixBaseColorFac;
 
 
 // Outline
+float _EnableOutline;
 float4 _OutlineDefaultColor;
 float4 _OutlineColor;
 float4 _OutlineColor0;
