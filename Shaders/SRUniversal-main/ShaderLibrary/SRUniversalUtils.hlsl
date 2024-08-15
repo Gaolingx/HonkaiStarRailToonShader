@@ -1,6 +1,9 @@
 #ifndef _SR_UNIVERSAL_UTILS_INCLUDED
 #define _SR_UNIVERSAL_UTILS_INCLUDED
 
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
 
 // const ---------------------------------------------------------------------------------------------------------- // 

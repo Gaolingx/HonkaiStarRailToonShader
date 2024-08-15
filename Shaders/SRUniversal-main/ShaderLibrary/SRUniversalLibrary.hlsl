@@ -1,12 +1,11 @@
 #ifndef _SR_UNIVERSAL_LIBRARY_INCLUDED
 #define _SR_UNIVERSAL_LIBRARY_INCLUDED
 
-// include -------------------------------------------------------------------------------------------------------- // 
-// ---------------------------------------------------------------------------------------------------------------- //
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #include "../ShaderLibrary/SRUniversalUtils.hlsl"
+
 
 // InputData ------------------------------------------------------------------------------------------------------ // 
 // ---------------------------------------------------------------------------------------------------------------- //
