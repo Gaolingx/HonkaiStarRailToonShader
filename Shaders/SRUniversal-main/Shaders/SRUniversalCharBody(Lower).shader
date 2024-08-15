@@ -1,4 +1,4 @@
-Shader "HonkaiStarRailToon/Character/UpperBody"
+Shader "HonkaiStarRailToon/Character/LowerBody"
 {
     Properties
     {
