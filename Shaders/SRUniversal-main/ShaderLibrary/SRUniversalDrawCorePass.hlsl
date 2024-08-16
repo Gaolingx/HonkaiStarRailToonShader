@@ -53,7 +53,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     float3 lightDirectionWS = normalize(mainLight.direction);
 
     // PerObjShadow
-    #if _AREA_UPPERBODY || _AREA_LOWERBODY
+    #if _AREA_BODY
         mainLight = GetCharPerObjectShadow(mainLight, positionWS, _PerObjShadowCasterId);
     #endif
 
@@ -84,8 +84,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     baseColor = GetMainTexColor(input.uv.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
@@ -96,7 +95,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     // lightMap.b: Specular Threshold
     // lightMap.a: Material Index
     float4 lightMap = 0;
-    lightMap = GetLightMapTex(input.uv.xy, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
+    lightMap = GetLightMapTex(input.uv.xy,
+    TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
+    TEXTURE2D_ARGS(_BodyLightMap, sampler_BodyLightMap));
 
     //对脸部采样 faceMap，脸部的LightMap就是这张FaceMap
     float4 faceMap = 0;
@@ -133,7 +134,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
 
     // Shadow
     float mainLightShadow = 1;
-    #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
+    #if _AREA_HAIR || _AREA_BODY
         {
             BodyShadowData bodyShadowData;
             bodyShadowData.aoIntensity = _LerpAOIntensity;
@@ -203,7 +204,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     half3 specularColor = 0;
 
     #if _SPECULAR_ON
-        #if _AREA_HAIR || _AREA_UPPERBODY || _AREA_LOWERBODY
+        #if _AREA_HAIR || _AREA_BODY
             {
                 SpecularAreaData specularAreaData = GetSpecularAreaData(lightMap.a, _SpecularColor.rgb);
                 float3 SpecularColor = specularAreaData.color;
@@ -229,7 +230,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     //Stockings
     float3 stockingsEffect = 1;
     #if _STOCKINGS_ON
-        #if _AREA_UPPERBODY || _AREA_LOWERBODY
+        #if _AREA_BODY
             {
                 StockingsData stockingsData;
                 stockingsData.StockRangeTex_ST = _StockRangeTex_ST;
@@ -303,8 +304,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
             float4 mainTex = GetMainTexColor(input.uv.xy,
             TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
             TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-            TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-            TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor);
+            TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
 
             EmissionData emissionData;
             emissionData.color = LinearColorMix(f3one, mainTex.rgb, _EmissionMixBaseColorFac);
@@ -346,7 +346,9 @@ out float4 colorTarget      : SV_Target0)
 
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
 
-    float4 lightMap = GetLightMapTex(input.uv.xy, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
+    float4 lightMap = GetLightMapTex(input.uv.xy,
+    TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
+    TEXTURE2D_ARGS(_BodyLightMap, sampler_BodyLightMap));
 
     BloomAreaData bloomAreaData = GetBloomAreaData(lightMap.a, outputColor.rgb);
     float3 bloomColor = bloomAreaData.color;
@@ -367,8 +369,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
     baseColor = GetMainTexColor(input.uv.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
@@ -413,7 +414,9 @@ out float4 colorTarget      : SV_Target0)
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
     float alpha = GetTransparentFronHairAlphaValue(input.positionWSAndFogFactor.xyz, _HairBlendAlpha);
 
-    float4 lightMap = GetLightMapTex(input.uv.xy, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
+    float4 lightMap = GetLightMapTex(input.uv.xy,
+    TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
+    TEXTURE2D_ARGS(_BodyLightMap, sampler_BodyLightMap));
 
     BloomAreaData bloomAreaData = GetBloomAreaData(lightMap.a, outputColor.rgb);
     float3 bloomColor = bloomAreaData.color;
@@ -434,8 +437,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
     baseColor = GetMainTexColor(input.uv.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
@@ -474,8 +476,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
     baseColor = GetMainTexColor(input.uv.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
@@ -503,8 +504,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
     baseColor = GetMainTexColor(input.uv.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
@@ -534,8 +534,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
     baseColor = GetMainTexColor(input.uv.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
@@ -565,8 +564,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC) : SV_Target
     baseColor = GetMainTexColor(input.uv.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);

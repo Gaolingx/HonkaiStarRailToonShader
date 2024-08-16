@@ -2,7 +2,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 {
     Properties
     {
-        [HideInInspector] [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 2
+        [HideInInspector] [KeywordEnum(None, Face, Hair, Body)] _Area("Material area", Float) = 2
         [HideInInspector] _MMDHeadBoneForward("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneUp("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneRight("", Float) = (0, 0, 0, 0)
@@ -13,10 +13,8 @@ Shader "HonkaiStarRailToon/Character/Hair"
         [HDR] _FaceColorMapColor("Face color map color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _HairColorMap("Hair color map (Default white)", 2D) = "white" { }
         [HDR] _HairColorMapColor("Hair color map color (Default white)", Color) = (1, 1, 1, 1)
-        [NoScaleOffset] _UpperBodyColorMap("Upper body color map (Default white)", 2D) = "white" { }
-        [HDR] _UpperBodyColorMapColor("Upper body color map color (Default white)", Color) = (1, 1, 1, 1)
-        [NoScaleOffset] _LowerBodyColorMap("Lower body color map (Default white)", 2D) = "white" { }
-        [HDR] _LowerBodyColorMapColor("Lower body color map color (Default white)", Color) = (1, 1, 1, 1)
+        [NoScaleOffset] _BodyColorMap("Body color map (Default white)", 2D) = "white" { }
+        [HDR] _BodyColorMapColor("Body color map color (Default white)", Color) = (1, 1, 1, 1)
         _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0, 3)) = 1
         _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1, 1)
         _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1, 1)
@@ -30,19 +28,18 @@ Shader "HonkaiStarRailToon/Character/Hair"
         _Alpha("Alpha (Default 1)", Range(0, 1)) = 1
         _AlphaTestThreshold("Alpha clip (Default 0.1)", Range(0, 1)) = 0.1
 
-        [Header(Transparent Fron Hair)]
-        _HairBlendAlpha("Hair Blend Alpha (Default 0.6)", Range(0, 1)) = 0.6
-
         [Header(Dither Alpha)]
         _DitherAlpha("Dither alpha (Default 1)", Range(0, 1)) = 1
+
+        [Header(Transparent Fron Hair)]
+        _HairBlendAlpha("Hair Blend Alpha (Default 0.6)", Range(0, 1)) = 0.6
 
         [Header(Head Bone)]
         [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Specular Color State", Float) = 1
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" { }
-        [NoScaleOffset] _UpperBodyLightMap("Upper body map (Default black)", 2D) = "black" { }
-        [NoScaleOffset] _LowerBodyLightMap("Lower body map (Default black)", 2D) = "black" { }
+        [NoScaleOffset] _BodyLightMap("Body light map (Default black)", 2D) = "black" { }
 
         [Header(Ramp Map)]
         [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)", 2D) = "white" { }
@@ -379,8 +376,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         #pragma shader_feature_local _AREA_FACE
         #pragma shader_feature_local _AREA_HAIR
-        #pragma shader_feature_local _AREA_UPPERBODY
-        #pragma shader_feature_local _AREA_LOWERBODY
+        #pragma shader_feature_local _AREA_BODY
         #pragma shader_feature_local _AUTO_Brightness_ON
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _CUSTOM_RAMP_MAPPING_ON
@@ -409,7 +405,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharDrawHairOpaque(1)"
+            Name "SRCharHairOpaque(1)"
 
             Tags
             {
@@ -459,7 +455,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharDrawHairOpaque(2)"
+            Name "SRCharHairOpaque(2)"
 
             Tags
             {
@@ -510,7 +506,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharDrawHairFakeTransparent"
+            Name "SRCharHairFakeTransparent"
 
             Tags
             {
@@ -565,7 +561,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharDrawCoreGBuffer"
+            Name "SRCharHairGBuffer"
 
             Tags
             {
@@ -609,7 +605,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass 
         {
-            Name "SRCharDrawOutline"
+            Name "SRCharHairOutline"
 
             Tags 
             {
@@ -641,7 +637,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharPerObjectShadow"
+            Name "SRCharHairPerObjectShadow"
 
             Tags
             {
@@ -676,7 +672,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharDepthOnly"
+            Name "SRCharHairDepthOnly"
 
             Tags
             {
@@ -704,7 +700,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharDepthNormals"
+            Name "SRCharHairDepthNormals"
 
             Tags
             {
@@ -731,7 +727,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharMotionVectors"
+            Name "SRCharHairMotionVectors"
 
             Tags
             {

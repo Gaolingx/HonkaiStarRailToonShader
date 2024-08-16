@@ -25,17 +25,13 @@ TEXTURE2D(_FaceColorMap);
 SAMPLER(sampler_FaceColorMap);
 TEXTURE2D(_HairColorMap);
 SAMPLER(sampler_HairColorMap);
-TEXTURE2D(_UpperBodyColorMap);
-SAMPLER(sampler_UpperBodyColorMap);
-TEXTURE2D(_LowerBodyColorMap);
-SAMPLER(sampler_LowerBodyColorMap);
+TEXTURE2D(_BodyColorMap);
+SAMPLER(sampler_BodyColorMap);
 
 TEXTURE2D(_HairLightMap);
 SAMPLER(sampler_HairLightMap);
-TEXTURE2D(_UpperBodyLightMap);
-SAMPLER(sampler_UpperBodyLightMap);
-TEXTURE2D(_LowerBodyLightMap);
-SAMPLER(sampler_LowerBodyLightMap);
+TEXTURE2D(_BodyLightMap);
+SAMPLER(sampler_BodyLightMap);
 
 TEXTURE2D(_HairCoolRamp);
 SAMPLER(sampler_HairCoolRamp);
@@ -66,8 +62,7 @@ float4 _Maps_ST;
 // MainTex
 float4 _FaceColorMapColor;
 float4 _HairColorMapColor;
-float4 _UpperBodyColorMapColor;
-float4 _LowerBodyColorMapColor;
+float4 _BodyColorMapColor;
 
 
 // NormalMap

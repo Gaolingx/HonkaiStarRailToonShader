@@ -1,8 +1,8 @@
-Shader "HonkaiStarRailToon/Character/UpperBody"
+Shader "HonkaiStarRailToon/Character/Body"
 {
     Properties
     {
-        [HideInInspector] [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 3
+        [HideInInspector] [KeywordEnum(None, Face, Hair, Body)] _Area("Material area", Float) = 3
         [HideInInspector] _MMDHeadBoneForward("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneUp("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneRight("", Float) = (0, 0, 0, 0)
@@ -13,10 +13,8 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
         [HDR] _FaceColorMapColor("Face color map color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _HairColorMap("Hair color map (Default white)", 2D) = "white" { }
         [HDR] _HairColorMapColor("Hair color map color (Default white)", Color) = (1, 1, 1, 1)
-        [NoScaleOffset] _UpperBodyColorMap("Upper body color map (Default white)", 2D) = "white" { }
-        [HDR] _UpperBodyColorMapColor("Upper body color map color (Default white)", Color) = (1, 1, 1, 1)
-        [NoScaleOffset] _LowerBodyColorMap("Lower body color map (Default white)", 2D) = "white" { }
-        [HDR] _LowerBodyColorMapColor("Lower body color map color (Default white)", Color) = (1, 1, 1, 1)
+        [NoScaleOffset] _BodyColorMap("Body color map (Default white)", 2D) = "white" { }
+        [HDR] _BodyColorMapColor("Body color map color (Default white)", Color) = (1, 1, 1, 1)
         _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0, 3)) = 1
         _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1, 1)
         _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1, 1)
@@ -41,8 +39,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" { }
-        [NoScaleOffset] _UpperBodyLightMap("Upper body map (Default black)", 2D) = "black" { }
-        [NoScaleOffset] _LowerBodyLightMap("Lower body map (Default black)", 2D) = "black" { }
+        [NoScaleOffset] _BodyLightMap("Body light map (Default black)", 2D) = "black" { }
 
         [Header(Ramp Map)]
         [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)", 2D) = "white" { }
@@ -379,8 +376,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         #pragma shader_feature_local _AREA_FACE
         #pragma shader_feature_local _AREA_HAIR
-        #pragma shader_feature_local _AREA_UPPERBODY
-        #pragma shader_feature_local _AREA_LOWERBODY
+        #pragma shader_feature_local _AREA_BODY
         #pragma shader_feature_local _AUTO_Brightness_ON
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _CUSTOM_RAMP_MAPPING_ON
@@ -409,7 +405,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         Pass
         {
-            Name "SRCharDrawCore"
+            Name "SRCharBodyOpaque"
 
             Tags
             {
@@ -461,7 +457,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         Pass
         {
-            Name "SRCharDrawCoreGBuffer"
+            Name "SRCharBodyOpaqueGBuffer"
 
             Tags
             {
@@ -505,7 +501,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         Pass 
         {
-            Name "SRCharDrawOutline"
+            Name "SRCharBodyOpaqueOutline"
 
             Tags 
             {
@@ -537,7 +533,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         Pass
         {
-            Name "SRCharPerObjectShadow"
+            Name "SRCharBodyOpaquePerObjectShadow"
 
             Tags
             {
@@ -572,7 +568,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         Pass
         {
-            Name "SRCharDepthOnly"
+            Name "SRCharBodyOpaqueDepthOnly"
 
             Tags
             {
@@ -600,7 +596,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         Pass
         {
-            Name "SRCharDepthNormals"
+            Name "SRCharBodyOpaqueDepthNormals"
 
             Tags
             {
@@ -627,7 +623,7 @@ Shader "HonkaiStarRailToon/Character/UpperBody"
 
         Pass
         {
-            Name "SRCharMotionVectors"
+            Name "SRCharBodyOpaqueMotionVectors"
 
             Tags
             {

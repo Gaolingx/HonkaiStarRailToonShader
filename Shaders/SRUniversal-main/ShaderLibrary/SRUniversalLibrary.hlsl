@@ -50,10 +50,10 @@ void InitializeInputData(CharCoreVaryings input, out InputData inputData)
 
 // MainTex -------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
-float4 GetMainTexColor(float2 uv, TEXTURE2D_PARAM(FaceColorMap, sampler_FaceColorMap), float4 FaceColorMapColor,
+float4 GetMainTexColor(float2 uv,
+TEXTURE2D_PARAM(FaceColorMap, sampler_FaceColorMap), float4 FaceColorMapColor,
 TEXTURE2D_PARAM(HairColorMap, sampler_HairColorMap), float4 HairColorMapColor,
-TEXTURE2D_PARAM(UpperBodyColorMap, sampler_UpperBodyColorMap), float4 UpperBodyColorMapColor,
-TEXTURE2D_PARAM(LowerBodyColorMap, sampler_LowerBodyColorMap), float4 LowerBodyColorMapColor)
+TEXTURE2D_PARAM(BodyColorMap, sampler_BodyColorMap), float4 BodyColorMapColor)
 {
     float4 areaMap = 0;
     float4 areaColor = 0;
@@ -64,12 +64,9 @@ TEXTURE2D_PARAM(LowerBodyColorMap, sampler_LowerBodyColorMap), float4 LowerBodyC
     #elif _AREA_HAIR
         areaMap = SAMPLE_TEXTURE2D(HairColorMap, sampler_HairColorMap, uv);
         areaColor = areaMap * HairColorMapColor;
-    #elif _AREA_UPPERBODY
-        areaMap = SAMPLE_TEXTURE2D(UpperBodyColorMap, sampler_UpperBodyColorMap, uv);
-        areaColor = areaMap * UpperBodyColorMapColor;
-    #elif _AREA_LOWERBODY
-        areaMap = SAMPLE_TEXTURE2D(LowerBodyColorMap, sampler_LowerBodyColorMap, uv);
-        areaColor = areaMap * LowerBodyColorMapColor;
+    #elif _AREA_BODY
+        areaMap = SAMPLE_TEXTURE2D(BodyColorMap, sampler_BodyColorMap, uv);
+        areaColor = areaMap * BodyColorMapColor;
     #endif
     return areaColor;
 }
@@ -77,15 +74,15 @@ TEXTURE2D_PARAM(LowerBodyColorMap, sampler_LowerBodyColorMap), float4 LowerBodyC
 
 // LightMap ------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
-float4 GetLightMapTex(float2 uv, TEXTURE2D_PARAM(HairLightMap, sampler_HairLightMap), TEXTURE2D_PARAM(UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_PARAM(LowerBodyLightMap, sampler_LowerBodyLightMap))
+float4 GetLightMapTex(float2 uv,
+TEXTURE2D_PARAM(HairLightMap, sampler_HairLightMap),
+TEXTURE2D_PARAM(BodyLightMap, sampler_BodyLightMap))
 {
     float4 lightMap = 0;
     #if _AREA_HAIR
         lightMap = SAMPLE_TEXTURE2D(HairLightMap, sampler_HairLightMap, uv);
-    #elif _AREA_UPPERBODY
-        lightMap = SAMPLE_TEXTURE2D(UpperBodyLightMap, sampler_UpperBodyLightMap, uv);
-    #elif _AREA_LOWERBODY
-        lightMap = SAMPLE_TEXTURE2D(LowerBodyLightMap, sampler_LowerBodyLightMap, uv);
+    #elif _AREA_BODY
+        lightMap = SAMPLE_TEXTURE2D(BodyLightMap, sampler_BodyLightMap, uv);
     #endif
     return lightMap;
 }
@@ -113,7 +110,7 @@ TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp))
     #if _AREA_HAIR
         coolRampTexCol = SAMPLE_TEXTURE2D(HairCoolRamp, sampler_HairCoolRamp, rampUV).rgb;
         warmRampTexCol = SAMPLE_TEXTURE2D(HairWarmRamp, sampler_HairWarmRamp, rampUV).rgb;
-    #elif _AREA_FACE || _AREA_UPPERBODY || _AREA_LOWERBODY
+    #elif _AREA_FACE || _AREA_BODY
         coolRampTexCol = SAMPLE_TEXTURE2D(BodyCoolRamp, sampler_BodyCoolRamp, rampUV).rgb;
         warmRampTexCol = SAMPLE_TEXTURE2D(BodyWarmRamp, sampler_BodyWarmRamp, rampUV).rgb;
     #endif

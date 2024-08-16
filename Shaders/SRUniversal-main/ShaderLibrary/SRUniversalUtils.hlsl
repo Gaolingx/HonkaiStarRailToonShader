@@ -23,7 +23,7 @@ float4 CombineAndTransformDualFaceUV(float2 uv1, float2 uv2, float4 mapST)
 
 void SetupDualFaceRendering(inout float3 normalWS, inout float4 uv, FRONT_FACE_TYPE isFrontFace)
 {
-    #if defined(_MODEL_GAME)
+    #if defined(_CUSTOMHEADBONEMODEVARENUM_GAME)
         if (IS_FRONT_VFACE(isFrontFace, 1, 0))
             return;
 

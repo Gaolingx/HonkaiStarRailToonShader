@@ -1,8 +1,8 @@
-Shader "HonkaiStarRailToon/Character/LowerBody"
+Shader "HonkaiStarRailToon/Character/Body (Transparent)"
 {
     Properties
     {
-        [HideInInspector] [KeywordEnum(None, Face, Hair, UpperBody, LowerBody)] _Area("Material area", Float) = 4
+        [HideInInspector] [KeywordEnum(None, Face, Hair, Body)] _Area("Material area", Float) = 3
         [HideInInspector] _MMDHeadBoneForward("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneUp("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneRight("", Float) = (0, 0, 0, 0)
@@ -13,10 +13,8 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
         [HDR] _FaceColorMapColor("Face color map color (Default white)", Color) = (1, 1, 1, 1)
         [NoScaleOffset] _HairColorMap("Hair color map (Default white)", 2D) = "white" { }
         [HDR] _HairColorMapColor("Hair color map color (Default white)", Color) = (1, 1, 1, 1)
-        [NoScaleOffset] _UpperBodyColorMap("Upper body color map (Default white)", 2D) = "white" { }
-        [HDR] _UpperBodyColorMapColor("Upper body color map color (Default white)", Color) = (1, 1, 1, 1)
-        [NoScaleOffset] _LowerBodyColorMap("Lower body color map (Default white)", 2D) = "white" { }
-        [HDR] _LowerBodyColorMapColor("Lower body color map color (Default white)", Color) = (1, 1, 1, 1)
+        [NoScaleOffset] _BodyColorMap("Body color map (Default white)", 2D) = "white" { }
+        [HDR] _BodyColorMapColor("Body color map color (Default white)", Color) = (1, 1, 1, 1)
         _ColorSaturation("Base color saturation Adjust (Default 1)", Range(0, 3)) = 1
         _FrontFaceTintColor("Front face tint color (Default white)", Color) = (1, 1, 1, 1)
         _BackFaceTintColor("Back face tint color (Default white)", Color) = (1, 1, 1, 1)
@@ -41,8 +39,7 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" { }
-        [NoScaleOffset] _UpperBodyLightMap("Upper body map (Default black)", 2D) = "black" { }
-        [NoScaleOffset] _LowerBodyLightMap("Lower body map (Default black)", 2D) = "black" { }
+        [NoScaleOffset] _BodyLightMap("Body light map (Default black)", 2D) = "black" { }
 
         [Header(Ramp Map)]
         [NoScaleOffset] _HairCoolRamp("Hair cool ramp (Default white)", 2D) = "white" { }
@@ -356,7 +353,7 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor("Core Pass dst blend mode color (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha("Core Pass src blend mode alpha (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha("Core Pass dst blend mode alpha (Default Zero)", Float) = 0
-        [Enum(Off, 0, On, 1)] _ZWrite("ZWrite (Default On)", Float) = 1
+        [Enum(Off, 0, On, 1)] _ZWrite("ZWrite (Default On)", Float) = 0
 
         [HideInInspector] _ModelScale("Model Scale (Default 1)", Float) = 1
         [HideInInspector] _PerObjShadowCasterId("Per Object Shadow Caster Id", Float) = -1
@@ -370,17 +367,16 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
         Tags
         {
             "RenderPipeline" = "UniversalPipeline"
-            "RenderType" = "Opaque"
+            "RenderType" = "Transparent"
             "UniversalMaterialType" = "ComplexLit"
-            "Queue" = "Geometry+30"  // 身体默认 +30，放在最后渲染
+            "Queue" = "Transparent"
         }
 
         HLSLINCLUDE
 
         #pragma shader_feature_local _AREA_FACE
         #pragma shader_feature_local _AREA_HAIR
-        #pragma shader_feature_local _AREA_UPPERBODY
-        #pragma shader_feature_local _AREA_LOWERBODY
+        #pragma shader_feature_local _AREA_BODY
         #pragma shader_feature_local _AUTO_Brightness_ON
         #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _CUSTOM_RAMP_MAPPING_ON
@@ -409,21 +405,20 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
 
         Pass
         {
-            Name "SRCharDrawCore"
+            Name "SRCharBodyTransparent"
 
             Tags
             {
-                // 在头发的两个 Pass 之后绘制，避免干扰透明刘海对眼睛区域的判断
-                "LightMode" = "HSRForward3"
+                "LightMode" = "HSRTransparent"
             }
 
-            // 角色的 Stencil
+            // 透明部分和角色的 Stencil
             Stencil
             {
-                Ref 1
-                WriteMask 1
+                Ref 5
+                WriteMask 5  // 透明和角色位
                 Comp Always
-                Pass Replace
+                Pass Replace // 写入透明和角色位
                 Fail Keep
             }
 
@@ -461,7 +456,7 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
 
         Pass
         {
-            Name "SRCharDrawCoreGBuffer"
+            Name "SRCharBodyTransparentGBuffer"
 
             Tags
             {
@@ -505,7 +500,7 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
 
         Pass 
         {
-            Name "SRCharDrawOutline"
+            Name "SRCharBodyTransparentOutline"
 
             Tags 
             {
@@ -537,7 +532,7 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
 
         Pass
         {
-            Name "SRCharPerObjectShadow"
+            Name "SRCharBodyTransparentPerObjectShadow"
 
             Tags
             {
@@ -569,90 +564,7 @@ Shader "HonkaiStarRailToon/Character/LowerBody"
 
             ENDHLSL
         }
-
-        Pass
-        {
-            Name "SRCharDepthOnly"
-
-            Tags
-            {
-                "LightMode" = "DepthOnly"
-            }
-
-            Cull [_CullMode]
-            ZWrite On
-            ColorMask R
-
-            HLSLPROGRAM
-
-            #pragma vertex CharacterDepthOnlyVertex
-            #pragma fragment CharacterDepthOnlyFragment
-
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "SRCharDepthNormals"
-
-            Tags
-            {
-                "LightMode" = "DepthNormals"
-            }
-
-            Cull [_CullMode]
-            ZWrite On
-
-            HLSLPROGRAM
-
-            #pragma vertex CharacterDepthNormalsVertex
-            #pragma fragment CharacterDepthNormalsFragment
-
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "SRCharMotionVectors"
-
-            Tags
-            {
-                "LightMode" = "MotionVectors"
-            }
-
-            Cull [_CullMode]
-
-            HLSLPROGRAM
-
-            #pragma vertex CharacterMotionVectorsVertex
-            #pragma fragment CharacterMotionVectorsFragment
-
-            #pragma exclude_renderers d3d11_9x
-            #pragma target 3.5
-
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-
-            ENDHLSL
-        }
+        // Because of Transparent,no Depth and Motion Vectors
 
     }
     Fallback Off

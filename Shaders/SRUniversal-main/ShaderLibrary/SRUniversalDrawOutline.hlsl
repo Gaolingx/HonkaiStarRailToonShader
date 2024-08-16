@@ -202,11 +202,12 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     baseColor = GetMainTexColor(input.baseUV.xy,
     TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
     TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_UpperBodyColorMap, sampler_UpperBodyColorMap), _UpperBodyColorMapColor,
-    TEXTURE2D_ARGS(_LowerBodyColorMap, sampler_LowerBodyColorMap), _LowerBodyColorMapColor).rgb;
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
 
     float4 lightMap = 0;
-    lightMap = GetLightMapTex(input.baseUV.xy, TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap), TEXTURE2D_ARGS(_UpperBodyLightMap, sampler_UpperBodyLightMap), TEXTURE2D_ARGS(_LowerBodyLightMap, sampler_LowerBodyLightMap));
+    lightMap = GetLightMapTex(input.baseUV.xy,
+    TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
+    TEXTURE2D_ARGS(_BodyLightMap, sampler_BodyLightMap));
 
     float DayTime = 0;
 
