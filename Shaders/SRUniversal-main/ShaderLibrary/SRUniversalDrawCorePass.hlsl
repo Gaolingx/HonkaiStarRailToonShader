@@ -304,7 +304,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
             float4 mainTex = GetMainTexColor(input.uv.xy,
             TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
             TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-            TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
+            TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor);
 
             EmissionData emissionData;
             emissionData.color = LinearColorMix(f3one, mainTex.rgb, _EmissionMixBaseColorFac);
