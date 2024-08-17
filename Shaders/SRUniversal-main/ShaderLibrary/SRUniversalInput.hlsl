@@ -92,6 +92,11 @@ float _DitherAlpha;
 
 // Transparent Fron Hair
 float _HairBlendAlpha;
+float _MaxEyeHairDistance;
+
+
+// Front Hair Shadow
+float _HairShadowDistance;
 
 
 // Setting

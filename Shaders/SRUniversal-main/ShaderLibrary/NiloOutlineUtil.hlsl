@@ -8,7 +8,7 @@
 // For this tutorial shader, we will keep things simple and use this slower but convenient method to get camera fov
 float GetCameraFOV()
 {
-    if(!_EnableFOVWidth) return 100.0;
+    if(!_EnableFOVWidth) return 60.0;
     //https://answers.unity.com/questions/770838/how-can-i-extract-the-fov-information-from-the-pro.html
     float t = unity_CameraProjection._m11;
     float Rad2Deg = 180 / 3.1415;

@@ -33,6 +33,10 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
 
         [Header(Transparent Fron Hair)]
         _HairBlendAlpha("Hair Blend Alpha (Default 0.6)", Range(0, 1)) = 0.6
+        _MaxEyeHairDistance("Max Eye Hair Distance (Default 0.2)", Float) = 0.2
+
+        [Header(Front Hair Shadow)]
+        _HairShadowDistance("Hair Shadow Distance (Default 0.2)", Range(0, 1)) = 0.2
 
         [Header(Head Bone)]
         [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Specular Color State", Float) = 1

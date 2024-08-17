@@ -132,7 +132,12 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     //float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
     float3 indirectLightColor = CalculateGI(baseColor, lightMap.g, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
 
-    // Shadow
+    // Front Hair Shadow(Face Only)
+    #if defined(_MAIN_LIGHT_FRONT_HAIR_SHADOWS)
+        mainLight.shadowAttenuation = min(mainLight.shadowAttenuation, GetFrontHairShadow(input.positionCS, lightDirectionWS, _HairShadowDistance));
+    #endif
+
+    // MainLight Shadow
     float mainLightShadow = 1;
     #if _AREA_HAIR || _AREA_BODY
         {
@@ -383,7 +388,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
     // （尽量）避免后一个角色的眼睛透过前一个角色的头发
     float sceneDepth = GetLinearEyeDepthAnyProjection(LoadSceneDepth(input.positionCS.xy - 0.5));
     float eyeDepth = GetLinearEyeDepthAnyProjection(input.positionCS);
-    float depthMask = step(abs(sceneDepth - eyeDepth), 0.2 * _ModelScale);
+    float depthMask = step(abs(sceneDepth - eyeDepth), _MaxEyeHairDistance * _ModelScale);
 
     // 眼睛、眼眶、眉毛的遮罩（不包括高光）
     #if defined(_CUSTOMHEADBONEMODEVARENUM_GAME)

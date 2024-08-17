@@ -33,6 +33,10 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         [Header(Transparent Fron Hair)]
         _HairBlendAlpha("Hair Blend Alpha (Default 0.6)", Range(0, 1)) = 0.6
+        _MaxEyeHairDistance("Max Eye Hair Distance (Default 0.2)", Float) = 0.2
+
+        [Header(Front Hair Shadow)]
+        _HairShadowDistance("Hair Shadow Distance (Default 0.2)", Range(0, 1)) = 0.2
 
         [Header(Head Bone)]
         [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Specular Color State", Float) = 1
@@ -677,6 +681,34 @@ Shader "HonkaiStarRailToon/Character/Hair"
             Tags
             {
                 "LightMode" = "DepthOnly"
+            }
+
+            Cull [_CullMode]
+            ZWrite On
+            ColorMask R
+
+            HLSLPROGRAM
+
+            #pragma vertex CharacterDepthOnlyVertex
+            #pragma fragment CharacterDepthOnlyFragment
+
+            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
+            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
+            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
+
+            #include "../ShaderLibrary/SRUniversalInput.hlsl"
+            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "SRCharHairDepthOnlyHSR"
+
+            Tags
+            {
+                "LightMode" = "HSRHairDepthOnly"
             }
 
             Cull [_CullMode]

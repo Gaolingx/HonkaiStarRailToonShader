@@ -5,6 +5,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 #include "../ShaderLibrary/SRUniversalUtils.hlsl"
+#include "../ShaderLibrary/CharHairDepthTexture.hlsl"
 
 
 // InputData ------------------------------------------------------------------------------------------------------ // 
@@ -306,7 +307,7 @@ half3 GetLUTMapBloomColor(int materialId)
 }
 
 
-// Shadow --------------------------------------------------------------------------------------------------------- // 
+// MainLight Shadow --------------------------------------------------------------------------------------------------------- // 
 // ---------------------------------------------------------------------------------------------------------------- //
 struct BodyShadowData
 {
@@ -370,6 +371,38 @@ float GetFaceMainLightShadow(FaceShadowData shadowData, HeadDirections headDirWS
 
     mainLightShadow = lerp(faceShadow, eyeShadow, faceMap.r);
     return mainLightShadow;
+}
+
+
+// Front Hair Shadow ---------------------------------------------------------------------------------------------- // 
+// ---------------------------------------------------------------------------------------------------------------- //
+float GetFrontHairShadow(float4 svPosition, float3 lightDirWS, float shadowDistance)
+{
+    float2 width = shadowDistance * 0.04;
+
+    if (IsPerspectiveProjection())
+    {
+        // unity_CameraProjection._m11: cot(FOV / 2)
+        // 2.414 是 FOV 为 45 度时的值
+        width *= unity_CameraProjection._m11 / 2.414; // FOV 越小，角色越大，偏移量越大
+    }
+    else
+    {
+        // unity_CameraProjection._m11: (1 / Size)
+        // 1.5996 纯 Magic Number
+        width *= unity_CameraProjection._m11 / 1.5996; // Size 越小，角色越大，偏移量越大
+    }
+
+    float depth = GetLinearEyeDepthAnyProjection(svPosition);
+    width *= rcp(depth / _ModelScale); // 近大远小
+
+    // 纵向分辨率越大，角色横向占有的 uv 越多，横向偏移量越大。纵向占有的 uv 始终不变
+    width.x *= log10(_ScaledScreenParams.y) / 3.33; // 3.33=log10(2160)，4K 分辨率高度
+
+    float3 offsetDir = TransformWorldToViewDir(lightDirWS, true);
+    float2 offsetUV = (svPosition.xy / _ScaledScreenParams.xy) + (offsetDir.xy * width);
+    float offsetDepth = GetLinearEyeDepthAnyProjection(SampleCharHairDepth(offsetUV));
+    return step(depth, offsetDepth);
 }
 
 

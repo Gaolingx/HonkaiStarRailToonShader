@@ -33,6 +33,10 @@ Shader "HonkaiStarRailToon/Character/Face"
 
         [Header(Transparent Fron Hair)]
         _HairBlendAlpha("Hair Blend Alpha (Default 0.6)", Range(0, 1)) = 0.6
+        _MaxEyeHairDistance("Max Eye Hair Distance (Default 0.2)", Float) = 0.2
+
+        [Header(Front Hair Shadow)]
+        _HairShadowDistance("Hair Shadow Distance (Default 0.2)", Range(0, 1)) = 0.2
 
         [Header(Head Bone)]
         [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Specular Color State", Float) = 1
@@ -441,7 +445,7 @@ Shader "HonkaiStarRailToon/Character/Face"
             #pragma multi_compile_fog
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_FRONT_HAIR_SHADOWS
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
