@@ -4,6 +4,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
+#include "../ShaderLibrary/NiloOutlineUtil.hlsl"
 
 struct CharOutlineAttributes
 {
@@ -38,12 +39,19 @@ float3 GetSmoothNormalWS(CharOutlineAttributes input)
     return smoothNormalOS;
 }
 
+float3 TransformPositionWSToOutlinePositionWS(float3 positionWS, float positionVS_Z, float3 normalWS, float outlineWidth)
+{
+    //you can replace it to your own method! Here we will write a simple world space method for tutorial reason, it is not the best method!
+    float outlineExpandAmount = outlineWidth * GetOutlineCameraFovAndDistanceFixMultiplier(positionVS_Z);
+    return positionWS + normalWS * outlineExpandAmount; 
+}
+
 CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 {
     CharOutlineVaryings output;
 
     VertexPositionInputs vertexPositionInput = GetVertexPositionInputs(input.positionOS.xyz);
-    VertexNormalInputs normalInputs = GetVertexNormalInputs(input.normalOS);
+    VertexNormalInputs vertexNormalInput = GetVertexNormalInputs(GetSmoothNormalWS(input));
 
     if(_FaceMaterial) // sigh is this even going to work in vr? 
         {
@@ -102,35 +110,22 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
             tmp0.y = tmp0.z * _FixLipOutline + tmp0.y;
             tmp0.x = tmp0.y * tmp0.x;
 
-
-            float3 outline_normal;
-            outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, GetSmoothNormalWS(input).xyz);
-            outline_normal.z = -1;
-            outline_normal.xyz = normalize(outline_normal.xyz);
-            float4 wv_pos = mul(UNITY_MATRIX_MV, input.positionOS);
-            float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-            if(!_EnableFOVWidth) fov_width = 1;
-            wv_pos.xyz = wv_pos.xyz + (outline_normal * fov_width * tmp0.x);
-            output.positionCS = mul(UNITY_MATRIX_P, wv_pos);
+            float3 positionWS = vertexPositionInput.positionWS;
+            positionWS = TransformPositionWSToOutlinePositionWS(vertexPositionInput.positionWS, vertexPositionInput.positionVS.z, vertexNormalInput.normalWS, (tmp0.x * 100));
+            output.positionCS = TransformWorldToHClip(positionWS);
         }
         else
         {
-            float3 outline_normal;
-            outline_normal = mul((float3x3)UNITY_MATRIX_IT_MV, GetSmoothNormalWS(input).xyz);
-            outline_normal.z = -1;
-            outline_normal.xyz = normalize(outline_normal.xyz);
-            float4 wv_pos = mul(UNITY_MATRIX_MV, input.positionOS);
-            float fov_width = 1.0f / (rsqrt(abs(wv_pos.z / unity_CameraProjection._m11)));
-            if(!_EnableFOVWidth)fov_width = 1;
-            wv_pos.xyz = wv_pos.xyz + (outline_normal * fov_width * (input.color.w * _OutlineWidth * _OutlineScale));
-            output.positionCS = mul(UNITY_MATRIX_P, wv_pos);
+            float3 positionWS = vertexPositionInput.positionWS;
+            positionWS = TransformPositionWSToOutlinePositionWS(vertexPositionInput.positionWS, vertexPositionInput.positionVS.z, vertexNormalInput.normalWS, (_OutlineWidth * _OutlineScale * input.color.w * 100));
+            output.positionCS = TransformWorldToHClip(positionWS);
         }
 
     output.baseUV = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
     output.color = input.color;
     float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
     output.positionWS = positionWS;
-    output.normalWS = normalInputs.normalWS;
+    output.normalWS = vertexNormalInput.normalWS;
 
     output.fogFactor = ComputeFogFactor(vertexPositionInput.positionCS.z);
 
