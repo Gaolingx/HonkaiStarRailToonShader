@@ -8,27 +8,27 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: FuXuan_00_Mat_Body1
-    second: {fileID: 2100000, guid: 49592c9cd5aae6b4e80dffd470faf6fd, type: 2}
+    second: {fileID: 2100000, guid: 1619d45b276b8ab49aecc27532b39280, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: FuXuan_00_Mat_Body2
-    second: {fileID: 2100000, guid: 00991e597a14ab749be6944b5fbf1cd3, type: 2}
+    second: {fileID: 2100000, guid: 92b78657f52696d4590b34a6f89d5471, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: FuXuan_00_Mat_Weapon
-    second: {fileID: 2100000, guid: 3414e2815f7560449a88ea3d1a69e80b, type: 2}
+    second: {fileID: 2100000, guid: 0bddc7840b582d2428af18aff9cfc9a1, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: FuXuan_Mat_Face
-    second: {fileID: 2100000, guid: fa91029d6acb06248862bd7ab7cacb27, type: 2}
+    second: {fileID: 2100000, guid: 48f17c8634988574a881e2232c6bcc40, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: FuXuan_Mat_Hair
-    second: {fileID: 2100000, guid: 85d70b64d03261740b335d3aed0ace77, type: 2}
+    second: {fileID: 2100000, guid: dff978d3e0c766447a43f80fe7e622d8, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
