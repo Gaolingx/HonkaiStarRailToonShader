@@ -23,11 +23,12 @@ struct CharCoreAttributes
 struct CharCoreVaryings
 {
     float4 uv                       : TEXCOORD0;
-    float4 positionWSAndFogFactor   : TEXCOORD1;
+    float3 positionWS               : TEXCOORD1;
     float3 normalWS                 : TEXCOORD2;
     float3 bitangentWS              : TEXCOORD3;
     float3 tangentWS                : TEXCOORD4;
     float3 SH                       : TEXCOORD5;
+    real   fogFactor                : TEXCOORD6;
     float4 color                    : COLOR;
     float4 positionCS               : SV_POSITION;
 };

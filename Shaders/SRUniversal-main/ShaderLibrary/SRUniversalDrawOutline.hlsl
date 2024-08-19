@@ -8,22 +8,22 @@
 
 struct CharOutlineAttributes
 {
-    float4 positionOS : POSITION;
-    float4 color : COLOR;
-    float3 normalOS : NORMAL;
-    float3 tangentOS : TANGENT;
-    float2 uv1 : TEXCOORD0;
-    float2 uv2 : TEXCOORD1;
+    float4 positionOS     : POSITION;
+    float4 color          : COLOR;
+    float3 normalOS       : NORMAL;
+    float3 tangentOS      : TANGENT;
+    float2 uv1            : TEXCOORD0;
+    float2 uv2            : TEXCOORD1;
 };
 
 struct CharOutlineVaryings
 {
-    float4 positionCS : SV_POSITION;
-    float4 baseUV : TEXCOORD0;
-    float4 color : COLOR;
-    float3 normalWS : TEXCOORD1;
-    float3 positionWS : TEXCOORD2;
-    float fogFactor : TEXCOORD3;
+    float4 positionCS     : SV_POSITION;
+    float4 baseUV         : TEXCOORD0;
+    float4 color          : COLOR;
+    float3 normalWS       : TEXCOORD1;
+    float3 positionWS     : TEXCOORD2;
+    real   fogFactor      : TEXCOORD3;
 };
 
 float3 GetSmoothNormalWS(CharOutlineAttributes input)
@@ -221,7 +221,9 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     DoClipTestToTargetAlphaValue(FinalOutlineColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
 
-    FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, input.fogFactor);
+    // Mix Fog
+    real fogFactor = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactor);
+    FinalOutlineColor.rgb = MixFog(FinalOutlineColor.rgb, fogFactor);
 
     return FinalOutlineColor;
 }

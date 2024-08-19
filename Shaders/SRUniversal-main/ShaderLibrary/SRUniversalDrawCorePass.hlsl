@@ -21,7 +21,7 @@ CharCoreVaryings SRUniversalCharVertex(CharCoreAttributes input)
 
     output.uv = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
     // 世界空间
-    output.positionWSAndFogFactor = float4(vertexPositionInputs.positionWS, ComputeFogFactor(vertexPositionInputs.positionCS.z));
+    output.positionWS = vertexPositionInputs.positionWS;
     // 世界空间法线、切线、副切线
     output.normalWS = vertexNormalInputs.normalWS;
     output.tangentWS = vertexNormalInputs.tangentWS;
@@ -30,8 +30,9 @@ CharCoreVaryings SRUniversalCharVertex(CharCoreAttributes input)
     output.color = input.color;
     // 间接光 with 球谐函数
     output.SH = SampleSH(lerp(vertexNormalInputs.normalWS, float3(0,0,0), _IndirectLightFlattenNormal));
-
     output.positionCS = vertexPositionInputs.positionCS;
+
+    output.fogFactor = ComputeFogFactor(vertexPositionInputs.positionCS.z);
 
     return output;
 }
@@ -39,7 +40,7 @@ CharCoreVaryings SRUniversalCharVertex(CharCoreAttributes input)
 float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFrontFace)
 {
     //片元世界空间位置
-    float3 positionWS = input.positionWSAndFogFactor.xyz;
+    float3 positionWS = input.positionWS;
 
     //阴影坐标
     float4 shadowCoord = TransformWorldToShadowCoord(positionWS);
@@ -206,8 +207,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     #endif
 
     // Specular
-    half3 specularColor = 0;
-
+    float3 specularColor = 0;
     #if _SPECULAR_ON
         #if _AREA_HAIR || _AREA_BODY
             {
@@ -233,7 +233,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     #endif
 
     //Stockings
-    float3 stockingsEffect = 1;
     #if _STOCKINGS_ON
         #if _AREA_BODY
             {
@@ -254,8 +253,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     
     // Rim Light
     float3 rimLightColor = 0;
-    float3 rimLightMask;
-
     #if _RIM_LIGHTING_ON
         {
             RimLightAreaData rimLightAreaData = GetRimLightAreaData(lightMap.a, _RimColor.rgb);
@@ -276,7 +273,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
             rimLightData.intensityFrontFace = _RimIntensity;
             rimLightData.intensityBackFace = _RimIntensityBackFace;
 
-            rimLightMask = GetRimLightMask(rimLightMaskData, normalWS, viewDirectionWS, NoV, input.positionCS, lightMap);
+            float3 rimLightMask = GetRimLightMask(rimLightMaskData, normalWS, viewDirectionWS, NoV, input.positionCS, lightMap);
             rimLightColor = GetRimLight(rimLightData, rimLightMask, NoL, mainLight, isFrontFace);
         }
     #endif
@@ -337,7 +334,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
     DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
 
-    FinalColor.rgb = MixFog(FinalColor.rgb, input.positionWSAndFogFactor.w);
+    // Mix Fog
+    real fogFactor = InitializeInputDataFog(float4(input.positionWS, 1.0), input.fogFactor);
+    FinalColor.rgb = MixFog(FinalColor.rgb, fogFactor);
 
     return FinalColor;
 }
@@ -417,7 +416,7 @@ out float4 colorTarget      : SV_Target0)
     clip(sceneDepth - hairDepth + HALF_EPS); // if (hairDepth > sceneDepth) discard;
 
     float4 outputColor = colorFragmentTarget(input, isFrontFace);
-    float alpha = GetTransparentFronHairAlphaValue(input.positionWSAndFogFactor.xyz, _HairBlendAlpha);
+    float alpha = GetTransparentFronHairAlphaValue(input.positionWS, _HairBlendAlpha);
 
     float4 lightMap = GetLightMapTex(input.uv.xy,
     TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
