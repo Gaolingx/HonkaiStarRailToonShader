@@ -33,7 +33,7 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Mat_EyeShadow
-    second: {fileID: 2100000, guid: 137b2afb8ffb4dc49a0850eb830f2abf, type: 2}
+    second: {fileID: 2100000, guid: 5e8875c13ef9b014fb3fc64de9f60c7c, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
