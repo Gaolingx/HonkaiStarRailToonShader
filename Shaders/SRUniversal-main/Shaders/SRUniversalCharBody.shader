@@ -325,7 +325,7 @@ Shader "HonkaiStarRailToon/Character/Body"
 
         [Header(Outline)]
         [Toggle] _EnableOutline("Enable Outline (Default YES)", Float) = 1
-        [KeywordEnum(Normal, Tangent)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
+        [KeywordEnum(Normal, Tangent, UV2)] _OutlineNormalChannel("Outline Normal Channel", Float) = 0
         _OutlineDefaultColor("Outline Default Color", Color) = (0.5, 0.5, 0.5, 1)
         [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
         [KeywordEnum(Disable, Multiply, Tint, Overlay, Custom)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
@@ -340,16 +340,9 @@ Shader "HonkaiStarRailToon/Character/Body"
 		_OutlineColor7("Outline Color 7", Color) = (0, 0, 0, 1)
 
         [Toggle] _FaceMaterial("Is Face Material Outline", Float) = 0
-        [Toggle] _EnableFOVWidth("Enable FOV Scaling", Float) = 1
-        _OutlineWidth("Outline Width", Range(0, 1)) = 0.1
-        _OutlineScale("Outline Scale", Range(0, 1)) = 0.187
-        _OutlineFixRange1("Lip _Outline Show Start", Range(0, 1)) = 0.1
-        _OutlineFixRange2("Lip _Outline Show Max", Range(0, 1)) = 0.1
-        _OutlineFixRange3("Lip _Outline Show Start", Range(0, 1)) = 0.1
-        _OutlineFixRange4("Lip _Outline Show Max", Range(0, 1)) = 0.1
-        _OutlineFixSide("Outline Fix Star Side", Range(0, 1)) = 0.6
-		_OutlineFixFront("Outline Fix Star Front", Range(0, 1)) = 0.05
-        _FixLipOutline("TurnOn Temp Lip Outline", Range(0, 1)) = 0
+        _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
+        _OutlineWidthMin("Outline Width Min (SS)(pixel)", Range(0, 10)) = 2
+        _OutlineWidthMax("Outline Width Max (SS)(pixel)", Range(0, 30)) = 30
 
         [Header(Surface Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode (Default Back)", Float) = 2
@@ -399,7 +392,7 @@ Shader "HonkaiStarRailToon/Character/Body"
         #pragma shader_feature_local _CUSTOMRIMSHADOWVARENUM_DISABLE _CUSTOMRIMSHADOWVARENUM_MULTIPLY _CUSTOMRIMSHADOWVARENUM_OVERLAY
         #pragma shader_feature_local _CUSTOMBLOOMVARENUM_DISABLE _CUSTOMBLOOMVARENUM_MULTIPLY _CUSTOMBLOOMVARENUM_OVERLAY
         #pragma shader_feature_local _CUSTOMBLOOMCOLORVARENUM_DISABLE _CUSTOMBLOOMCOLORVARENUM_TINT _CUSTOMBLOOMCOLORVARENUM_OVERLAY
-        #pragma shader_feature_local _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT
+        #pragma shader_feature_local _OUTLINENORMALCHANNEL_NORMAL _OUTLINENORMALCHANNEL_TANGENT _OUTLINENORMALCHANNEL_UV2
         #pragma shader_feature_local _CUSTOMOUTLINEVARENUM_DISABLE _CUSTOMOUTLINEVARENUM_MULTIPLY _CUSTOMOUTLINEVARENUM_TINT _CUSTOMOUTLINEVARENUM_OVERLAY _CUSTOMOUTLINEVARENUM_CUSTOM
         #pragma shader_feature_local _OUTLINE_VERTEX_COLOR_SMOOTH_NORMAL
         #pragma shader_feature_local _EMISSION_ON

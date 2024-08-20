@@ -193,12 +193,14 @@ Material:
     - _OutlineFixRange2: 0.1
     - _OutlineFixRange3: 0.1
     - _OutlineFixRange4: 0.1
-    - _OutlineFixSide: 0.6
+    - _OutlineFixSide: 1
     - _OutlineNormal: 0
     - _OutlineNormalChannel: 0
     - _OutlineScale: 0.01
     - _OutlineUseLutMapToggle: 0
-    - _OutlineWidth: 1
+    - _OutlineWidth: 0.00139
+    - _OutlineWidthMax: 30
+    - _OutlineWidthMin: 0
     - _OutlineZOffset: 0
     - _PerObjShadowCasterId: -1
     - _RampCoolWarmLerpFactor: 1

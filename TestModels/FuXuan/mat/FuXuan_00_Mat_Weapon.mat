@@ -204,7 +204,9 @@ Material:
     - _OutlineNormalChannel: 0
     - _OutlineScale: 0.025
     - _OutlineUseLutMapToggle: 0
-    - _OutlineWidth: 1
+    - _OutlineWidth: 0.005
+    - _OutlineWidthMax: 30
+    - _OutlineWidthMin: 2
     - _OutlineZOffset: 0
     - _PerObjShadowCasterId: -1
     - _RampCoolWarmLerpFactor: 1
