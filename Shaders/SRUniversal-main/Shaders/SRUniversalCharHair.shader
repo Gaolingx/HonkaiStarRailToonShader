@@ -350,7 +350,6 @@ Shader "HonkaiStarRailToon/Character/Hair"
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeColor("Core Pass dst blend mode color (Default Zero)", Float) = 0
         [Enum(UnityEngine.Rendering.BlendMode)] _SrcBlendModeAlpha("Core Pass src blend mode alpha (Default One)", Float) = 1
         [Enum(UnityEngine.Rendering.BlendMode)] _DstBlendModeAlpha("Core Pass dst blend mode alpha (Default Zero)", Float) = 0
-        [Enum(Off, 0, On, 1)] _ZWrite("ZWrite (Default On)", Float) = 1
 
         [HideInInspector] _ModelScale("Model Scale (Default 1)", Float) = 1
         [HideInInspector] _PerObjShadowCasterId("Per Object Shadow Caster Id", Float) = -1
@@ -566,7 +565,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             }
 
             Cull [_CullMode]
-            ZWrite [_ZWrite]
+            ZWrite On
 
             ColorMask RGBA 0
 

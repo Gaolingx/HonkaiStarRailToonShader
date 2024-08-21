@@ -898,33 +898,29 @@ struct SpecularData
     float materialId;
 };
 
-float3 specular_base(Light light, float shadow_area, float ndoth, float lightmap_spec, float3 specular_color, float3 specular_values)
+half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
+    half3 specColor, float shininess, float roughness, float intensity, float diffuseFac, float metallic = 0.0)
 {
-    float specular = ndoth;
-    specular = pow(max(specular, 0.01f), specular_values.x);
-    specular_values.y = max(specular_values.y, 0.001f);
+    //roughness = lerp(1.0, roughness * roughness, metallic);
+    //float smoothness = exp2(shininess * (1.0 - roughness) + 1.0) + 1.0;
+    float3 halfDirWS = normalize(light.direction + viewDirWS);
+    float blinnPhong = pow(saturate(dot(halfDirWS, normalWS)), shininess);
+    float threshold = 1.0 - surface.specularThreshold;
+    float stepPhong = smoothstep(threshold - roughness, threshold + roughness, blinnPhong);
 
-    float specular_thresh = 1.0f - lightmap_spec;
-    float rough_thresh = specular_thresh - specular_values.y;
-    specular_thresh = (specular_values.y + specular_thresh) - rough_thresh;
-    specular = shadow_area * specular - rough_thresh; 
-    specular_thresh = saturate((1.0f / specular_thresh) * specular);
-    specular = (specular_thresh * - 2.0f + 3.0f) * pow(specular_thresh, 2.0f);
-    float3 specularColor = specular_color * specular * (specular_values.z * 0.35f);
+    float3 f0 = lerp(0.04, surface.color, metallic);
+    float3 fresnel = f0 + (1.0 - f0) * pow(1.0 - saturate(dot(viewDirWS, halfDirWS)), 5.0);
 
-    float attenuation = light.shadowAttenuation * saturate(light.distanceAttenuation);
-    float3 lightColor = light.color * attenuation;
-
-    float3 FinalSpecular = specularColor * lightColor;
-    return FinalSpecular;
+    half3 lightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
+    half3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, 1.0, metallic);
+    
+    return specular * intensity;
 }
 
-float3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS, float3 normalWS, float diffuseFac)
+half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, float diffuseFac)
 {
-    float3 half_vector = normalize(viewDirWS + light.direction);
-    float ndoth = dot(normalWS, half_vector);
     float metallic = step(abs(GetRampLineIndex(surface.materialId) - GetMetalIndex()), 0.001);
-    return specular_base(light, metallic, ndoth, surface.specularThreshold, surface.color, float3(surface.shininess, surface.roughness, surface.intensity));
+    return CalculateSpecular(surface, light, viewDirWS, normalWS, surface.color, surface.shininess, surface.roughness, surface.intensity, diffuseFac, metallic);
 }
 
 // Stockings ------------------------------------------------------------------------------------------------------ // 
