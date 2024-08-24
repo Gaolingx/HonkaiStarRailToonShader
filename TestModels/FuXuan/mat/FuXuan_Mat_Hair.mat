@@ -81,7 +81,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HairCoolRamp:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 185b3f657fe424c4bad1fa10e9613217, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HairLightMap:
@@ -89,7 +89,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HairWarmRamp:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: b7da780d2b1ae544ca2cc53ad034bd93, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LightMap:
@@ -189,8 +189,8 @@ Material:
     - _OutlineNormal: 0
     - _OutlineNormalChannel: 0
     - _OutlineUseLutMapToggle: 0
-    - _OutlineWidth: 0.002
-    - _OutlineWidthMax: 18
+    - _OutlineWidth: 0.00159
+    - _OutlineWidthMax: 30
     - _OutlineWidthMin: 0
     - _OutlineZOffset: 0
     - _PerObjShadowCasterId: -1
