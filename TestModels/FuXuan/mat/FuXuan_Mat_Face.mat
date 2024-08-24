@@ -14,8 +14,8 @@ Material:
   m_ValidKeywords:
   - _AREA_FACE
   - _AUTO_Brightness_ON
-  - _CUSTOMBLOOMCOLORVARENUM_DISABLE
-  - _CUSTOMBLOOMVARENUM_DISABLE
+  - _CUSTOMBLOOMCOLORVARENUM_OVERLAY
+  - _CUSTOMBLOOMVARENUM_OVERLAY
   - _CUSTOMHEADBONEMODEVARENUM_GAME
   - _CUSTOMOUTLINEVARENUM_OVERLAY
   - _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE
@@ -27,7 +27,6 @@ Material:
   - _CUSTOM_RAMP_MAPPING_ON
   - _MODEL_GAME
   - _OUTLINENORMALCHANNEL_NORMAL
-  - _RIM_LIGHTING_ON
   - _SPECULAR_ON
   m_InvalidKeywords:
   - _DAYTIME_MANUAL_ON_ON
@@ -132,8 +131,8 @@ Material:
     - _CoolShadowMultColorFac6: 0
     - _CoolShadowMultColorFac7: 0
     - _CullMode: 2
-    - _CustomBloomColorVarEnum: 0
-    - _CustomBloomVarEnum: 0
+    - _CustomBloomColorVarEnum: 2
+    - _CustomBloomVarEnum: 2
     - _CustomHeadBoneModeVarEnum: 1
     - _CustomOutlineVarEnum: 3
     - _CustomRampMappingToggle: 1
@@ -298,7 +297,7 @@ Material:
     - _UseEmission: 0
     - _UseLutMapToggle: 0
     - _UseNormalMap: 0
-    - _UseRimLight: 1
+    - _UseRimLight: 0
     - _UseRimShadow: 0
     - _UseStockings: 0
     - _WarmShadowMultColorFac0: 0

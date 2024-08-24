@@ -31,6 +31,7 @@ Material:
   - _RIM_LIGHTING_ON
   - _RIM_SHADOW_ON
   - _SPECULAR_ON
+  - _STOCKINGS_ON
   m_InvalidKeywords:
   - _DAYTIME_MANUAL_ON_ON
   - _ENABLEFOVWIDTH_ON
@@ -119,7 +120,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _StockRangeTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: a9879e27fde22f1438572c45e09a3287, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _StockingsMap:
@@ -314,16 +315,16 @@ Material:
     - _SrcBlendColor: 1
     - _SrcBlendModeAlpha: 1
     - _SrcBlendModeColor: 1
-    - _StockDarkWidth: 0.5
+    - _StockDarkWidth: 0.365
     - _StockRoughness: 1
-    - _StockSP: 0.25
+    - _StockSP: 0.222
     - _StockingsDarkWidth: 0.365
     - _StockingsLightedIntensity: 0.222
     - _StockingsLightedWidth: 2.31
     - _StockingsPower: 0.452
     - _StockingsRoughness: 1
-    - _Stockpower: 1
-    - _Stockpower1: 1
+    - _Stockpower: 0.452
+    - _Stockpower1: 2.31
     - _UseAdditionalLighting: 0
     - _UseAlphaClipping: 0
     - _UseAutoBrightness: 1
@@ -333,7 +334,7 @@ Material:
     - _UseNormalMap: 0
     - _UseRimLight: 1
     - _UseRimShadow: 1
-    - _UseStockings: 0
+    - _UseStockings: 1
     - _WarmShadowMultColorFac0: 0
     - _WarmShadowMultColorFac1: 0
     - _WarmShadowMultColorFac2: 0
@@ -427,8 +428,8 @@ Material:
     - _SpecularColor5: {r: 0, g: 0, b: 0, a: 1}
     - _SpecularColor6: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 1}
     - _SpecularColor7: {r: 0.5566037, g: 0.5566037, b: 0.5566037, a: 1}
-    - _StockDarkcolor: {r: 1, g: 1, b: 1, a: 1}
-    - _Stockcolor: {r: 1, g: 1, b: 1, a: 1}
+    - _StockDarkcolor: {r: 0.45141223, g: 0.1713243, b: 0.4716981, a: 1}
+    - _Stockcolor: {r: 0.9528302, g: 0.8510434, b: 0.79552335, a: 1}
     - _StockingsColor: {r: 0.9528302, g: 0.8510434, b: 0.79552335, a: 1}
     - _StockingsColorDark: {r: 0.45141223, g: 0.1713243, b: 0.4716981, a: 1}
     - _WarmShadowMultColor0: {r: 1, g: 1, b: 1, a: 1}

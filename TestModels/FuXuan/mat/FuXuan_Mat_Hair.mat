@@ -14,24 +14,24 @@ Material:
   m_ValidKeywords:
   - _AREA_HAIR
   - _AUTO_Brightness_ON
-  - _CUSTOMBLOOMCOLORVARENUM_DISABLE
-  - _CUSTOMBLOOMVARENUM_DISABLE
+  - _CUSTOMBLOOMCOLORVARENUM_OVERLAY
+  - _CUSTOMBLOOMVARENUM_OVERLAY
   - _CUSTOMHEADBONEMODEVARENUM_GAME
   - _CUSTOMOUTLINEVARENUM_OVERLAY
-  - _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE
-  - _CUSTOMRIMLIGHTVARENUM_DISABLE
-  - _CUSTOMRIMSHADOWCOLORVARENUM_DISABLE
-  - _CUSTOMRIMSHADOWVARENUM_DISABLE
+  - _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY
+  - _CUSTOMRIMLIGHTVARENUM_OVERLAY
+  - _CUSTOMRIMSHADOWCOLORVARENUM_OVERLAY
+  - _CUSTOMRIMSHADOWVARENUM_OVERLAY
   - _CUSTOMSPECULARCOLORVARENUM_OVERLAY
   - _CUSTOMSPECULARVARENUM_OVERLAY
   - _CUSTOM_RAMP_MAPPING_ON
   - _MODEL_GAME
   - _OUTLINENORMALCHANNEL_NORMAL
   - _RIM_LIGHTING_ON
+  - _RIM_SHADOW_ON
   - _SPECULAR_ON
   m_InvalidKeywords:
   - _DAYTIME_MANUAL_ON_ON
-  - _ENABLEFOVWIDTH_ON
   - _ENABLEOUTLINE_ON
   - _OUTLINENORMAL_TANGENT
   m_LightmapFlags: 4
@@ -81,7 +81,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HairCoolRamp:
-        m_Texture: {fileID: 2800000, guid: 185b3f657fe424c4bad1fa10e9613217, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HairLightMap:
@@ -89,7 +89,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _HairWarmRamp:
-        m_Texture: {fileID: 2800000, guid: b7da780d2b1ae544ca2cc53ad034bd93, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _LightMap:
@@ -144,16 +144,16 @@ Material:
     - _CoolShadowMultColorFac6: 0
     - _CoolShadowMultColorFac7: 0
     - _Cull: 0
-    - _CullMode: 2
-    - _CustomBloomColorVarEnum: 0
-    - _CustomBloomVarEnum: 0
+    - _CullMode: 0
+    - _CustomBloomColorVarEnum: 2
+    - _CustomBloomVarEnum: 2
     - _CustomHeadBoneModeVarEnum: 1
     - _CustomOutlineVarEnum: 3
     - _CustomRampMappingToggle: 1
-    - _CustomRimLightColorVarEnum: 0
-    - _CustomRimLightVarEnum: 0
-    - _CustomRimShadowColorVarEnum: 0
-    - _CustomRimShadowVarEnum: 0
+    - _CustomRimLightColorVarEnum: 2
+    - _CustomRimLightVarEnum: 2
+    - _CustomRimShadowColorVarEnum: 2
+    - _CustomRimShadowVarEnum: 2
     - _CustomSpecularColorVarEnum: 2
     - _CustomSpecularVarEnum: 2
     - _DayTime: 12
@@ -165,7 +165,6 @@ Material:
     - _EmissionIntensity: 0
     - _EmissionMixBaseColorFac: 1
     - _EmissionThreshold: 1
-    - _EnableFOVWidth: 1
     - _EnableOutline: 1
     - _EnableSpecular: 1
     - _ExCheekIntensity: 0
@@ -174,7 +173,6 @@ Material:
     - _FaceMaterial: 0
     - _FaceShadowOffset: 0
     - _FaceShadowTransitionSoftness: 0.05
-    - _FixLipOutline: 0
     - _HairBlendAlpha: 0.6
     - _HairShadowDistance: 0.2
     - _IndirectLightFlattenNormal: 0
@@ -188,18 +186,11 @@ Material:
     - _Model: 0
     - _ModelScale: 1
     - _NoseLinePower: 1
-    - _OutlineFixFront: 0.05
-    - _OutlineFixRange1: 0.1
-    - _OutlineFixRange2: 0.1
-    - _OutlineFixRange3: 0.1
-    - _OutlineFixRange4: 0.1
-    - _OutlineFixSide: 1
     - _OutlineNormal: 0
     - _OutlineNormalChannel: 0
-    - _OutlineScale: 0.01
     - _OutlineUseLutMapToggle: 0
-    - _OutlineWidth: 0.00139
-    - _OutlineWidthMax: 30
+    - _OutlineWidth: 0.002
+    - _OutlineWidthMax: 18
     - _OutlineWidthMin: 0
     - _OutlineZOffset: 0
     - _PerObjShadowCasterId: -1
@@ -287,7 +278,7 @@ Material:
     - _SpecularRoughness4: 0.02
     - _SpecularRoughness5: 0.02
     - _SpecularRoughness6: 0.02
-    - _SpecularRoughness7: 0.1
+    - _SpecularRoughness7: 0.02
     - _SpecularShininess: 10
     - _SpecularShininess0: 10
     - _SpecularShininess1: 10
@@ -313,7 +304,7 @@ Material:
     - _UseLutMapToggle: 0
     - _UseNormalMap: 0
     - _UseRimLight: 1
-    - _UseRimShadow: 0
+    - _UseRimShadow: 1
     - _UseStockings: 0
     - _WarmShadowMultColorFac0: 0
     - _WarmShadowMultColorFac1: 0
@@ -323,7 +314,6 @@ Material:
     - _WarmShadowMultColorFac5: 0
     - _WarmShadowMultColorFac6: 0
     - _WarmShadowMultColorFac7: 0
-    - _ZWrite: 1
     - _mmBloomIntensity0: 0.02
     - _mmBloomIntensity1: 0
     - _mmBloomIntensity2: 0
@@ -378,7 +368,7 @@ Material:
     - _OutlineColor4: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor5: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor6: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor7: {r: 0.4745098, g: 0.3254902, b: 0.39607844, a: 1}
+    - _OutlineColor7: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineDefaultColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
     - _RimColor: {r: 1, g: 1, b: 1, a: 1}
     - _RimColor0: {r: 1, g: 0.8443396, b: 0.8520345, a: 1}
