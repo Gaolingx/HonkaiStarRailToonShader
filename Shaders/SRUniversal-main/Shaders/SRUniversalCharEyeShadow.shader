@@ -88,6 +88,38 @@ Shader "HonkaiStarRailToon/Character/EyeShadow"
 
         Pass
         {
+            Name "SRCharEyeShadowGBuffer"
+
+            Tags
+            {
+                "LightMode" = "UniversalGBuffer"
+            }
+
+            Cull Back
+            ZWrite On
+
+            ColorMask RGBA 0
+
+            HLSLPROGRAM
+            #pragma target 4.5
+
+            // Deferred Rendering Path does not support the OpenGL-based graphics API:
+            // Desktop OpenGL, OpenGL ES 3.0, WebGL 2.0.
+            #pragma exclude_renderers gles3 glcore
+
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+
+            #pragma vertex SRUniversalCharVertex
+            #pragma fragment SRUniversalCharGBufferFragment
+
+            #include "../ShaderLibrary/SRUniversalInput.hlsl"
+            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+
+            ENDHLSL
+        }
+
+        Pass
+        {
             Name "SRCharEyeShadowMotionVectors"
 
             Tags

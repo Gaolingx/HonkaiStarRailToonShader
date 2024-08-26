@@ -471,6 +471,8 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
             // Desktop OpenGL, OpenGL ES 3.0, WebGL 2.0.
             #pragma exclude_renderers gles3 glcore
 
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT
+
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharGBufferFragment
 
