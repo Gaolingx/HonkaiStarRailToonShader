@@ -364,7 +364,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
         {
             "RenderPipeline" = "UniversalPipeline"
             "RenderType" = "Opaque"
-            "UniversalMaterialType" = "ComplexLit"
+            "UniversalMaterialType" = "ComplexLit" // Packages/com.unity.render-pipelines.universal/Runtime/Passes/GBufferPass.cs: Fill GBuffer, but skip lighting pass for ComplexLit
             "Queue" = "Geometry+20"  // 必须在脸和眼睛之后绘制
         }
 
@@ -426,6 +426,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ColorMask RGBA 0
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharCoreFragment
@@ -477,6 +478,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ColorMask RGBA 0
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharCoreFragment
@@ -532,6 +534,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ColorMask RGBA 0
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex SRUniversalCharVertex
             #pragma fragment HairFakeTransparentFragment
@@ -585,16 +588,6 @@ Shader "HonkaiStarRailToon/Character/Hair"
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON
             #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
-            #pragma multi_compile_fog
-
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile _ _LIGHT_LAYERS
-            #pragma multi_compile _ _FORWARD_PLUS
-
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
@@ -617,6 +610,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ColorMask RGBA 0
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex CharacterOutlinePassVertex
             #pragma fragment CharacterOutlinePassFragment
@@ -649,7 +643,6 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ColorMask 0
 
             HLSLPROGRAM
-
             #pragma target 2.0
 
             #pragma vertex CharacterShadowVertex
@@ -682,6 +675,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ColorMask R
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex CharacterDepthOnlyVertex
             #pragma fragment CharacterDepthOnlyFragment
@@ -710,6 +704,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ColorMask R
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex CharacterDepthOnlyVertex
             #pragma fragment CharacterDepthOnlyFragment
@@ -726,20 +721,23 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharHairDepthNormals"
+            Name "SRCharHairDepthNormalsOnly"
 
             Tags
             {
-                "LightMode" = "DepthNormals"
+                "LightMode" = "DepthNormalsOnly"
             }
 
             Cull [_CullMode]
             ZWrite On
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex CharacterDepthNormalsVertex
             #pragma fragment CharacterDepthNormalsFragment
+
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT // forward-only variant
 
             #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
             #pragma shader_feature_local_fragment _ _ALPHATEST_ON

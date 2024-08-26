@@ -59,6 +59,7 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             ColorMask RGBA 0
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma multi_compile_fog
 
@@ -131,7 +132,6 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             ColorMask 0
 
             HLSLPROGRAM
-
             #pragma target 2.0
 
             #pragma vertex FaceMaskShadowVertex
@@ -170,6 +170,7 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             ColorMask R
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex FaceMaskDepthOnlyVertex
             #pragma fragment FaceMaskDepthOnlyFragment
@@ -193,20 +194,23 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
 
         Pass
         {
-            Name "SRCharFaceMaskDepthNormals"
+            Name "SRCharFaceMaskDepthNormalsOnly"
 
             Tags
             {
-                "LightMode" = "DepthNormals"
+                "LightMode" = "DepthNormalsOnly"
             }
 
             Cull Off
             ZWrite On
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma vertex FaceMaskDepthNormalsVertex
             #pragma fragment FaceMaskDepthNormalsFragment
+
+            #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT // forward-only variant
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"

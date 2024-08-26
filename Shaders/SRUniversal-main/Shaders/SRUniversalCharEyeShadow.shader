@@ -61,6 +61,7 @@ Shader "HonkaiStarRailToon/Character/EyeShadow"
             ColorMask 0 1
 
             HLSLPROGRAM
+            #pragma target 2.0
 
             #pragma multi_compile_fog
 

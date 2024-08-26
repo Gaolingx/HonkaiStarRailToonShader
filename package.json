@@ -1,15 +1,19 @@
 {
   "name": "com.gaolingx.honkaistarrailtoonshader",
   "displayName": "Gaolingx HonkaiStarRail Shader",
-  "version": "3.9.0",
+  "author": {
+    "name": "Gaolingx",
+    "url": "https://github.com/Gaolingx"
+  },
+  "version": "4.0.0",
   "unity": "2022.3",
-  "unityRelease": "0a10",
-  "description": "This is a toon style shader based on Unity URP,which seems to imitate the character rendering of Honkai: Star Rail.",
+  "description": "This is a toon style shader based on Universal Render Pipeline, which seems to imitate the character rendering of Honkai: Star Rail",
   "keywords": [
+    "NPR",
     "Shaders",
-    "Toon",
-    "NPR"
+    "URP"
   ],
+  "license": "MIT",
   "dependencies": {
     "com.stalomeow.star-rail-npr-shader": "2.9.0"
   }
