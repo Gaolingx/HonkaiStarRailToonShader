@@ -110,12 +110,12 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
         [Toggle] _SingleMaterial("Is Single Material (Use Ramp Line of Mat0)", Float) = 0
         [IntRange] _RampV0("Ramp Line of Mat0 (Default 0)", Range(0, 7)) = 0
         [IntRange] _RampV1("Ramp Line of Mat1 (Default 1)", Range(0, 7)) = 1
-    	[IntRange] _RampV2("Ramp Line of Mat2 (Default 2)", Range(0, 7)) = 2
-    	[IntRange] _RampV3("Ramp Line of Mat3 (Default 3)", Range(0, 7)) = 3
-    	[IntRange] _RampV4("Ramp Line of Mat4 (Default 4)", Range(0, 7)) = 4
-    	[IntRange] _RampV5("Ramp Line of Mat5 (Default 5)", Range(0, 7)) = 5
-    	[IntRange] _RampV6("Ramp Line of Mat6 (Default 6)", Range(0, 7)) = 6
-    	[IntRange] _RampV7("Ramp Line of Mat7 (Default 7)", Range(0, 7)) = 7
+        [IntRange] _RampV2("Ramp Line of Mat2 (Default 2)", Range(0, 7)) = 2
+        [IntRange] _RampV3("Ramp Line of Mat3 (Default 3)", Range(0, 7)) = 3
+        [IntRange] _RampV4("Ramp Line of Mat4 (Default 4)", Range(0, 7)) = 4
+        [IntRange] _RampV5("Ramp Line of Mat5 (Default 5)", Range(0, 7)) = 5
+        [IntRange] _RampV6("Ramp Line of Mat6 (Default 6)", Range(0, 7)) = 6
+        [IntRange] _RampV7("Ramp Line of Mat7 (Default 7)", Range(0, 7)) = 7
 
         [Header(Indirect Lighting)]
         _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)", Range(0, 1)) = 0
@@ -212,8 +212,8 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
         _StockSP ("Stockings Lighted Intensity", Range(0, 1)) = 0.25
         //_StockTransparency ("Stockings Transparency", Range(0, 1)) = 0
         _StockRoughness ("Stockings Texture Intensity", Range(0, 1)) = 1
-		_Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
-		// _Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
+        _Stockpower1 ("Stockings Lighted Width", Range(1, 32)) = 1
+        // _Stockthickness ("Stockings Thickness", Range(0, 1)) = 0
         [HideInInspector] m_end_stockings("", Float) = 0
 
         [Header(Rim Lighting)]
@@ -330,14 +330,14 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
         [Toggle(_USE_LUT_MAP_OUTLINE)] _OutlineUseLutMapToggle("Outline Use LUT Map (Default NO)", Float) = 0
         [KeywordEnum(Disable, Multiply, Tint, Overlay, Custom)] _CustomOutlineVarEnum("Custom Outline Var State", Float) = 0
         _OutlineColor("Outline Color", Color) = (0, 0, 0, 1)
-		_OutlineColor0("Outline Color 0", Color) = (0, 0, 0, 1)
-		_OutlineColor1("Outline Color 1", Color) = (0, 0, 0, 1)
-		_OutlineColor2("Outline Color 2", Color) = (0, 0, 0, 1)
-		_OutlineColor3("Outline Color 3", Color) = (0, 0, 0, 1)
-		_OutlineColor4("Outline Color 4", Color) = (0, 0, 0, 1)
-		_OutlineColor5("Outline Color 5", Color) = (0, 0, 0, 1)
-		_OutlineColor6("Outline Color 6", Color) = (0, 0, 0, 1)
-		_OutlineColor7("Outline Color 7", Color) = (0, 0, 0, 1)
+        _OutlineColor0("Outline Color 0", Color) = (0, 0, 0, 1)
+        _OutlineColor1("Outline Color 1", Color) = (0, 0, 0, 1)
+        _OutlineColor2("Outline Color 2", Color) = (0, 0, 0, 1)
+        _OutlineColor3("Outline Color 3", Color) = (0, 0, 0, 1)
+        _OutlineColor4("Outline Color 4", Color) = (0, 0, 0, 1)
+        _OutlineColor5("Outline Color 5", Color) = (0, 0, 0, 1)
+        _OutlineColor6("Outline Color 6", Color) = (0, 0, 0, 1)
+        _OutlineColor7("Outline Color 7", Color) = (0, 0, 0, 1)
 
         [Toggle] _FaceMaterial("Is Face Material Outline", Float) = 0
         _OutlineWidth("OutlineWidth (WS)(m)", Range(0, 0.01)) = 0.0035
