@@ -4,11 +4,11 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
 ///////////////////////////////////////////////////////////////////////////////////////
-// CBUFFER and Uniforms 
+// CBUFFER and Uniforms
 // (you should put all uniforms of all passes inside this single UnityPerMaterial CBUFFER! else SRP batching is not possible!)
 ///////////////////////////////////////////////////////////////////////////////////////
 
-// all sampler2D don't need to put inside CBUFFER 
+// all sampler2D don't need to put inside CBUFFER
 
 TEXTURE2D(_BaseMap);
 SAMPLER(sampler_BaseMap);

@@ -89,7 +89,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
     //给背面填充颜色，对眼睛，丝袜很有用
     baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
-    
+
     //对有LightMap的部位，采样 LightMap
     // LightMap
     // lightMap.r: Specular Intensity
@@ -194,7 +194,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     }
 
     float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime, _ShadowBoost);
-    
+
     float3 FinalDiffuse = mainLightColor * mainLight.distanceAttenuation * baseColor * rampColor;
 
     // Additional Lights
@@ -251,7 +251,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
             }
         #endif
     #endif
-    
+
     // Rim Light
     float3 rimLightColor = 0;
     #if _RIM_LIGHTING_ON
@@ -268,7 +268,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
             rimLightMaskData.edgeSoftness = rimLightAreaEdgeSoftnesses;
             rimLightMaskData.modelScale = _ModelScale;
             rimLightMaskData.ditherAlpha = _DitherAlpha;
-        
+
             RimLightData rimLightData;
             rimLightData.darkenValue = rimLightAreaDark;
             rimLightData.intensityFrontFace = _RimIntensity;

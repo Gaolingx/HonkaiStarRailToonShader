@@ -529,11 +529,11 @@ Shader "HonkaiStarRailToon/Character/Face"
             ENDHLSL
         }
 
-        Pass 
+        Pass
         {
             Name "SRCharFaceOutline"
 
-            Tags 
+            Tags
             {
                 "LightMode" = "HSROutline"
             }

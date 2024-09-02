@@ -594,11 +594,11 @@ Shader "HonkaiStarRailToon/Character/Hair"
             ENDHLSL
         }
 
-        Pass 
+        Pass
         {
             Name "SRCharHairOutline"
 
-            Tags 
+            Tags
             {
                 "LightMode" = "HSROutline"
             }

@@ -30,7 +30,7 @@ struct CharOutlineVaryings
 float3 GetSmoothNormalWS(CharOutlineAttributes input)
 {
     float3 smoothNormalOS = input.normalOS;
-    
+
     #ifdef _OUTLINENORMALCHANNEL_NORMAL
         smoothNormalOS = input.normalOS;
     #elif _OUTLINENORMALCHANNEL_TANGENT
@@ -126,7 +126,7 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
     return outlineColor;
 }
 
-float4 colorFragmentTarget(inout CharOutlineVaryings input) 
+float4 colorFragmentTarget(inout CharOutlineVaryings input)
 {
     [branch] if (_EnableOutline == 0)
     {

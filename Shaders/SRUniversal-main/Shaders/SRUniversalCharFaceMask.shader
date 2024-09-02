@@ -7,10 +7,7 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
         [Header(TextureScale Offset)]
         [TextureScaleOffset] _Maps_ST("Maps Scale Offset", Vector) = (1, 1, 0, 0)
 
-        [Header(Indirect Lighting)]
-        _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)", Range(0, 1)) = 0
-        _IndirectLightIntensity("Indirect light intensity (Default 1)", Range(0, 2)) = 1
-        _IndirectLightUsage("Indirect light color usage (Default 0.5)", Range(0, 1)) = 0.5
+        [HideInInspector] _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)", Range(0, 1)) = 0
 
         [Header(Self Shadow Caster)]
         _SelfShadowDepthBias("Depth Bias", Float) = -0.01

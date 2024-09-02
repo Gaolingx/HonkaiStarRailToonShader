@@ -488,11 +488,11 @@ Shader "HonkaiStarRailToon/Character/Body"
             ENDHLSL
         }
 
-        Pass 
+        Pass
         {
             Name "SRCharBodyOpaqueOutline"
 
-            Tags 
+            Tags
             {
                 "LightMode" = "HSROutline"
             }

@@ -3,7 +3,7 @@
 #ifndef Include_NiloOutlineUtil
 #define Include_NiloOutlineUtil
 
-// Vertex Utils --------------------------------------------------------------------------------------------------- // 
+// Vertex Utils --------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float CalculateExtendWidthWS(float3 positionWS, float3 extendVectorWS, float extendWS, float minExtendSS, float maxExtendSS)
 {

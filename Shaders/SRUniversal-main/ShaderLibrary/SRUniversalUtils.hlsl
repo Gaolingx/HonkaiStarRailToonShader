@@ -6,7 +6,7 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
 
-// const ---------------------------------------------------------------------------------------------------------- // 
+// const ---------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 const static float3 f3zero = float3(0.0, 0.0, 0.0);
 const static float3 f3one = float3(1.0, 1.0, 1.0);
@@ -14,7 +14,7 @@ const static float4 f4zero = float4(0.0, 0.0, 0.0, 0.0);
 const static float4 f4one = float4(1.0, 1.0, 1.0, 1.0);
 
 
-// utils ---------------------------------------------------------------------------------------------------------- // 
+// utils ---------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float4 CombineAndTransformDualFaceUV(float2 uv1, float2 uv2, float4 mapST)
 {
@@ -101,7 +101,7 @@ float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float dayTime, float shad
     return rampColor;
 }
 
-void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold) 
+void DoClipTestToTargetAlphaValue(float alpha, float alphaTestThreshold)
 {
     #if _ALPHATEST_ON
         clip(alpha - alphaTestThreshold);
@@ -114,7 +114,7 @@ float3 MixBloomColor(float3 colorTarget, float3 bloomColor, float bloomIntensity
 }
 
 
-// HeadDirections ------------------------------------------------------------------------------------------------- // 
+// HeadDirections ------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct HeadDirections
 {
@@ -153,7 +153,7 @@ HeadDirections GetWorldSpaceCharHeadDirectionsImpl(
     GetWorldSpaceCharHeadDirectionsImpl(_MMDHeadBoneForward, _MMDHeadBoneUp, _MMDHeadBoneRight)
 
 
-// DitherAlpha ---------------------------------------------------------------------------------------------------- // 
+// DitherAlpha ---------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 void DoDitherAlphaEffect(float4 svPosition, float ditherAlpha)
 {
@@ -171,7 +171,7 @@ void DoDitherAlphaEffect(float4 svPosition, float ditherAlpha)
 }
 
 
-// CharacterMainLight --------------------------------------------------------------------------------------------- // 
+// CharacterMainLight --------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 Light GetCharacterMainLightStruct(float4 shadowCoord, float3 positionWS)
 {
@@ -215,7 +215,7 @@ float3 GetMainLightColor(float3 inputMainLightColor, float mainLightColorUsage)
 }
 
 
-// CharacterAdditionalLight --------------------------------------------------------------------------------------- // 
+// CharacterAdditionalLight --------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float3 GetAdditionalLightDiffuse(float3 baseColor, Light light)
 {
@@ -268,7 +268,7 @@ Light GetCharacterAdditionalLight(uint lightIndex, float3 positionWS)
 #define CHAR_LIGHT_LOOP_END } LIGHT_LOOP_END
 
 
-// GI ------------------------------------------------------------------------------------------------------------- // 
+// GI ------------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float3 CalculateGI(float3 baseColor, float diffuseThreshold, float3 sh, float intensity, float mainColorLerp)
 {
@@ -276,7 +276,7 @@ float3 CalculateGI(float3 baseColor, float diffuseThreshold, float3 sh, float in
 }
 
 
-// RampIndex ------------------------------------------------------------------------------------------------------ // 
+// RampIndex ------------------------------------------------------------------------------------------------------ //
 // ---------------------------------------------------------------------------------------------------------------- //
 void OverrideRampLineIfNeed()
 {
@@ -327,7 +327,7 @@ half GetMetalIndex()
 }
 
 
-// NPR ------------------------------------------------------------------------------------------------------------ // 
+// NPR ------------------------------------------------------------------------------------------------------------ //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct RampUVData
 {
@@ -350,7 +350,7 @@ RampUVData GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, 
     return data;
 }
 
-// TransparentFronHair -------------------------------------------------------------------------------------------- // 
+// TransparentFronHair -------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float GetTransparentFronHairAlphaValue(float3 positionWS, float blendAlpha)
 {

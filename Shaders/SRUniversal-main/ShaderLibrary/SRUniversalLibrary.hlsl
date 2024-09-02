@@ -8,7 +8,7 @@
 #include "../ShaderLibrary/CharHairDepthTexture.hlsl"
 
 
-// InputData ------------------------------------------------------------------------------------------------------ // 
+// InputData ------------------------------------------------------------------------------------------------------ //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct CharCoreAttributes
 {
@@ -50,7 +50,7 @@ void InitializeInputData(CharCoreVaryings input, out InputData inputData)
 }
 
 
-// MainTex -------------------------------------------------------------------------------------------------------- // 
+// MainTex -------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float4 GetMainTexColor(float2 uv,
 TEXTURE2D_PARAM(FaceColorMap, sampler_FaceColorMap), float4 FaceColorMapColor,
@@ -74,7 +74,7 @@ TEXTURE2D_PARAM(BodyColorMap, sampler_BodyColorMap), float4 BodyColorMapColor)
 }
 
 
-// LightMap ------------------------------------------------------------------------------------------------------- // 
+// LightMap ------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float4 GetLightMapTex(float2 uv,
 TEXTURE2D_PARAM(HairLightMap, sampler_HairLightMap),
@@ -90,7 +90,7 @@ TEXTURE2D_PARAM(BodyLightMap, sampler_BodyLightMap))
 }
 
 
-// RampMap -------------------------------------------------------------------------------------------------------- // 
+// RampMap -------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct RampColor
 {
@@ -122,7 +122,7 @@ TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp))
 }
 
 
-// RampColorTint -------------------------------------------------------------------------------------------------- // 
+// RampColorTint -------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 RampColor TintRampColor(float3 coolRamp, float3 warmRamp, float materialId)
 {
@@ -188,7 +188,7 @@ RampColor TintRampColor(float3 coolRamp, float3 warmRamp, float materialId)
 }
 
 
-// LutMap --------------------------------------------------------------------------------------------------------- // 
+// LutMap --------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct LutMapData
 {
@@ -308,7 +308,7 @@ half3 GetLUTMapBloomColor(int materialId)
 }
 
 
-// MainLight Shadow --------------------------------------------------------------------------------------------------------- // 
+// MainLight Shadow --------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct BodyShadowData
 {
@@ -375,7 +375,7 @@ float GetFaceMainLightShadow(FaceShadowData shadowData, HeadDirections headDirWS
 }
 
 
-// Front Hair Shadow ---------------------------------------------------------------------------------------------- // 
+// Front Hair Shadow ---------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float GetFrontHairShadow(float4 svPosition, float3 lightDirWS, float shadowDistance)
 {
@@ -407,7 +407,7 @@ float GetFrontHairShadow(float4 svPosition, float3 lightDirWS, float shadowDista
 }
 
 
-// RimLight ------------------------------------------------------------------------------------------------------- // 
+// RimLight ------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct RimLightAreaData
 {
@@ -422,7 +422,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     RimLightAreaData rimLightAreaData;
 
     half3 color = rimLightColor;
-    
+
     const float4 overlayColors[8] = {
         _RimColor0,
         _RimColor1,
@@ -433,7 +433,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
         _RimColor6,
         _RimColor7,
     };
-    
+
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
         overlayColor = GetLUTMapRimLightColor(GetRampLineIndex(materialId)).rgb;
@@ -451,14 +451,14 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
         _RimWidth6,
         _RimWidth7,
     };
-    
+
     float overlayWidth = 0;
     #if _USE_LUT_MAP
         overlayWidth = GetLUTMapRimLightWidth(GetRampLineIndex(materialId));
     #else
         overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
     #endif
-    
+
     const float rimDarks[8] = {
         _RimDark0,
         _RimDark1,
@@ -469,7 +469,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
         _RimDark6,
         _RimDark7,
     };
-    
+
     float overlayDark = 0;
     #if _USE_LUT_MAP
         overlayDark = GetLUTMapRimLightDark(GetRampLineIndex(materialId));
@@ -487,7 +487,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
         _RimEdgeSoftness6,
         _RimEdgeSoftness7,
     };
-    
+
     float overlayEdgeSoftness = 0;
     #if _USE_LUT_MAP
         overlayEdgeSoftness = GetLUTMapRimLightEdgeSoftness(GetRampLineIndex(materialId));
@@ -505,7 +505,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     #else
         finalRimColor = color.rgb;
     #endif
-    
+
     float finalRimWidth = 0;
     #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
         finalRimWidth = _RimWidth;
@@ -618,7 +618,7 @@ float3 GetRimLight(RimLightData rimData, float3 rimMask, float NoL, Light light,
 }
 
 
-// RimShadow ------------------------------------------------------------------------------------------------------ // 
+// RimShadow ------------------------------------------------------------------------------------------------------ //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct RimShadowAreaData
 {
@@ -632,7 +632,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     RimShadowAreaData rimShadowAreaData;
 
     half3 color = rimShadowColor;
-    
+
     const float4 overlayColors[8] = {
         _RimShadowColor0,
         _RimShadowColor1,
@@ -643,7 +643,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
         _RimShadowColor6,
         _RimShadowColor7,
     };
-    
+
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
         overlayColor = GetLUTMapRimShadowColor(GetRampLineIndex(materialId)).rgb;
@@ -661,7 +661,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
         _RimShadowWidth6,
         _RimShadowWidth7,
     };
-    
+
     float overlayWidth = 0;
     #if _USE_LUT_MAP
         overlayWidth = GetLUTMapRimShadowWidth(GetRampLineIndex(materialId));
@@ -679,7 +679,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
         _RimShadowFeather6,
         _RimShadowFeather7,
     };
-    
+
     float overlayFeather = 0;
     #if _USE_LUT_MAP
         overlayFeather = GetLUTMapRimShadowFeather(GetRampLineIndex(materialId));
@@ -697,7 +697,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     #else
         finalRimShadowColor = color.rgb;
     #endif
-    
+
     float finalRimShadowWidth = 0;
     #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
         finalRimShadowWidth = _RimShadowWidth;
@@ -748,7 +748,7 @@ float3 GetRimShadow(RimShadowData data, float3 viewDirWS, float3 normalWS)
 }
 
 
-// Specular ------------------------------------------------------------------------------------------------------- // 
+// Specular ------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct SpecularAreaData
 {
@@ -763,7 +763,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     SpecularAreaData specularAreaData;
 
     half3 color = specularColor;
-    
+
     const float4 overlayColorArr[8] = {
         _SpecularColor0,
         _SpecularColor1,
@@ -774,7 +774,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularColor6,
         _SpecularColor7,
     };
-    
+
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
         overlayColor = GetLUTMapSpecularColor(GetRampLineIndex(materialId)).rgb;
@@ -792,7 +792,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularIntensity6,
         _SpecularIntensity7,
     };
-    
+
     float overlayIntensity = 0;
     #if _USE_LUT_MAP
         overlayIntensity = GetLUTMapSpecularIntensity(GetRampLineIndex(materialId));
@@ -810,7 +810,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularShininess6,
         _SpecularShininess7,
     };
-    
+
     float overlayShininess = 0;
     #if _USE_LUT_MAP
         overlayShininess = GetLUTMapSpecularShininess(GetRampLineIndex(materialId));
@@ -828,7 +828,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
         _SpecularRoughness6,
         _SpecularRoughness7,
     };
-    
+
     float overlayRoughness = 0;
     #if _USE_LUT_MAP
         overlayRoughness = GetLUTMapSpecularRoughness(GetRampLineIndex(materialId));
@@ -857,7 +857,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     #else
         finalSpecularIntensity = _SpecularIntensity;
     #endif
-    
+
     float finalSpecularShininess = 0;
     #ifdef _CUSTOMSPECULARVARENUM_DISABLE
         finalSpecularShininess = _SpecularShininess;
@@ -898,7 +898,7 @@ struct SpecularData
     float materialId;
 };
 
-half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS, 
+half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, half3 normalWS,
     half3 specColor, float shininess, float roughness, float intensity, float diffuseFac, float metallic = 0.0)
 {
     //roughness = lerp(1.0, roughness * roughness, metallic);
@@ -913,7 +913,7 @@ half3 CalculateSpecular(SpecularData surface, Light light, float3 viewDirWS, hal
 
     half3 lightColor = light.color * (light.distanceAttenuation * light.shadowAttenuation);
     half3 specular = lightColor * specColor * fresnel * stepPhong * lerp(diffuseFac, 1.0, metallic);
-    
+
     return specular * intensity;
 }
 
@@ -923,7 +923,7 @@ half3 CalculateBaseSpecular(SpecularData surface, Light light, float3 viewDirWS,
     return CalculateSpecular(surface, light, viewDirWS, normalWS, surface.color, surface.shininess, surface.roughness, surface.intensity, diffuseFac, metallic);
 }
 
-// Stockings ------------------------------------------------------------------------------------------------------ // 
+// Stockings ------------------------------------------------------------------------------------------------------ //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct StockingsData
 {
@@ -941,23 +941,23 @@ float3 CalculateStockingsEffect(StockingsData stockingsData, float3 diffuse, flo
 {
     float2 tile_uv = uv.xy * stockingsData.StockRangeTex_ST.xy + stockingsData.StockRangeTex_ST.zw;
 
-    float stock_tile = SAMPLE_TEXTURE2D(StockRangeTex, sampler_StockRangeTex, tile_uv).z; 
+    float stock_tile = SAMPLE_TEXTURE2D(StockRangeTex, sampler_StockRangeTex, tile_uv).z;
     // blue channel is a tiled texture that when used adds the rough mesh textured feel
     stock_tile = stock_tile * 0.5f - 0.5f;
     stock_tile = stockingsData.StockRoughness * stock_tile + 1.0f;
-    // extract and remap 
+    // extract and remap
 
-    // sample untiled texture 
+    // sample untiled texture
     float4 stocking_tex = SAMPLE_TEXTURE2D(StockRangeTex, sampler_StockRangeTex, uv.xy);
     // determine which areas area affected by the stocking
     float stock_area = (stocking_tex.x > 0.001f) ? 1.0f : 0.0f;
 
     //float offset_ndotv = dot(normal, normalize(view - _RimOffset));
-    // i dont remember where i got this from but its in my mmd shader so it must be right... right? 
+    // i dont remember where i got this from but its in my mmd shader so it must be right... right?
     float stock_rim = max(0.001f, ndotv);
 
     stockingsData.Stockpower = max(0.039f, stockingsData.Stockpower);
-        
+
     stock_rim = smoothstep(stockingsData.Stockpower, stockingsData.StockDarkWidth * stockingsData.Stockpower, stock_rim) * stockingsData.StockSP;
 
     stocking_tex.x = stocking_tex.x * stock_area * stock_rim;
@@ -978,7 +978,7 @@ float3 CalculateStockingsEffect(StockingsData stockingsData, float3 diffuse, flo
 }
 
 
-// Emission ------------------------------------------------------------------------------------------------------- // 
+// Emission ------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct EmissionData
 {
@@ -1002,7 +1002,7 @@ half3 CalculateBaseEmission(EmissionData emissionData, float4 albedo)
 }
 
 
-// Bloom ---------------------------------------------------------------------------------------------------------- // 
+// Bloom ---------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 struct BloomAreaData
 {
@@ -1015,7 +1015,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
     BloomAreaData bloomAreaData;
 
     half3 color = mainColor;
-    
+
     const float4 overlayColorArr[8] = {
         _BloomColor0,
         _BloomColor1,
@@ -1026,7 +1026,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
         _BloomColor6,
         _BloomColor7,
     };
-    
+
     half3 overlayColor = 0;
     #if _USE_LUT_MAP
         overlayColor = GetLUTMapBloomColor(GetRampLineIndex(materialId)).rgb;
@@ -1044,7 +1044,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
         _mmBloomIntensity6,
         _mmBloomIntensity7,
     };
-    
+
     float overlayIntensity = 0;
     #if _USE_LUT_MAP
         overlayIntensity = GetLUTMapBloomIntensity(GetRampLineIndex(materialId));
