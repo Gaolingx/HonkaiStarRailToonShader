@@ -188,8 +188,9 @@ Material:
     - _NoseLinePower: 1
     - _OutlineNormal: 0
     - _OutlineNormalChannel: 0
+    - _OutlineScale: 10
     - _OutlineUseLutMapToggle: 0
-    - _OutlineWidth: 0.00159
+    - _OutlineWidth: 0.1
     - _OutlineWidthMax: 30
     - _OutlineWidthMin: 0
     - _OutlineZOffset: 0

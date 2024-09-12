@@ -204,9 +204,9 @@ Material:
     - _OutlineFixSide: 0.6
     - _OutlineNormal: 0
     - _OutlineNormalChannel: 0
-    - _OutlineScale: 0.025
+    - _OutlineScale: 10
     - _OutlineUseLutMapToggle: 0
-    - _OutlineWidth: 0.005
+    - _OutlineWidth: 0.2
     - _OutlineWidthMax: 30
     - _OutlineWidthMin: 2
     - _OutlineZOffset: 0

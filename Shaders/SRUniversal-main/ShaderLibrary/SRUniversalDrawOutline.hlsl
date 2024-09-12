@@ -27,6 +27,11 @@ struct CharOutlineVaryings
     real   fogFactor      : TEXCOORD3;
 };
 
+
+///////////////////////////////////////////////////////////////////////////////////////
+// vertex shared functions
+///////////////////////////////////////////////////////////////////////////////////////
+
 float3 GetSmoothNormalWS(CharOutlineAttributes input)
 {
     float3 smoothNormalOS = input.normalOS;
@@ -46,6 +51,13 @@ float3 GetSmoothNormalWS(CharOutlineAttributes input)
     return TransformObjectToWorldNormal(smoothNormalOS);
 }
 
+float3 TransformPositionWSToOutlinePositionWS(float3 positionWS, float positionVS_Z, float3 normalWS, float outlineWidth)
+{
+    //you can replace it to your own method! Here we will write a simple world space method for tutorial reason, it is not the best method!
+    float outlineExpandAmount = outlineWidth * GetOutlineCameraFovAndDistanceFixMultiplier(positionVS_Z);
+    return positionWS + normalWS * outlineExpandAmount; 
+}
+
 CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 {
     CharOutlineVaryings output;
@@ -56,15 +68,14 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
     float3 smoothNormalWS = GetSmoothNormalWS(input);
     float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
 
-    float outlineWidth = input.color.a;
+    float outlineWidth = input.color.a * _OutlineWidth * _OutlineScale;
     if (_FaceMaterial == 1)
     {
         outlineWidth *= lerp(1.0,
             saturate(0.4 - dot(_MMDHeadBoneForward.xz, normalize(GetCameraPositionWS() - positionWS).xz)), step(0.5, input.color.b));
     }
 
-    positionWS = ExtendOutline(positionWS, smoothNormalWS,
-        _OutlineWidth * outlineWidth, _OutlineWidthMin * outlineWidth, _OutlineWidthMax * outlineWidth);
+    positionWS = TransformPositionWSToOutlinePositionWS(vertexPositionInput.positionWS, vertexPositionInput.positionVS.z, smoothNormalWS, outlineWidth);
 
     output.baseUV = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
     output.color = input.color;
