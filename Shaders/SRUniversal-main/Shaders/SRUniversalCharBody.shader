@@ -39,7 +39,7 @@ Shader "HonkaiStarRailToon/Character/Body"
         _HairShadowDistance("Hair Shadow Distance (Default 0.2)", Range(0, 1)) = 0.2
 
         [Header(Head Bone)]
-        [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Specular Color State", Float) = 1
+        [KeywordEnum(Default, Game, MMD)] _CustomHeadBoneModeVarEnum("Custom Head Bone State", Float) = 1
 
         [Header(Light Map)]
         [NoScaleOffset] _HairLightMap("Hair light map (Default black)", 2D) = "black" { }
@@ -369,12 +369,12 @@ Shader "HonkaiStarRailToon/Character/Body"
 
         HLSLINCLUDE
 
-        #pragma shader_feature_local _AREA_FACE
-        #pragma shader_feature_local _AREA_HAIR
-        #pragma shader_feature_local _AREA_BODY
+        #pragma shader_feature_local _AREA_FACE _AREA_HAIR _AREA_BODY
+        #pragma shader_feature_local _ALPHATEST_ON
+        #pragma shader_feature_local _BACKFACEUV2_ON
         #pragma shader_feature_local _AUTO_Brightness_ON
-        #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _CUSTOM_RAMP_MAPPING_ON
+        #pragma shader_feature_local_fragment _NORMAL_MAP_ON
         #pragma shader_feature_local _SPECULAR_ON
         #pragma shader_feature_local _STOCKINGS_ON
         #pragma shader_feature_local _RIM_LIGHTING_ON
@@ -431,10 +431,6 @@ Shader "HonkaiStarRailToon/Character/Body"
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharCoreFragment
 
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
             #pragma multi_compile_fog
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
@@ -477,10 +473,6 @@ Shader "HonkaiStarRailToon/Character/Body"
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharGBufferFragment
 
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
@@ -507,10 +499,6 @@ Shader "HonkaiStarRailToon/Character/Body"
 
             #pragma vertex CharacterOutlinePassVertex
             #pragma fragment CharacterOutlinePassFragment
-
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #pragma multi_compile_fog
 
@@ -541,10 +529,6 @@ Shader "HonkaiStarRailToon/Character/Body"
             #pragma vertex CharacterShadowVertex
             #pragma fragment CharacterShadowFragment
 
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             #pragma multi_compile_vertex _ _CASTING_SELF_SHADOW
 
@@ -573,10 +557,6 @@ Shader "HonkaiStarRailToon/Character/Body"
             #pragma vertex CharacterDepthOnlyVertex
             #pragma fragment CharacterDepthOnlyFragment
 
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
@@ -603,10 +583,6 @@ Shader "HonkaiStarRailToon/Character/Body"
 
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT // forward-only variant
 
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
-
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
@@ -631,10 +607,6 @@ Shader "HonkaiStarRailToon/Character/Body"
 
             #pragma exclude_renderers d3d11_9x
             #pragma target 3.5
-
-            #pragma shader_feature_local _MODEL_GAME _MODEL_MMD
-            #pragma shader_feature_local_fragment _ _ALPHATEST_ON
-            #pragma shader_feature_local_fragment _ _BACKFACEUV2_ON
 
             #include "../ShaderLibrary/SRUniversalInput.hlsl"
             #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
