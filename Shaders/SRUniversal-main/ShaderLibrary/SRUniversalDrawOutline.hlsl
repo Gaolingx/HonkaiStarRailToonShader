@@ -69,8 +69,7 @@ float4 GetOutlinePosition(VertexPositionInputs vertexInput, float3 normalWS, flo
 
     if (_FaceMaterial == 1)
     {
-        width *= lerp(1.0,
-            saturate(0.4 - dot(_MMDHeadBoneForward.xz, normalize(GetCameraPositionWS() - positionWS).xz)), step(0.5, vertexColor.b));
+        width *= lerp(1.0, 0.0, step(0.5, vertexColor.b));
     }
 
     half3 normalVS = TransformWorldToViewNormal(normalWS);
