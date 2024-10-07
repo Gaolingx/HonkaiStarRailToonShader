@@ -4,7 +4,6 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 #include "../ShaderLibrary/SRUniversalLibrary.hlsl"
-#include "../ShaderLibrary/NiloOutlineUtil.hlsl"
 
 struct CharOutlineAttributes
 {
@@ -51,12 +50,42 @@ float3 GetSmoothNormalWS(CharOutlineAttributes input)
     return TransformObjectToWorldNormal(smoothNormalOS);
 }
 
-float3 TransformPositionWSToOutlinePositionWS(float3 positionWS, float positionVS_Z, float3 normalWS, float outlineWidth)
+float GetOutlineWidth(float positionVS_Z)
 {
-    //you can replace it to your own method! Here we will write a simple world space method for tutorial reason, it is not the best method!
-    float outlineExpandAmount = outlineWidth * GetOutlineCameraFovAndDistanceFixMultiplier(positionVS_Z);
-    return positionWS + normalWS * outlineExpandAmount; 
+    float fovFactor = 2.414 / UNITY_MATRIX_P[1].y;
+    float z = abs(positionVS_Z * fovFactor);
+
+    float4 params = _OutlineWidthParams;
+    float k = saturate((z - params.x) / (params.y - params.x));
+    float width = lerp(params.z, params.w, k);
+
+    return 0.01 * _OutlineWidth * _OutlineScale * width;
 }
+
+float4 GetOutlinePosition(VertexPositionInputs vertexInput, float3 normalWS, float3 positionWS, half4 vertexColor)
+{
+    float z = vertexInput.positionVS.z;
+    float width = GetOutlineWidth(z) * vertexColor.a;
+
+    if (_FaceMaterial == 1)
+    {
+        width *= lerp(1.0,
+            saturate(0.4 - dot(_MMDHeadBoneForward.xz, normalize(GetCameraPositionWS() - positionWS).xz)), step(0.5, vertexColor.b));
+    }
+
+    half3 normalVS = TransformWorldToViewNormal(normalWS);
+    normalVS = SafeNormalize(half3(normalVS.xy, 0.0));
+
+    float3 positionVS = vertexInput.positionVS;
+    positionVS += 0.01 * _OutlineZOffset * SafeNormalize(positionVS);
+    positionVS += width * normalVS;
+
+    float4 positionCS = TransformWViewToHClip(positionVS);
+    positionCS.xy += _ScreenOffset.zw * positionCS.w;
+
+    return positionCS;
+}
+
 
 CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 {
@@ -67,21 +96,13 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 
     float3 smoothNormalWS = GetSmoothNormalWS(input);
     float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
-
-    float outlineWidth = input.color.a * _OutlineWidth * _OutlineScale;
-    if (_FaceMaterial == 1)
-    {
-        outlineWidth *= lerp(1.0,
-            saturate(0.4 - dot(_MMDHeadBoneForward.xz, normalize(GetCameraPositionWS() - positionWS).xz)), step(0.5, input.color.b));
-    }
-
-    positionWS = TransformPositionWSToOutlinePositionWS(vertexPositionInput.positionWS, vertexPositionInput.positionVS.z, smoothNormalWS, outlineWidth);
+    float4 positionCS = GetOutlinePosition(vertexPositionInput, smoothNormalWS, positionWS, input.color);
 
     output.baseUV = CombineAndTransformDualFaceUV(input.uv1, input.uv2, _Maps_ST);
     output.color = input.color;
     output.positionWS = positionWS;
     output.normalWS = vertexNormalInput.normalWS;
-    output.positionCS = TransformWorldToHClip(positionWS);
+    output.positionCS = positionCS;
 
     output.fogFactor = ComputeFogFactor(vertexPositionInput.positionCS.z);
 

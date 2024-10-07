@@ -341,7 +341,10 @@ Shader "HonkaiStarRailToon/Character/Face"
 
         [Toggle] _FaceMaterial("Is Face Material Outline", Float) = 0
         _OutlineWidth("OutlineWidth (World Space)", Range(0, 1)) = 0.1
-        _OutlineScale("OutlineScale (Default 10)", Float) = 10
+        _OutlineScale("OutlineScale (Default 1)", Float) = 1
+        _OutlineWidthParams("Outline Width Params", Vector) = (0, 1, 0, 1)
+        _OutlineZOffset("Outline Z Offset", Float) = 0
+        _ScreenOffset("Screen Offset", Vector) = (0, 0, 0, 0)
 
         [Header(Surface Options)]
         [Enum(UnityEngine.Rendering.CullMode)] _CullMode("Cull Mode (Default Back)", Float) = 2

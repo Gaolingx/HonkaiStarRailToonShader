@@ -349,6 +349,9 @@ float4 _OutlineColor7;
 float _FaceMaterial;
 float _OutlineWidth;
 float _OutlineScale;
+float4 _OutlineWidthParams;
+float _OutlineZOffset;
+float4 _ScreenOffset;
 
 // Bloom
 float _BloomIntensity;
