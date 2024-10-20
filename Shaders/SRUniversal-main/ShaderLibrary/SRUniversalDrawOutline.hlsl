@@ -50,34 +50,58 @@ float3 GetSmoothNormalWS(CharOutlineAttributes input)
     return TransformObjectToWorldNormal(smoothNormalOS);
 }
 
-float GetOutlineWidth(float positionVS_Z)
+float GetFaceOutlineWidth(float4 vertexColorB)
 {
-    float fovFactor = 2.414 / UNITY_MATRIX_P[1].y;
-    float z = abs(positionVS_Z * fovFactor);
+    float widthOffset = 1;
+    [branch] if (_FaceMaterial == 1)
+    {
+        widthOffset = lerp(1.0, 0.0, step(0.5, vertexColorB));
+    }
+    return widthOffset;
+}
 
-    float4 params = _OutlineWidthParams;
-    float k = saturate((z - params.x) / (params.y - params.x));
-    float width = lerp(params.z, params.w, k);
+half RemapOutline(half x, half t1, half t2, half s1, half s2)
+{
+    return saturate((x - t1) /  max(0.00100000005,(t2 - t1))) * (s2 - s1) + s1;
+}
 
-    return 0.01 * _OutlineWidth * _OutlineScale * width;
+float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z, float4 vertexColor, float outlineScaleFactor, float outlineWidth, float4 outlineDistanceAdjust, float4 outlineScaleAdjust)
+{
+    float fovfactor = 2.41400003 / unity_CameraProjection._m11;
+    float fovAndDepthFactor = fovfactor * - positionVS_Z;
+    float4 outlineAdjValue = 0;
+    outlineAdjValue.xy = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineDistanceAdjust.xy : outlineDistanceAdjust.yz;
+    outlineAdjValue.zw = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineScaleAdjust.xy : outlineScaleAdjust.yz;
+    
+    fovfactor = RemapOutline(fovAndDepthFactor,outlineAdjValue.x,outlineAdjValue.y,outlineAdjValue.z,outlineAdjValue.w);
+    float tempScaleFactor = outlineScaleFactor;
+    fovfactor = tempScaleFactor * fovfactor;
+    fovfactor = 100 * fovfactor;
+    fovfactor = outlineWidth * fovfactor;
+    fovfactor = 0.414250195 * fovfactor;
+    fovfactor = vertexColor.a * fovfactor;
+    fovfactor = GetFaceOutlineWidth(vertexColor.b) * fovfactor;
+    float outlineFactor = fovfactor;
+    return outlineFactor;
+}
+float3 ApplyOutlineOffsetViewSpace(float3 positionVS, float3 viewDir, float outlineZOffset, float3 normalVS, float outlineFactor)
+{
+    float3 offsetPositionVS = 0;
+    offsetPositionVS = positionVS + viewDir * outlineZOffset;
+    offsetPositionVS.xy = offsetPositionVS.xy + normalVS.xy * outlineFactor;
+    return offsetPositionVS;
 }
 
 float4 GetOutlinePosition(VertexPositionInputs vertexInput, float3 normalWS, float3 positionWS, half4 vertexColor)
 {
     float z = vertexInput.positionVS.z;
-    float width = GetOutlineWidth(z) * vertexColor.a;
-
-    if (_FaceMaterial == 1)
-    {
-        width *= lerp(1.0, 0.0, step(0.5, vertexColor.b));
-    }
-
+    float3 viewDirectionWS = normalize(GetWorldSpaceViewDir(positionWS));
     half3 normalVS = TransformWorldToViewNormal(normalWS);
     normalVS = SafeNormalize(half3(normalVS.xy, 0.0));
 
-    float3 positionVS = vertexInput.positionVS;
-    positionVS += 0.01 * _OutlineZOffset * SafeNormalize(positionVS);
-    positionVS += width * normalVS;
+    float outlineFactor = GetOutlineCameraFovAndDistanceFixMultiplier(z, vertexColor, _OutlineScale, _OutlineWidth, _OutlineDistanceAdjust, _OutlineScaleAdjust);
+
+    float3 positionVS = ApplyOutlineOffsetViewSpace(vertexInput.positionVS, viewDirectionWS, _OutlineZOffset, normalVS, outlineFactor);
 
     float4 positionCS = TransformWViewToHClip(positionVS);
     positionCS.xy += _ScreenOffset.zw * positionCS.w;

@@ -349,7 +349,8 @@ float4 _OutlineColor7;
 float _FaceMaterial;
 float _OutlineWidth;
 float _OutlineScale;
-float4 _OutlineWidthParams;
+float4 _OutlineDistanceAdjust;
+float4 _OutlineScaleAdjust;
 float _OutlineZOffset;
 float4 _ScreenOffset;
 

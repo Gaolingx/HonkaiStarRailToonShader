@@ -341,8 +341,9 @@ Shader "HonkaiStarRailToon/Character/Body"
 
         [Toggle] _FaceMaterial("Is Face Material Outline", Float) = 0
         _OutlineWidth("OutlineWidth (World Space)", Range(0, 1)) = 0.1
-        _OutlineScale("OutlineScale (Default 1)", Float) = 1
-        _OutlineWidthParams("Outline Width Params", Vector) = (0, 1, 0, 1)
+        _OutlineScale("OutlineScale (Default 0.001)", Float) = 0.001
+        _OutlineDistanceAdjust("Outline Distance Adjust", Vector) = (1, 1, 1, 1)
+        _OutlineScaleAdjust("Outline Scale Adjust", Vector) = (1, 1, 1, 1)
         _OutlineZOffset("Outline Z Offset", Float) = 0
         _ScreenOffset("Screen Offset", Vector) = (0, 0, 0, 0)
 
