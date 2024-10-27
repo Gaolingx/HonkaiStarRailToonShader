@@ -329,13 +329,7 @@ half GetMetalIndex()
 
 // NPR ------------------------------------------------------------------------------------------------------------ //
 // ---------------------------------------------------------------------------------------------------------------- //
-struct RampUVData
-{
-    float diffuseFac;
-    float2 rampUV;
-};
-
-RampUVData GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, bool singleMaterial)
+float2 GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, bool singleMaterial)
 {
     float material = singleMaterial ? 0 : lightMap.a;
 
@@ -343,11 +337,7 @@ RampUVData GetRampUV(float diffuseFac, float shadowRampOffset, float4 lightMap, 
     float rampU = diffuseFac * (1 - shadowRampOffset) + shadowRampOffset;
     rampUV = float2(rampU, GetRampV(material));
 
-    RampUVData data;
-    data.diffuseFac = diffuseFac;
-    data.rampUV = rampUV;
-
-    return data;
+    return rampUV;
 }
 
 // TransparentFronHair -------------------------------------------------------------------------------------------- //

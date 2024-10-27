@@ -161,9 +161,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     #endif
 
     // Ramp UV
-    RampUVData uvData = GetRampUV(mainLightShadow, _ShadowRampOffset, lightMap, _SingleMaterial);
-    float2 rampUV = uvData.rampUV;
-    float diffuseFac = uvData.diffuseFac;
+    float diffuseFac = mainLightShadow;
+    float2 rampUV = GetRampUV(diffuseFac, _ShadowRampOffset, lightMap, _SingleMaterial);
 
     // Ramp Color
     float3 coolRampCol = 1;
