@@ -155,9 +155,10 @@ Shader "HonkaiStarRailToon/Character/Hair"
         _ExCheekIntensity("Cheek Intensity (Default 0)", Range(0, 1)) = 0
         _ExShyColor("Shy Color (Default white)", Color) = (1, 1, 1, 1)
         _ExShyIntensity("Shy Intensity (Default 0)", Range(0, 1)) = 0
-        _ExShadowColor("Shadow Color (Default white)", Color) = (1, 1, 1, 1)
+        _ExShadowColor("Face Shadow Color (Default white)", Color) = (1, 1, 1, 1)
+        _ExShadowIntensity("Face Shadow Intensity (Default 0)", Range(0, 1)) = 0
         _ExEyeColor("Eye Color (Default white)", Color) = (1, 1, 1, 1)
-        _ExShadowIntensity("Shadow Intensity (Default 0)", Range(0, 1)) = 0
+        _ExEyeShadowIntensity("Eye Shadow Intensity (Default 0)", Range(0, 1)) = 0
 
         [Header(Specular)]
         [Toggle(_SPECULAR_ON)] _EnableSpecular("Enable Specular (Default YES)", Float) = 1

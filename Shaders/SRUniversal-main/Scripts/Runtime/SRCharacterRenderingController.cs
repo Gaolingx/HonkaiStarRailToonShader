@@ -22,10 +22,10 @@
 // Thanks to stalomeow's material setter.
 // <https://github.com/stalomeow/StarRailNPRShader/blob/main/Runtime/StarRailCharacterRenderingController.cs>
 
-using System;
-using System.Collections.Generic;
 using HSR.NPRShader.PerObjectShadow;
 using HSR.NPRShader.Utils;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -47,20 +47,21 @@ namespace SRUniversal.Main
         }
 
         [Header("Day Time(Ramp Lerp Control)")]
-        [SerializeField] [Range(0, 24)] private float m_DayTime = 12;
+        [SerializeField][Range(0, 24)] private float m_DayTime = 12;
 
         [Header("Character Misc")]
-        [SerializeField] [Range(0, 3)] private float m_ColorSaturation = 1;
-        [SerializeField] [Range(-1, 1)] private float m_AutoBrightnessOffset = 0;
+        [SerializeField][Range(0, 3)] private float m_ColorSaturation = 1;
+        [SerializeField][Range(-1, 1)] private float m_AutoBrightnessOffset = 0;
 
-        [SerializeField] [Range(0, 1)] private float m_DitherAlpha = 1;
-        [SerializeField] [Range(0, 1)] private float m_ExCheekIntensity = 0;
-        [SerializeField] [Range(0, 1)] private float m_ExShyIntensity = 0;
-        [SerializeField] [Range(0, 1)] private float m_ExShadowIntensity = 0;
+        [SerializeField][Range(0, 1)] private float m_DitherAlpha = 1;
+        [SerializeField][Range(0, 1)] private float m_ExCheekIntensity = 0;
+        [SerializeField][Range(0, 1)] private float m_ExShyIntensity = 0;
+        [SerializeField][Range(0, 1)] private float m_ExShadowIntensity = 0;
+        [SerializeField][Range(0, 1)] private float m_ExEyeShadowIntensity = 0;
 
         [Header("Character Shadow")]
         [SerializeField] private bool m_IsCastingShadow = true;
-        
+
         [Header("Character HeadVector")]
         [SerializeField] private Transform m_MMDHeadBone;
         [SerializeField] private TransformDirection m_MMDHeadBoneForward = TransformDirection.Forward;
@@ -112,6 +113,12 @@ namespace SRUniversal.Main
         {
             get => m_ExShadowIntensity;
             set => m_ExShadowIntensity = Mathf.Clamp01(value);
+        }
+
+        public float ExpressionEyeShadowIntensity
+        {
+            get => m_ExEyeShadowIntensity;
+            set => m_ExEyeShadowIntensity = Mathf.Clamp01(value);
         }
 
         public bool IsCastingShadow
@@ -216,6 +223,7 @@ namespace SRUniversal.Main
                 floats.Add((PropertyIds._ExCheekIntensity, m_ExCheekIntensity));
                 floats.Add((PropertyIds._ExShyIntensity, m_ExShyIntensity));
                 floats.Add((PropertyIds._ExShadowIntensity, m_ExShadowIntensity));
+                floats.Add((PropertyIds._ExEyeShadowIntensity, m_ExEyeShadowIntensity));
                 floats.Add((PropertyIds._PerObjShadowCasterId, m_ShadowCasterId));
 
                 if (m_MMDHeadBone != null)
@@ -280,6 +288,7 @@ namespace SRUniversal.Main
             public static readonly int _ExCheekIntensity = MemberNameHelpers.ShaderPropertyID();
             public static readonly int _ExShyIntensity = MemberNameHelpers.ShaderPropertyID();
             public static readonly int _ExShadowIntensity = MemberNameHelpers.ShaderPropertyID();
+            public static readonly int _ExEyeShadowIntensity = MemberNameHelpers.ShaderPropertyID();
             public static readonly int _PerObjShadowCasterId = MemberNameHelpers.ShaderPropertyID();
 
             public static readonly int _MMDHeadBoneForward = MemberNameHelpers.ShaderPropertyID();

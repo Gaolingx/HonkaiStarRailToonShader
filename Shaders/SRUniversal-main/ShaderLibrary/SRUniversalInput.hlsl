@@ -193,8 +193,9 @@ float _ExCheekIntensity;
 float4 _ExShyColor;
 float _ExShyIntensity;
 float4 _ExShadowColor;
-float4 _ExEyeColor;
 float _ExShadowIntensity;
+float4 _ExEyeColor;
+float _ExEyeShadowIntensity;
 
 
 // Specular

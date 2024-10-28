@@ -124,8 +124,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
             baseColor.rgb = lerp(baseColor.rgb, exShy, _ExShyIntensity);
             float3 exShadow = lerp(baseColor.rgb, baseColor.rgb * _ExShadowColor.rgb, exprMap.b);
             baseColor.rgb = lerp(baseColor.rgb, exShadow, _ExShadowIntensity);
-            float3 exEyeShadow = lerp(baseColor.rgb, baseColor.rgb * _ExEyeColor.rgb, faceMap.r);
-            baseColor.rgb = lerp(baseColor.rgb, exEyeShadow, _ExShadowIntensity);
+            float3 exEyeShadow = lerp(baseColor.rgb * _ExEyeColor.rgb, baseColor.rgb, input.color.r);
+            baseColor.rgb = lerp(baseColor.rgb, exEyeShadow, _ExEyeShadowIntensity);
         }
     #endif
 

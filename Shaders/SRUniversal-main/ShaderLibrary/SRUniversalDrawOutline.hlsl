@@ -73,7 +73,7 @@ float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z, float4 ver
     outlineAdjValue.xy = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineDistanceAdjust.xy : outlineDistanceAdjust.yz;
     outlineAdjValue.zw = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineScaleAdjust.xy : outlineScaleAdjust.yz;
     
-    fovfactor = RemapOutline(fovAndDepthFactor,outlineAdjValue.x,outlineAdjValue.y,outlineAdjValue.z,outlineAdjValue.w);
+    fovfactor = RemapOutline(fovAndDepthFactor, outlineAdjValue.x, outlineAdjValue.y, outlineAdjValue.z, outlineAdjValue.w);
     float tempScaleFactor = outlineScaleFactor;
     fovfactor = tempScaleFactor * fovfactor;
     fovfactor = 100 * fovfactor;

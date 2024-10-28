@@ -178,6 +178,7 @@ Material:
     - _EnableOutline: 1
     - _EnableSpecular: 1
     - _ExCheekIntensity: 0
+    - _ExEyeShadowIntensity: 0
     - _ExShadowIntensity: 0
     - _ExShyIntensity: 0
     - _FaceMaterial: 0
