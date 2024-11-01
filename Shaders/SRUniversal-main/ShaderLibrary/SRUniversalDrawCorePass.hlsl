@@ -436,30 +436,20 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
 {
     SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
 
-    float3 baseColor = 0;
-    baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv.xy).rgb;
-    baseColor = GetMainTexColor(input.uv.xy,
-    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
-    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
-    baseColor = ColorSaturationAdjustment(baseColor, _ColorSaturation);
-    //给背面填充颜色，对眼睛，丝袜很有用
-    baseColor *= IS_FRONT_VFACE(isFrontFace, _FrontFaceTintColor.rgb, _BackFaceTintColor.rgb);
-
+    float3 color = f3zero;
     float alpha = _Alpha;
-    float4 FinalColor = float4(baseColor, alpha);
+
+    DoClipTestToTargetAlphaValue(alpha, _AlphaTestThreshold);
+    DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
 
     InputData inputData;
     InitializeInputData(input, inputData);
 
     SurfaceData surfaceData = (SurfaceData)0;
-    surfaceData.albedo = FinalColor.rgb;
+    surfaceData.albedo = color;
     surfaceData.alpha = alpha;
 
     surfaceData.occlusion = 1;
-
-    DoClipTestToTargetAlphaValue(FinalColor.a, _AlphaTestThreshold);
-    DoDitherAlphaEffect(input.positionCS, _DitherAlpha);
 
     return SurfaceDataToGbuffer(surfaceData, inputData, float3(0,0,0), kLightingInvalid);
 }
