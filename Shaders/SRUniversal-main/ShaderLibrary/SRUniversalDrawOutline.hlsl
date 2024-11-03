@@ -62,13 +62,13 @@ float GetFaceOutlineWidth(float4 vertexColorB)
 
 half RemapOutline(half x, half t1, half t2, half s1, half s2)
 {
-    return saturate((x - t1) /  max(0.00100000005,(t2 - t1))) * (s2 - s1) + s1;
+    return saturate((x - t1) / max(0.00100000005, (t2 - t1))) * (s2 - s1) + s1;
 }
 
 float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z, float4 vertexColor, float outlineScaleFactor, float outlineWidth, float4 outlineDistanceAdjust, float4 outlineScaleAdjust)
 {
     float fovfactor = 2.41400003 / unity_CameraProjection._m11;
-    float fovAndDepthFactor = fovfactor * - positionVS_Z;
+    float fovAndDepthFactor = abs(positionVS_Z * fovfactor);
     float4 outlineAdjValue = 0;
     outlineAdjValue.xy = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineDistanceAdjust.xy : outlineDistanceAdjust.yz;
     outlineAdjValue.zw = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineScaleAdjust.xy : outlineScaleAdjust.yz;
