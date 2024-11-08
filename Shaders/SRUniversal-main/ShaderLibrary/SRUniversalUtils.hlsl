@@ -75,7 +75,7 @@ float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd, float thresh
 float3 ColorBrightnessAdjustment(float3 color, float brightnessAdd, float brightnessThresholdMin, float brightnessThresholdMax)
 {
     float3 hsv = RgbToHsv(color);
-    hsv.z = clamp(hsv.z + brightnessAdd, brightnessThresholdMin, brightnessThresholdMax);
+    hsv.z = clamp(brightnessThresholdMin, brightnessThresholdMax, (hsv.z + brightnessAdd));
     return HsvToRgb(hsv);
 }
 
