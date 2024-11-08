@@ -65,10 +65,10 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd, float thresholdMax)
+float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
 {
     float3 hsv = RgbToHsv(color + colorAdd);
-    hsv.z = max(RgbToHsv(color).z, clamp(0, thresholdMax, RgbToHsv(colorAdd).z));
+    hsv.z = max(RgbToHsv(color).z, RgbToHsv(colorAdd).z);
     return HsvToRgb(hsv);
 }
 
@@ -209,63 +209,64 @@ float4 GetMainLightBrightness(float3 inputMainLightColor, float brightnessFactor
     return float4(LightColor, 1);
 }
 
-float3 GetMainLightColor(float3 inputMainLightColor, float mainLightColorUsage)
+float3 GetMainLightDiffuse(Light light, float brightnessFactor, float brightnessThresholdMin, float brightnessThresholdMax, float brightnessOffset, float mainLightColorUsage)
 {
-    return lerp(desaturation(inputMainLightColor.rgb), inputMainLightColor.rgb, mainLightColorUsage);
+    float3 color = light.color;
+    color = GetMainLightBrightness(color, brightnessFactor, brightnessThresholdMin, brightnessThresholdMax, brightnessOffset).rgb;
+    color = lerp(desaturation(color.rgb), color.rgb, mainLightColorUsage);
+    return color * light.distanceAttenuation;
 }
 
 
 // CharacterAdditionalLight --------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
-float3 GetAdditionalLightDiffuse(float3 baseColor, Light light)
+void GetAdditionalLightDiffuse(float3 positionWS, float4 positionCS, float strength, inout float3 lightColor)
 {
-    float attenuation = light.shadowAttenuation * saturate(light.distanceAttenuation);
-    return baseColor * light.color * attenuation;
-}
 
-Light GetCharacterAdditionalLight(uint lightIndex, float3 positionWS)
-{
-    Light light = GetAdditionalLight(lightIndex, positionWS);
-    // light.distanceAttenuation = saturate(light.distanceAttenuation);
+    #if defined(_ADDITIONAL_LIGHTS) || defined(_ADDITIONAL_LIGHTS_VERTEX)
+        uint lightsCount = GetAdditionalLightsCount();
+        #if defined(LIGHT_LOOP_BEGIN)
+            InputData inputData = (InputData)0;
+            inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(positionCS);
+            inputData.positionWS = positionWS;
+            LIGHT_LOOP_BEGIN(lightsCount)
+        #else
+            for(uint lightIndex = 0; lightIndex < lightsCount; lightIndex++)
+            {
+        #endif
 
-    #if defined(ADDITIONAL_LIGHT_CALCULATE_SHADOWS)
-        light.shadowAttenuation = AdditionalLightRealtimeShadow(lightIndex, positionWS, light.direction);
-        light.shadowAttenuation = lerp(light.shadowAttenuation, 1, GetAdditionalLightShadowFade(positionWS));
+            Light light = GetAdditionalLight(lightIndex, positionWS);
+            #if defined(_LIGHT_LAYERS)
+                if (IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
+            #endif
+            {
+                lightColor += light.color.rgb * light.distanceAttenuation * strength;
+            }
+
+        #if defined(LIGHT_LOOP_END)
+            LIGHT_LOOP_END
+        #else
+            }
+        #endif
     #endif
 
-    #ifdef _LIGHT_LAYERS
-        if (!IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
+    #if defined(_ADDITIONAL_LIGHTS) && USE_FORWARD_PLUS
+        #if defined(URP_FP_DIRECTIONAL_LIGHTS_COUNT)
+            for(uint lightIndex = 0; lightIndex < min(URP_FP_DIRECTIONAL_LIGHTS_COUNT, MAX_VISIBLE_LIGHTS); lightIndex++)
+        #else
+            for(uint lightIndex = 0; lightIndex < min(_AdditionalLightsDirectionalCount, MAX_VISIBLE_LIGHTS); lightIndex++)
+        #endif
         {
-            // 偷个懒，直接把强度改成 0
-            light.distanceAttenuation = 0;
-            light.shadowAttenuation = 0;
+            Light light = GetAdditionalLight(lightIndex, positionWS);
+            #if defined(_LIGHT_LAYERS)
+                if (IsMatchingLightLayer(light.layerMask, GetMeshRenderingLayer()))
+            #endif
+            {
+                lightColor += light.color.rgb * light.distanceAttenuation * strength;
+            }
         }
     #endif
-
-    return light;
 }
-
-#if USE_FORWARD_PLUS
-    // Packages/com.unity.render-pipelines.universal/ShaderLibrary/Input.hlsl
-    struct ForwardPlusDummyInputData
-    {
-        float3 positionWS;
-        float2 normalizedScreenSpaceUV;
-    };
-
-    #define CHAR_LIGHT_LOOP_BEGIN(posWS, posHCS) { \
-        uint pixelLightCount = GetAdditionalLightsCount(); \
-        ForwardPlusDummyInputData inputData; \
-        inputData.positionWS = posWS; \
-        inputData.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(posHCS); \
-        LIGHT_LOOP_BEGIN(pixelLightCount)
-#else
-    #define CHAR_LIGHT_LOOP_BEGIN(posWS, posHCS) { \
-        uint pixelLightCount = GetAdditionalLightsCount(); \
-        LIGHT_LOOP_BEGIN(pixelLightCount)
-#endif
-
-#define CHAR_LIGHT_LOOP_END } LIGHT_LOOP_END
 
 
 // GI ------------------------------------------------------------------------------------------------------------- //

@@ -50,7 +50,7 @@ float3 GetSmoothNormalWS(CharOutlineAttributes input)
     return TransformObjectToWorldNormal(smoothNormalOS);
 }
 
-float GetFaceOutlineWidth(float4 vertexColorB)
+float GetFaceOutlineWidth(float vertexColorB)
 {
     float widthOffset = 1;
     [branch] if (_FaceMaterial == 1)

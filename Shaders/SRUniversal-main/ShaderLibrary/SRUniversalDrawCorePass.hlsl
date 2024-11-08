@@ -47,9 +47,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     //获取主光源，传入shadowCoord是为了让mainLight获取阴影衰减，也就是实时阴影（shadowCoord为灯光空间坐标，xy采样shadowmap然后与z对比）
     Light mainLight = GetCharacterMainLightStruct(shadowCoord, positionWS);
     //获取主光源颜色
-    float4 LightColor = GetMainLightBrightness(mainLight.color.rgb, _MainLightBrightnessFactor, _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax, _BrightnessOffset);
     //使用一个参数_MainLightColorUsage控制主光源颜色的使用程度
-    float3 mainLightColor = GetMainLightColor(LightColor.rgb, _MainLightColorUsage);
+    float3 mainLightColor = GetMainLightDiffuse(mainLight, _MainLightBrightnessFactor, _AutoBrightnessThresholdMin, _AutoBrightnessThresholdMax, _BrightnessOffset, _MainLightColorUsage);
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
 
@@ -194,16 +193,13 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
 
     float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime, _ShadowBoost);
 
-    float3 FinalDiffuse = mainLightColor * mainLight.distanceAttenuation * baseColor * rampColor;
+    float3 FinalDiffuse = mainLightColor * baseColor * rampColor;
 
     // Additional Lights
-    #if defined(_ADDITIONAL_LIGHTS)
-        #if _AdditionalLighting_ON
-            CHAR_LIGHT_LOOP_BEGIN(positionWS, input.positionCS)
-                Light lightAdd = GetCharacterAdditionalLight(lightIndex, positionWS);
-                FinalDiffuse = CombineColorPreserveLuminance(FinalDiffuse, GetAdditionalLightDiffuse(baseColor.rgb, lightAdd), _AdditionalLightIntensity);
-            CHAR_LIGHT_LOOP_END
-        #endif
+    float3 lightAdd = f3zero;
+    #if _AdditionalLighting_ON
+        GetAdditionalLightDiffuse(positionWS, input.positionCS, max(0, _AdditionalLightIntensity), lightAdd);
+        FinalDiffuse = CombineColorPreserveLuminance(FinalDiffuse, lightAdd);
     #endif
 
     // Specular
