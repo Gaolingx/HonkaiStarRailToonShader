@@ -52,11 +52,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     //获取主光源方向
     float3 lightDirectionWS = normalize(mainLight.direction);
 
-    // PerObjShadow
-    #if _AREA_BODY
-        mainLight = GetCharPerObjectShadow(mainLight, positionWS, _PerObjShadowCasterId);
-    #endif
-
     //获取世界空间法线，如果要采样NormalMap，要使用TBN矩阵变换
     #if _NORMAL_MAP_ON
         float3x3 tangentToWorld = float3x3(input.tangentWS, input.bitangentWS, input.normalWS);
@@ -99,6 +94,9 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
     TEXTURE2D_ARGS(_BodyLightMap, sampler_BodyLightMap));
 
+    // GI
+    float3 indirectLightColor = CalculateGI(baseColor, lightMap.g, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
+
     //对脸部采样 faceMap，脸部的LightMap就是这张FaceMap
     float4 faceMap = 0;
     #if _AREA_FACE
@@ -128,9 +126,10 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
         }
     #endif
 
-    // GI
-    //float3 indirectLightColor = input.SH.rgb * _IndirectLightUsage;
-    float3 indirectLightColor = CalculateGI(baseColor, lightMap.g, input.SH.rgb, _IndirectLightIntensity, _IndirectLightUsage);
+    // PerObjShadow
+    #if _AREA_BODY
+        mainLight = GetCharPerObjectShadow(mainLight, positionWS, _PerObjShadowCasterId);
+    #endif
 
     // Front Hair Shadow(Face Only)
     #if defined(_MAIN_LIGHT_FRONT_HAIR_SHADOWS)
@@ -159,9 +158,34 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
         }
     #endif
 
+    // Additional Lights
+    float3 lightAdd = 0;
+    #if _AdditionalLighting_ON
+        GetAdditionalLightDiffuse(positionWS, input.positionCS, max(0, _AdditionalLightIntensity), lightAdd);
+    #endif
+
     // Ramp UV
     float diffuseFac = mainLightShadow;
     float2 rampUV = GetRampUV(diffuseFac, _ShadowRampOffset, lightMap, _SingleMaterial);
+
+    // Stockings
+    #if _STOCKINGS_ON
+        #if _AREA_BODY
+            {
+                StockingsData stockingsData;
+                stockingsData.StockRangeTex_ST = _StockRangeTex_ST;
+                stockingsData.Stockcolor = _Stockcolor;
+                stockingsData.StockDarkcolor = _StockDarkcolor;
+                stockingsData.StockDarkWidth = _StockDarkWidth;
+                stockingsData.Stockpower = _Stockpower;
+                stockingsData.Stockpower1 = _Stockpower1;
+                stockingsData.StockSP = _StockSP;
+                stockingsData.StockRoughness = _StockRoughness;
+
+                baseColor = CalculateStockingsEffect(stockingsData, baseColor, NoV, input.uv.xy, TEXTURE2D_ARGS(_StockRangeTex, sampler_StockRangeTex));
+            }
+        #endif
+    #endif
 
     // Ramp Color
     float3 coolRampCol = 1;
@@ -193,14 +217,11 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
 
     float3 rampColor = LerpRampColor(coolRampCol, warmRampCol, DayTime, _ShadowBoost);
 
-    float3 FinalDiffuse = mainLightColor * baseColor * rampColor;
+    float3 FinalDiffuse = baseColor * rampColor;
 
-    // Additional Lights
-    float3 lightAdd = f3zero;
-    #if _AdditionalLighting_ON
-        GetAdditionalLightDiffuse(positionWS, input.positionCS, max(0, _AdditionalLightIntensity), lightAdd);
-        FinalDiffuse = CombineColorPreserveLuminance(FinalDiffuse, lightAdd);
-    #endif
+    // Diffuse
+    float3 characterMainLightCol = mainLightColor * FinalDiffuse;
+    float3 characterAddLightCol = lightAdd * FinalDiffuse;
 
     // Specular
     float3 specularColor = 0;
@@ -226,25 +247,6 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
         #endif
     #else
         specularColor = 0;
-    #endif
-
-    //Stockings
-    #if _STOCKINGS_ON
-        #if _AREA_BODY
-            {
-                StockingsData stockingsData;
-                stockingsData.StockRangeTex_ST = _StockRangeTex_ST;
-                stockingsData.Stockcolor = _Stockcolor;
-                stockingsData.StockDarkcolor = _StockDarkcolor;
-                stockingsData.StockDarkWidth = _StockDarkWidth;
-                stockingsData.Stockpower = _Stockpower;
-                stockingsData.Stockpower1 = _Stockpower1;
-                stockingsData.StockSP = _StockSP;
-                stockingsData.StockRoughness = _StockRoughness;
-
-                FinalDiffuse = CalculateStockingsEffect(stockingsData, FinalDiffuse, NoV, input.uv.xy, TEXTURE2D_ARGS(_StockRangeTex, sampler_StockRangeTex));
-            }
-        #endif
     #endif
 
     // Rim Light
@@ -305,7 +307,7 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
             TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor);
 
             EmissionData emissionData;
-            emissionData.color = LinearColorMix(f3one, mainTex.rgb, _EmissionMixBaseColorFac);
+            emissionData.color = LinearColorMix(1, mainTex.rgb, _EmissionMixBaseColorFac);
             emissionData.tintColor = _EmissionTintColor.rgb;
             emissionData.intensity = _EmissionIntensity;
             emissionData.threshold = _EmissionThreshold;
@@ -318,7 +320,8 @@ float4 colorFragmentTarget(inout CharCoreVaryings input, FRONT_FACE_TYPE isFront
     // TotalColor
     float3 albedo = 0;
     albedo += indirectLightColor;
-    albedo += FinalDiffuse;
+    albedo += characterMainLightCol;
+    albedo += characterAddLightCol;
     albedo += specularColor;
     albedo += rimLightColor;
     albedo += emissionColor;
@@ -432,7 +435,7 @@ FRONT_FACE_TYPE isFrontFace : FRONT_FACE_SEMANTIC)
 {
     SetupDualFaceRendering(input.normalWS, input.uv, isFrontFace);
 
-    float3 color = f3zero;
+    float3 color = 0;
     float alpha = _Alpha;
 
     DoClipTestToTargetAlphaValue(alpha, _AlphaTestThreshold);

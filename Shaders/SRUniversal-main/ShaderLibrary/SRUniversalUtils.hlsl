@@ -6,14 +6,6 @@
 #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
 
 
-// const ---------------------------------------------------------------------------------------------------------- //
-// ---------------------------------------------------------------------------------------------------------------- //
-const static float3 f3zero = float3(0.0, 0.0, 0.0);
-const static float3 f3one = float3(1.0, 1.0, 1.0);
-const static float4 f4zero = float4(0.0, 0.0, 0.0, 0.0);
-const static float4 f4one = float4(1.0, 1.0, 1.0, 1.0);
-
-
 // utils ---------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float4 CombineAndTransformDualFaceUV(float2 uv1, float2 uv2, float4 mapST)
@@ -65,13 +57,6 @@ float3 desaturation(float3 color)
     return float3(grayf, grayf, grayf);
 }
 
-float3 CombineColorPreserveLuminance(float3 color, float3 colorAdd)
-{
-    float3 hsv = RgbToHsv(color + colorAdd);
-    hsv.z = max(RgbToHsv(color).z, RgbToHsv(colorAdd).z);
-    return HsvToRgb(hsv);
-}
-
 float3 ColorBrightnessAdjustment(float3 color, float brightnessAdd, float brightnessThresholdMin, float brightnessThresholdMax)
 {
     float3 hsv = RgbToHsv(color);
@@ -97,7 +82,7 @@ float3 LerpRampColor(float3 coolRamp, float3 warmRamp, float dayTime, float shad
 {
     float3 rampColor = 0;
     rampColor = lerp(warmRamp, coolRamp, abs(dayTime - 12.0) * rcp(12.0));
-    rampColor = lerp(f3one, rampColor, shadowBoost);
+    rampColor = lerp(1, rampColor, shadowBoost);
     return rampColor;
 }
 
@@ -273,7 +258,7 @@ void GetAdditionalLightDiffuse(float3 positionWS, float4 positionCS, float stren
 // ---------------------------------------------------------------------------------------------------------------- //
 float3 CalculateGI(float3 baseColor, float diffuseThreshold, float3 sh, float intensity, float mainColorLerp)
 {
-    return intensity * lerp(f3one, baseColor, mainColorLerp) * lerp(desaturation(sh), sh, mainColorLerp) * diffuseThreshold;
+    return intensity * lerp(1, baseColor, mainColorLerp) * lerp(desaturation(sh), sh, mainColorLerp) * diffuseThreshold;
 }
 
 

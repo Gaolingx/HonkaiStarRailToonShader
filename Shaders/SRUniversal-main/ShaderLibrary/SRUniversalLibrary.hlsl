@@ -996,7 +996,7 @@ half3 CalculateBaseEmission(EmissionData emissionData, float4 albedo)
     emissionFactor = emissionData.threshold < albedo.a ? emissionFactor : 0;
 
     half3 emissionTintColor = emissionData.color * emissionData.tintColor * emissionData.intensity;
-    half3 emissionColor = lerp(f3zero, emissionTintColor, emissionFactor);
+    half3 emissionColor = lerp(0, emissionTintColor, emissionFactor);
 
     return emissionColor;
 }
