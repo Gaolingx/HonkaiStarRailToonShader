@@ -64,14 +64,12 @@ float4 _FaceColorMapColor;
 float4 _HairColorMapColor;
 float4 _BodyColorMapColor;
 
-
 // NormalMap
 float _BumpFactor;
 
 // Self Shadow Caster
 float _SelfShadowDepthBias;
 float _SelfShadowNormalBias;
-
 
 // ColorSaturation
 float _ColorSaturation;
@@ -80,24 +78,19 @@ float _ColorSaturation;
 float4 _FrontFaceTintColor;
 float4 _BackFaceTintColor;
 
-
 // Alpha
 float _Alpha;
 float _AlphaTestThreshold;
 
-
 // DitherAlpha
 float _DitherAlpha;
-
 
 // Transparent Fron Hair
 float _HairBlendAlpha;
 float _MaxEyeHairDistance;
 
-
 // Front Hair Shadow
 float _HairShadowDistance;
-
 
 // Setting
 float _SingleMaterial;
@@ -110,11 +103,9 @@ float _RampV5;
 float _RampV6;
 float _RampV7;
 
-
 // DayTime
 float _DayTime_MANUAL_ON;
 float _DayTime;
-
 
 // RampColor
 float _WarmShadowMultColorFac0;
@@ -153,12 +144,10 @@ float4 _CoolShadowMultColor5;
 float4 _CoolShadowMultColor6;
 float4 _CoolShadowMultColor7;
 
-
 // Lighting
 float _IndirectLightFlattenNormal;
 float _IndirectLightIntensity;
 float _IndirectLightUsage;
-
 
 float _AutoBrightnessThresholdMin;
 float _AutoBrightnessThresholdMax;
@@ -172,20 +161,16 @@ float _ShadowThresholdSoftness;
 float _ShadowRampOffset;
 float _ShadowBoost;
 
-
 // Additional Light
 float _AdditionalLightIntensity;
-
 
 // FaceShadow
 float _FaceShadowOffset;
 float _FaceShadowTransitionSoftness;
 
-
 // Nose Line
 float4 _NoseLineColor;
 float _NoseLinePower;
-
 
 // Expression
 float4 _ExCheekColor;
@@ -196,7 +181,6 @@ float4 _ExShadowColor;
 float _ExShadowIntensity;
 float4 _ExEyeColor;
 float _ExEyeShadowIntensity;
-
 
 // Specular
 float4 _SpecularColor;
@@ -239,7 +223,6 @@ float _SpecularIntensity5;
 float _SpecularIntensity6;
 float _SpecularIntensity7;
 
-
 // Stockings
 float4 _StockRangeTex_ST;
 float4 _Stockcolor;
@@ -251,7 +234,6 @@ float _Stockpower1;
 float _StockSP;
 float _StockRoughness;
 float _Stockthickness;
-
 
 // RimLight
 float _ModelScale;
@@ -294,7 +276,6 @@ float _RimWidth7;
 float _RimDark7;
 float _RimEdgeSoftness7;
 
-
 // RimShadow
 float _RimShadowCt;
 float _RimShadowIntensity;
@@ -332,7 +313,6 @@ float4 _EmissionTintColor;
 float _EmissionIntensity;
 float _EmissionThreshold;
 float _EmissionMixBaseColorFac;
-
 
 // Outline
 float _EnableOutline;
