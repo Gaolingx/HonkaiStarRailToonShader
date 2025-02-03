@@ -7,24 +7,25 @@
 
 struct CharOutlineAttributes
 {
-    float4 positionOS : POSITION;
-    float4 color : COLOR;
-    float3 normalOS : NORMAL;
-    float4 tangentOS : TANGENT;
-    float2 uv1 : TEXCOORD0;
-    float2 uv2 : TEXCOORD1;
+    float4 positionOS     : POSITION;
+    float4 color          : COLOR;
+    float3 normalOS       : NORMAL;
+    float4 tangentOS      : TANGENT;
+    float2 uv1            : TEXCOORD0;
+    float2 uv2            : TEXCOORD1;
     float2 packSmoothNormal : TEXCOORD2;
 };
 
 struct CharOutlineVaryings
 {
-    float4 positionCS : SV_POSITION;
-    float4 baseUV : TEXCOORD0;
-    float4 color : COLOR;
-    float3 normalWS : TEXCOORD1;
-    float3 positionWS : TEXCOORD2;
-    real fogFactor : TEXCOORD3;
+    float4 positionCS     : SV_POSITION;
+    float4 baseUV         : TEXCOORD0;
+    float4 color          : COLOR;
+    float3 normalWS       : TEXCOORD1;
+    float3 positionWS     : TEXCOORD2;
+    real   fogFactor      : TEXCOORD3;
 };
+
 
 ///////////////////////////////////////////////////////////////////////////////////////
 // vertex shared functions
@@ -34,17 +35,17 @@ float3 GetSmoothNormalWS(CharOutlineAttributes input)
 {
     float3 smoothNormalOS = input.normalOS;
 
-#ifdef _OUTLINENORMALCHANNEL_NORMAL
-    smoothNormalOS = input.normalOS;
-#elif _OUTLINENORMALCHANNEL_TANGENT
-    smoothNormalOS = input.tangentOS.xyz;
-#elif _OUTLINENORMALCHANNEL_UV2
-    float3 normalOS = normalize(input.normalOS);
-    float3 tangentOS = normalize(input.tangentOS.xyz);
-    float3 bitangentOS = normalize(cross(normalOS, tangentOS) * (input.tangentOS.w * GetOddNegativeScale()));
-    float3 smoothNormalTS = UnpackNormalOctQuadEncode(input.packSmoothNormal);
-    smoothNormalOS = mul(smoothNormalTS, float3x3(tangentOS, bitangentOS, normalOS));
-#endif
+    #ifdef _OUTLINENORMALCHANNEL_NORMAL
+        smoothNormalOS = input.normalOS;
+    #elif _OUTLINENORMALCHANNEL_TANGENT
+        smoothNormalOS = input.tangentOS.xyz;
+    #elif _OUTLINENORMALCHANNEL_UV2
+        float3 normalOS = normalize(input.normalOS);
+        float3 tangentOS = normalize(input.tangentOS.xyz);
+        float3 bitangentOS = normalize(cross(normalOS, tangentOS) * (input.tangentOS.w * GetOddNegativeScale()));
+        float3 smoothNormalTS = UnpackNormalOctQuadEncode(input.packSmoothNormal);
+        smoothNormalOS = mul(smoothNormalTS, float3x3(tangentOS, bitangentOS, normalOS));
+    #endif
 
     return TransformObjectToWorldNormal(smoothNormalOS);
 }
@@ -71,7 +72,7 @@ float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z, float4 ver
     float4 outlineAdjValue = 0;
     outlineAdjValue.xy = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineDistanceAdjust.xy : outlineDistanceAdjust.yz;
     outlineAdjValue.zw = fovAndDepthFactor < outlineDistanceAdjust.y ? outlineScaleAdjust.xy : outlineScaleAdjust.yz;
-
+    
     fovfactor = RemapOutline(fovAndDepthFactor, outlineAdjValue.x, outlineAdjValue.y, outlineAdjValue.z, outlineAdjValue.w);
     float tempScaleFactor = outlineScaleFactor;
     fovfactor = tempScaleFactor * fovfactor;
@@ -108,6 +109,7 @@ float4 GetOutlinePosition(VertexPositionInputs vertexInput, float3 normalWS, flo
     return positionCS;
 }
 
+
 CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 {
     CharOutlineVaryings output;
@@ -133,20 +135,20 @@ CharOutlineVaryings CharacterOutlinePassVertex(CharOutlineAttributes input)
 half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
 {
     half3 color = 0;
-#if _USE_LUT_MAP && _USE_LUT_MAP_OUTLINE
-    color = GetLUTMapOutlineColor(GetRampLineIndex(materialId)).rgb;
-#else
-    float2 rampUV = float2(0, GetRampV(materialId));
-    RampColor RC = RampColorConstruct(rampUV,
-                                      TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp),
-                                      TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp),
-                                      TEXTURE2D_ARGS(_BodyCoolRamp, sampler_BodyCoolRamp),
-                                      TEXTURE2D_ARGS(_BodyWarmRamp, sampler_BodyWarmRamp));
+    #if _USE_LUT_MAP && _USE_LUT_MAP_OUTLINE
+        color = GetLUTMapOutlineColor(GetRampLineIndex(materialId)).rgb;
+    #else
+        float2 rampUV = float2(0, GetRampV(materialId));
+        RampColor RC = RampColorConstruct(rampUV,
+        TEXTURE2D_ARGS(_HairCoolRamp, sampler_HairCoolRamp),
+        TEXTURE2D_ARGS(_HairWarmRamp, sampler_HairWarmRamp),
+        TEXTURE2D_ARGS(_BodyCoolRamp, sampler_BodyCoolRamp),
+        TEXTURE2D_ARGS(_BodyWarmRamp, sampler_BodyWarmRamp));
 
-    half3 coolRampCol = RC.coolRampCol;
-    half3 warmRampCol = RC.warmRampCol;
-    color = mainColor * LerpRampColor(coolRampCol, warmRampCol, DayTime, 1);
-#endif
+        half3 coolRampCol = RC.coolRampCol;
+        half3 warmRampCol = RC.warmRampCol;
+        color = mainColor * LerpRampColor(coolRampCol, warmRampCol, DayTime, 1);
+    #endif
 
     const float4 overlayColors[8] = {
         _OutlineColor0,
@@ -162,19 +164,19 @@ half3 GetOutlineColor(half materialId, half3 mainColor, half DayTime)
     half3 overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
 
     half3 outlineColor = 0;
-#ifdef _CUSTOMOUTLINEVARENUM_DISABLE
-    outlineColor = color;
-#elif _CUSTOMOUTLINEVARENUM_MULTIPLY
-    outlineColor = color * overlayColor;
-#elif _CUSTOMOUTLINEVARENUM_TINT
-    outlineColor = color * _OutlineColor.rgb;
-#elif _CUSTOMOUTLINEVARENUM_OVERLAY
-    outlineColor = overlayColor;
-#elif _CUSTOMOUTLINEVARENUM_CUSTOM
-    outlineColor = _OutlineDefaultColor.rgb;
-#else
-    outlineColor = color;
-#endif
+    #ifdef _CUSTOMOUTLINEVARENUM_DISABLE
+        outlineColor = color;
+    #elif _CUSTOMOUTLINEVARENUM_MULTIPLY
+        outlineColor = color * overlayColor;
+    #elif _CUSTOMOUTLINEVARENUM_TINT
+        outlineColor = color * _OutlineColor.rgb;
+    #elif _CUSTOMOUTLINEVARENUM_OVERLAY
+        outlineColor = overlayColor;
+    #elif _CUSTOMOUTLINEVARENUM_CUSTOM
+        outlineColor = _OutlineDefaultColor.rgb;
+    #else
+        outlineColor = color;
+    #endif
 
     return outlineColor;
 }
@@ -193,15 +195,14 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
     float3 baseColor = 0;
     baseColor = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.baseUV.xy).rgb;
     baseColor = GetMainTexColor(input.baseUV.xy,
-                                TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
-                                TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
-                                TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor)
-                    .rgb;
+    TEXTURE2D_ARGS(_FaceColorMap, sampler_FaceColorMap), _FaceColorMapColor,
+    TEXTURE2D_ARGS(_HairColorMap, sampler_HairColorMap), _HairColorMapColor,
+    TEXTURE2D_ARGS(_BodyColorMap, sampler_BodyColorMap), _BodyColorMapColor).rgb;
 
     float4 lightMap = 0;
     lightMap = GetLightMapTex(input.baseUV.xy,
-                              TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
-                              TEXTURE2D_ARGS(_BodyLightMap, sampler_BodyLightMap));
+    TEXTURE2D_ARGS(_HairLightMap, sampler_HairLightMap),
+    TEXTURE2D_ARGS(_BodyLightMap, sampler_BodyLightMap));
 
     float DayTime = 0;
 
@@ -228,8 +229,8 @@ float4 colorFragmentTarget(inout CharOutlineVaryings input)
 }
 
 void CharacterOutlinePassFragment(
-    CharOutlineVaryings input,
-    out float4 colorTarget : SV_Target0)
+CharOutlineVaryings input,
+out float4 colorTarget      : SV_Target0)
 {
     float4 outputColor = colorFragmentTarget(input);
 
