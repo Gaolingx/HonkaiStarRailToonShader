@@ -12,25 +12,25 @@
 // ---------------------------------------------------------------------------------------------------------------- //
 struct CharCoreAttributes
 {
-    float3 positionOS   : POSITION;
-    half3 normalOS      : NORMAL;
-    half4 tangentOS     : TANGENT;
-    float2 uv1          : TEXCOORD0;
-    float2 uv2          : TEXCOORD1;
-    float4 color        : COLOR;
+    float3 positionOS : POSITION;
+    half3 normalOS : NORMAL;
+    half4 tangentOS : TANGENT;
+    float2 uv1 : TEXCOORD0;
+    float2 uv2 : TEXCOORD1;
+    float4 color : COLOR;
 };
 
 struct CharCoreVaryings
 {
-    float4 uv                       : TEXCOORD0;
-    float3 positionWS               : TEXCOORD1;
-    float3 normalWS                 : TEXCOORD2;
-    float3 bitangentWS              : TEXCOORD3;
-    float3 tangentWS                : TEXCOORD4;
-    float3 SH                       : TEXCOORD5;
-    real   fogFactor                : TEXCOORD6;
-    float4 color                    : COLOR;
-    float4 positionCS               : SV_POSITION;
+    float4 uv : TEXCOORD0;
+    float3 positionWS : TEXCOORD1;
+    float3 normalWS : TEXCOORD2;
+    float3 bitangentWS : TEXCOORD3;
+    float3 tangentWS : TEXCOORD4;
+    float3 SH : TEXCOORD5;
+    real   fogFactor : TEXCOORD6;
+    float4 color : COLOR;
+    float4 positionCS : SV_POSITION;
 };
 
 void InitializeInputData(CharCoreVaryings input, out InputData inputData)
@@ -53,23 +53,23 @@ void InitializeInputData(CharCoreVaryings input, out InputData inputData)
 // MainTex -------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float4 GetMainTexColor(float2 uv,
-TEXTURE2D_PARAM(FaceColorMap, sampler_FaceColorMap), float4 FaceColorMapColor,
-TEXTURE2D_PARAM(HairColorMap, sampler_HairColorMap), float4 HairColorMapColor,
-TEXTURE2D_PARAM(BodyColorMap, sampler_BodyColorMap), float4 BodyColorMapColor)
+    TEXTURE2D_PARAM(FaceColorMap, sampler_FaceColorMap), float4 FaceColorMapColor,
+    TEXTURE2D_PARAM(HairColorMap, sampler_HairColorMap), float4 HairColorMapColor,
+    TEXTURE2D_PARAM(BodyColorMap, sampler_BodyColorMap), float4 BodyColorMapColor)
 {
     float4 areaMap = 0;
     float4 areaColor = 0;
     //根据不同的Keyword，采样不同的贴图，作为额漫反射颜色
-    #if _AREA_FACE
-        areaMap = SAMPLE_TEXTURE2D(FaceColorMap, sampler_FaceColorMap, uv);
-        areaColor = areaMap * FaceColorMapColor;
-    #elif _AREA_HAIR
-        areaMap = SAMPLE_TEXTURE2D(HairColorMap, sampler_HairColorMap, uv);
-        areaColor = areaMap * HairColorMapColor;
-    #elif _AREA_BODY
-        areaMap = SAMPLE_TEXTURE2D(BodyColorMap, sampler_BodyColorMap, uv);
-        areaColor = areaMap * BodyColorMapColor;
-    #endif
+#if _AREA_FACE
+    areaMap = SAMPLE_TEXTURE2D(FaceColorMap, sampler_FaceColorMap, uv);
+    areaColor = areaMap * FaceColorMapColor;
+#elif _AREA_HAIR
+    areaMap = SAMPLE_TEXTURE2D(HairColorMap, sampler_HairColorMap, uv);
+    areaColor = areaMap * HairColorMapColor;
+#elif _AREA_BODY
+    areaMap = SAMPLE_TEXTURE2D(BodyColorMap, sampler_BodyColorMap, uv);
+    areaColor = areaMap * BodyColorMapColor;
+#endif
     return areaColor;
 }
 
@@ -77,15 +77,15 @@ TEXTURE2D_PARAM(BodyColorMap, sampler_BodyColorMap), float4 BodyColorMapColor)
 // LightMap ------------------------------------------------------------------------------------------------------- //
 // ---------------------------------------------------------------------------------------------------------------- //
 float4 GetLightMapTex(float2 uv,
-TEXTURE2D_PARAM(HairLightMap, sampler_HairLightMap),
-TEXTURE2D_PARAM(BodyLightMap, sampler_BodyLightMap))
+    TEXTURE2D_PARAM(HairLightMap, sampler_HairLightMap),
+    TEXTURE2D_PARAM(BodyLightMap, sampler_BodyLightMap))
 {
     float4 lightMap = 0;
-    #if _AREA_HAIR
-        lightMap = SAMPLE_TEXTURE2D(HairLightMap, sampler_HairLightMap, uv);
-    #elif _AREA_BODY
-        lightMap = SAMPLE_TEXTURE2D(BodyLightMap, sampler_BodyLightMap, uv);
-    #endif
+#if _AREA_HAIR
+    lightMap = SAMPLE_TEXTURE2D(HairLightMap, sampler_HairLightMap, uv);
+#elif _AREA_BODY
+    lightMap = SAMPLE_TEXTURE2D(BodyLightMap, sampler_BodyLightMap, uv);
+#endif
     return lightMap;
 }
 
@@ -99,23 +99,23 @@ struct RampColor
 };
 
 RampColor RampColorConstruct(float2 rampUV,
-TEXTURE2D_PARAM(HairCoolRamp, sampler_HairCoolRamp),
-TEXTURE2D_PARAM(HairWarmRamp, sampler_HairWarmRamp),
-TEXTURE2D_PARAM(BodyCoolRamp, sampler_BodyCoolRamp),
-TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp))
+    TEXTURE2D_PARAM(HairCoolRamp, sampler_HairCoolRamp),
+    TEXTURE2D_PARAM(HairWarmRamp, sampler_HairWarmRamp),
+    TEXTURE2D_PARAM(BodyCoolRamp, sampler_BodyCoolRamp),
+    TEXTURE2D_PARAM(BodyWarmRamp, sampler_BodyWarmRamp))
 {
     RampColor rampColor;
     float3 coolRampTexCol = 1;
     float3 warmRampTexCol = 1;
 
     //hair的Ramp贴图和身体或脸部的不一样，按照keyword采样
-    #if _AREA_HAIR
-        coolRampTexCol = SAMPLE_TEXTURE2D(HairCoolRamp, sampler_HairCoolRamp, rampUV).rgb;
-        warmRampTexCol = SAMPLE_TEXTURE2D(HairWarmRamp, sampler_HairWarmRamp, rampUV).rgb;
-    #elif _AREA_FACE || _AREA_BODY
-        coolRampTexCol = SAMPLE_TEXTURE2D(BodyCoolRamp, sampler_BodyCoolRamp, rampUV).rgb;
-        warmRampTexCol = SAMPLE_TEXTURE2D(BodyWarmRamp, sampler_BodyWarmRamp, rampUV).rgb;
-    #endif
+#if _AREA_HAIR
+    coolRampTexCol = SAMPLE_TEXTURE2D(HairCoolRamp, sampler_HairCoolRamp, rampUV).rgb;
+    warmRampTexCol = SAMPLE_TEXTURE2D(HairWarmRamp, sampler_HairWarmRamp, rampUV).rgb;
+#elif _AREA_FACE || _AREA_BODY
+    coolRampTexCol = SAMPLE_TEXTURE2D(BodyCoolRamp, sampler_BodyCoolRamp, rampUV).rgb;
+    warmRampTexCol = SAMPLE_TEXTURE2D(BodyWarmRamp, sampler_BodyWarmRamp, rampUV).rgb;
+#endif
     rampColor.coolRampCol = coolRampTexCol;
     rampColor.warmRampCol = warmRampTexCol;
     return rampColor;
@@ -209,8 +209,8 @@ LutMapData GetMaterialValuesPackLUT(float material_ID)
     float4 lut_speccol = _MaterialValuesPackLUT.Load(float3(material_ID, 0, 0)); // xyz : color
     float4 lut_specval = _MaterialValuesPackLUT.Load(float3(material_ID, 1, 0)); // x: shininess, y : roughness, z : intensity
     float4 lut_edgecol = _MaterialValuesPackLUT.Load(float3(material_ID, 2, 0)); // xyz : color
-    float4 lut_rimcol  = _MaterialValuesPackLUT.Load(float3(material_ID, 3, 0)); // xyz : color
-    float4 lut_rimval  = _MaterialValuesPackLUT.Load(float3(material_ID, 4, 0)); // x : rim type, y : softness , z : dark
+    float4 lut_rimcol = _MaterialValuesPackLUT.Load(float3(material_ID, 3, 0)); // xyz : color
+    float4 lut_rimval = _MaterialValuesPackLUT.Load(float3(material_ID, 4, 0)); // x : rim type, y : softness , z : dark
     float4 lut_rimscol = _MaterialValuesPackLUT.Load(float3(material_ID, 5, 0)); // xyz : color
     float4 lut_rimsval = _MaterialValuesPackLUT.Load(float3(material_ID, 6, 0)); // x: rim shadow width, y: rim shadow feather z: bloom intensity
     float4 lut_bloomval = _MaterialValuesPackLUT.Load(float3(material_ID, 7, 0)); // xyz : color
@@ -328,9 +328,9 @@ float GetBodyMainLightShadow(BodyShadowData shadowData, Light light, float4 ligh
     shadowThreshold *= lerp(1, vertexColor.r, shadowData.aoIntensity);
     //加个过渡，这里 shadowSoftness=0.1
     mainLightShadow = smoothstep(
-    1.0 - shadowThreshold - shadowData.shadowSoftness,
-    1.0 - shadowThreshold + shadowData.shadowSoftness,
-    remappedNoL + shadowData.shadowCenterOffset) + shadowData.mainLightShadowOffset;
+        1.0 - shadowThreshold - shadowData.shadowSoftness,
+        1.0 - shadowThreshold + shadowData.shadowSoftness,
+        remappedNoL + shadowData.shadowCenterOffset) + shadowData.mainLightShadowOffset;
 
     mainLightShadow = lerp(0.20, mainLightShadow, saturate(light.shadowAttenuation + HALF_EPS));
     mainLightShadow = lerp(0, mainLightShadow, step(0.05, shadowThreshold));
@@ -435,11 +435,11 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     };
 
     half3 overlayColor = 0;
-    #if _USE_LUT_MAP
-        overlayColor = GetLUTMapRimLightColor(GetRampLineIndex(materialId)).rgb;
-    #else
-        overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
-    #endif
+#if _USE_LUT_MAP
+    overlayColor = GetLUTMapRimLightColor(GetRampLineIndex(materialId)).rgb;
+#else
+    overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+#endif
 
     const float overlayWidths[8] = {
         _RimWidth0,
@@ -453,11 +453,11 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     };
 
     float overlayWidth = 0;
-    #if _USE_LUT_MAP
-        overlayWidth = GetLUTMapRimLightWidth(GetRampLineIndex(materialId));
-    #else
-        overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayWidth = GetLUTMapRimLightWidth(GetRampLineIndex(materialId));
+#else
+    overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
+#endif
 
     const float rimDarks[8] = {
         _RimDark0,
@@ -471,11 +471,11 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     };
 
     float overlayDark = 0;
-    #if _USE_LUT_MAP
-        overlayDark = GetLUTMapRimLightDark(GetRampLineIndex(materialId));
-    #else
-        overlayDark = rimDarks[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayDark = GetLUTMapRimLightDark(GetRampLineIndex(materialId));
+#else
+    overlayDark = rimDarks[GetRampLineIndex(materialId)];
+#endif
 
     const float rimEdgeSoftnesses[8] = {
         _RimEdgeSoftness0,
@@ -489,55 +489,55 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     };
 
     float overlayEdgeSoftness = 0;
-    #if _USE_LUT_MAP
-        overlayEdgeSoftness = GetLUTMapRimLightEdgeSoftness(GetRampLineIndex(materialId));
-    #else
-        overlayEdgeSoftness = rimEdgeSoftnesses[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayEdgeSoftness = GetLUTMapRimLightEdgeSoftness(GetRampLineIndex(materialId));
+#else
+    overlayEdgeSoftness = rimEdgeSoftnesses[GetRampLineIndex(materialId)];
+#endif
 
     float3 finalRimColor = 0;
-    #ifdef _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE
-        finalRimColor = color.rgb;
-    #elif _CUSTOMRIMLIGHTCOLORVARENUM_TINT
-        finalRimColor = color.rgb * overlayColor;
-    #elif _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY
-        finalRimColor = overlayColor;
-    #else
-        finalRimColor = color.rgb;
-    #endif
+#ifdef _CUSTOMRIMLIGHTCOLORVARENUM_DISABLE
+    finalRimColor = color.rgb;
+#elif _CUSTOMRIMLIGHTCOLORVARENUM_TINT
+    finalRimColor = color.rgb * overlayColor;
+#elif _CUSTOMRIMLIGHTCOLORVARENUM_OVERLAY
+    finalRimColor = overlayColor;
+#else
+    finalRimColor = color.rgb;
+#endif
 
     float finalRimWidth = 0;
-    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
-        finalRimWidth = _RimWidth;
-    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
-        finalRimWidth = _RimWidth * overlayWidth;
-    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
-        finalRimWidth = overlayWidth;
-    #else
-        finalRimWidth = _RimWidth;
-    #endif
+#ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
+    finalRimWidth = _RimWidth;
+#elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
+    finalRimWidth = _RimWidth * overlayWidth;
+#elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
+    finalRimWidth = overlayWidth;
+#else
+    finalRimWidth = _RimWidth;
+#endif
 
     float finalRimDark = 0;
-    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
-        finalRimDark = _RimDark;
-    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
-        finalRimDark = _RimDark * overlayDark;
-    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
-        finalRimDark = overlayDark;
-    #else
-        finalRimDark = _RimDark;
-    #endif
+#ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
+    finalRimDark = _RimDark;
+#elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
+    finalRimDark = _RimDark * overlayDark;
+#elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
+    finalRimDark = overlayDark;
+#else
+    finalRimDark = _RimDark;
+#endif
 
     float finalRimEdgeSoftness = 0;
-    #ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
-        finalRimEdgeSoftness = _RimEdgeSoftness;
-    #elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
-        finalRimEdgeSoftness = _RimEdgeSoftness * overlayEdgeSoftness;
-    #elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
-        finalRimEdgeSoftness = overlayEdgeSoftness;
-    #else
-        finalRimEdgeSoftness = _RimEdgeSoftness;
-    #endif
+#ifdef _CUSTOMRIMLIGHTVARENUM_DISABLE
+    finalRimEdgeSoftness = _RimEdgeSoftness;
+#elif _CUSTOMRIMLIGHTVARENUM_MULTIPLY
+    finalRimEdgeSoftness = _RimEdgeSoftness * overlayEdgeSoftness;
+#elif _CUSTOMRIMLIGHTVARENUM_OVERLAY
+    finalRimEdgeSoftness = overlayEdgeSoftness;
+#else
+    finalRimEdgeSoftness = _RimEdgeSoftness;
+#endif
 
     rimLightAreaData.color = finalRimColor.rgb;
     rimLightAreaData.width = finalRimWidth;
@@ -645,11 +645,11 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     };
 
     half3 overlayColor = 0;
-    #if _USE_LUT_MAP
-        overlayColor = GetLUTMapRimShadowColor(GetRampLineIndex(materialId)).rgb;
-    #else
-        overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
-    #endif
+#if _USE_LUT_MAP
+    overlayColor = GetLUTMapRimShadowColor(GetRampLineIndex(materialId)).rgb;
+#else
+    overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
+#endif
 
     const float overlayWidths[8] = {
         _RimShadowWidth0,
@@ -663,11 +663,11 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     };
 
     float overlayWidth = 0;
-    #if _USE_LUT_MAP
-        overlayWidth = GetLUTMapRimShadowWidth(GetRampLineIndex(materialId));
-    #else
-        overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayWidth = GetLUTMapRimShadowWidth(GetRampLineIndex(materialId));
+#else
+    overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
+#endif
 
     const float rimShadowFeather[8] = {
         _RimShadowFeather0,
@@ -681,44 +681,44 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     };
 
     float overlayFeather = 0;
-    #if _USE_LUT_MAP
-        overlayFeather = GetLUTMapRimShadowFeather(GetRampLineIndex(materialId));
-    #else
-        overlayFeather = rimShadowFeather[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayFeather = GetLUTMapRimShadowFeather(GetRampLineIndex(materialId));
+#else
+    overlayFeather = rimShadowFeather[GetRampLineIndex(materialId)];
+#endif
 
     float3 finalRimShadowColor = 0;
-    #ifdef _CUSTOMRIMSHADOWCOLORVARENUM_DISABLE
-        finalRimShadowColor = color.rgb;
-    #elif _CUSTOMRIMSHADOWCOLORVARENUM_TINT
-        finalRimShadowColor = color.rgb * overlayColor;
-    #elif _CUSTOMRIMSHADOWCOLORVARENUM_OVERLAY
-        finalRimShadowColor = overlayColor;
-    #else
-        finalRimShadowColor = color.rgb;
-    #endif
+#ifdef _CUSTOMRIMSHADOWCOLORVARENUM_DISABLE
+    finalRimShadowColor = color.rgb;
+#elif _CUSTOMRIMSHADOWCOLORVARENUM_TINT
+    finalRimShadowColor = color.rgb * overlayColor;
+#elif _CUSTOMRIMSHADOWCOLORVARENUM_OVERLAY
+    finalRimShadowColor = overlayColor;
+#else
+    finalRimShadowColor = color.rgb;
+#endif
 
     float finalRimShadowWidth = 0;
-    #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
-        finalRimShadowWidth = _RimShadowWidth;
-    #elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
-        finalRimShadowWidth = _RimShadowWidth * overlayWidth;
-    #elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
-        finalRimShadowWidth = overlayWidth;
-    #else
-        finalRimShadowWidth = _RimShadowWidth;
-    #endif
+#ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
+    finalRimShadowWidth = _RimShadowWidth;
+#elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
+    finalRimShadowWidth = _RimShadowWidth * overlayWidth;
+#elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
+    finalRimShadowWidth = overlayWidth;
+#else
+    finalRimShadowWidth = _RimShadowWidth;
+#endif
 
     float finalRimShadowFeather = 0;
-    #ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
-        finalRimShadowFeather = _RimShadowFeather;
-    #elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
-        finalRimShadowFeather = _RimShadowFeather * overlayFeather;
-    #elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
-        finalRimShadowFeather = overlayFeather;
-    #else
-        finalRimShadowFeather = _RimShadowFeather;
-    #endif
+#ifdef _CUSTOMRIMSHADOWVARENUM_DISABLE
+    finalRimShadowFeather = _RimShadowFeather;
+#elif _CUSTOMRIMSHADOWVARENUM_MULTIPLY
+    finalRimShadowFeather = _RimShadowFeather * overlayFeather;
+#elif _CUSTOMRIMSHADOWVARENUM_OVERLAY
+    finalRimShadowFeather = overlayFeather;
+#else
+    finalRimShadowFeather = _RimShadowFeather;
+#endif
 
     rimShadowAreaData.color = finalRimShadowColor.rgb;
     rimShadowAreaData.width = finalRimShadowWidth;
@@ -776,11 +776,11 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     };
 
     half3 overlayColor = 0;
-    #if _USE_LUT_MAP
-        overlayColor = GetLUTMapSpecularColor(GetRampLineIndex(materialId)).rgb;
-    #else
-        overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
-    #endif
+#if _USE_LUT_MAP
+    overlayColor = GetLUTMapSpecularColor(GetRampLineIndex(materialId)).rgb;
+#else
+    overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
+#endif
 
     const float overlayIntensityArr[8] = {
         _SpecularIntensity0,
@@ -794,11 +794,11 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     };
 
     float overlayIntensity = 0;
-    #if _USE_LUT_MAP
-        overlayIntensity = GetLUTMapSpecularIntensity(GetRampLineIndex(materialId));
-    #else
-        overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayIntensity = GetLUTMapSpecularIntensity(GetRampLineIndex(materialId));
+#else
+    overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+#endif
 
     const float overlayShininessArr[8] = {
         _SpecularShininess0,
@@ -812,11 +812,11 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     };
 
     float overlayShininess = 0;
-    #if _USE_LUT_MAP
-        overlayShininess = GetLUTMapSpecularShininess(GetRampLineIndex(materialId));
-    #else
-        overlayShininess = overlayShininessArr[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayShininess = GetLUTMapSpecularShininess(GetRampLineIndex(materialId));
+#else
+    overlayShininess = overlayShininessArr[GetRampLineIndex(materialId)];
+#endif
 
     const float overlayRoughnessArr[8] = {
         _SpecularRoughness0,
@@ -830,55 +830,55 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     };
 
     float overlayRoughness = 0;
-    #if _USE_LUT_MAP
-        overlayRoughness = GetLUTMapSpecularRoughness(GetRampLineIndex(materialId));
-    #else
-        overlayRoughness = overlayRoughnessArr[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayRoughness = GetLUTMapSpecularRoughness(GetRampLineIndex(materialId));
+#else
+    overlayRoughness = overlayRoughnessArr[GetRampLineIndex(materialId)];
+#endif
 
     float3 finalSpecularColor = 0;
-    #ifdef _CUSTOMSPECULARCOLORVARENUM_DISABLE
-        finalSpecularColor = color.rgb;
-    #elif _CUSTOMSPECULARCOLORVARENUM_TINT
-        finalSpecularColor = color.rgb * overlayColor;
-    #elif _CUSTOMSPECULARCOLORVARENUM_OVERLAY
-        finalSpecularColor = overlayColor;
-    #else
-        finalSpecularColor = color.rgb;
-    #endif
+#ifdef _CUSTOMSPECULARCOLORVARENUM_DISABLE
+    finalSpecularColor = color.rgb;
+#elif _CUSTOMSPECULARCOLORVARENUM_TINT
+    finalSpecularColor = color.rgb * overlayColor;
+#elif _CUSTOMSPECULARCOLORVARENUM_OVERLAY
+    finalSpecularColor = overlayColor;
+#else
+    finalSpecularColor = color.rgb;
+#endif
 
     float finalSpecularIntensity = 0;
-    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
-        finalSpecularIntensity = _SpecularIntensity;
-    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
-        finalSpecularIntensity = _SpecularIntensity * overlayIntensity;
-    #elif _CUSTOMSPECULARVARENUM_OVERLAY
-        finalSpecularIntensity = overlayIntensity;
-    #else
-        finalSpecularIntensity = _SpecularIntensity;
-    #endif
+#ifdef _CUSTOMSPECULARVARENUM_DISABLE
+    finalSpecularIntensity = _SpecularIntensity;
+#elif _CUSTOMSPECULARVARENUM_MULTIPLY
+    finalSpecularIntensity = _SpecularIntensity * overlayIntensity;
+#elif _CUSTOMSPECULARVARENUM_OVERLAY
+    finalSpecularIntensity = overlayIntensity;
+#else
+    finalSpecularIntensity = _SpecularIntensity;
+#endif
 
     float finalSpecularShininess = 0;
-    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
-        finalSpecularShininess = _SpecularShininess;
-    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
-        finalSpecularShininess = _SpecularShininess * overlayShininess;
-    #elif _CUSTOMSPECULARVARENUM_OVERLAY
-        finalSpecularShininess = overlayShininess;
-    #else
-        finalSpecularShininess = _SpecularShininess;
-    #endif
+#ifdef _CUSTOMSPECULARVARENUM_DISABLE
+    finalSpecularShininess = _SpecularShininess;
+#elif _CUSTOMSPECULARVARENUM_MULTIPLY
+    finalSpecularShininess = _SpecularShininess * overlayShininess;
+#elif _CUSTOMSPECULARVARENUM_OVERLAY
+    finalSpecularShininess = overlayShininess;
+#else
+    finalSpecularShininess = _SpecularShininess;
+#endif
 
     float finalSpecularRoughness = 0;
-    #ifdef _CUSTOMSPECULARVARENUM_DISABLE
-        finalSpecularRoughness = _SpecularRoughness;
-    #elif _CUSTOMSPECULARVARENUM_MULTIPLY
-        finalSpecularRoughness = _SpecularRoughness * overlayRoughness;
-    #elif _CUSTOMSPECULARVARENUM_OVERLAY
-        finalSpecularRoughness = overlayRoughness;
-    #else
-        finalSpecularRoughness = _SpecularRoughness;
-    #endif
+#ifdef _CUSTOMSPECULARVARENUM_DISABLE
+    finalSpecularRoughness = _SpecularRoughness;
+#elif _CUSTOMSPECULARVARENUM_MULTIPLY
+    finalSpecularRoughness = _SpecularRoughness * overlayRoughness;
+#elif _CUSTOMSPECULARVARENUM_OVERLAY
+    finalSpecularRoughness = overlayRoughness;
+#else
+    finalSpecularRoughness = _SpecularRoughness;
+#endif
 
     specularAreaData.color = finalSpecularColor.rgb;
     specularAreaData.intensity = finalSpecularIntensity;
@@ -1028,11 +1028,11 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
     };
 
     half3 overlayColor = 0;
-    #if _USE_LUT_MAP
-        overlayColor = GetLUTMapBloomColor(GetRampLineIndex(materialId)).rgb;
-    #else
-        overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
-    #endif
+#if _USE_LUT_MAP
+    overlayColor = GetLUTMapBloomColor(GetRampLineIndex(materialId)).rgb;
+#else
+    overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
+#endif
 
     const float overlayIntensityArr[8] = {
         _mmBloomIntensity0,
@@ -1046,33 +1046,33 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
     };
 
     float overlayIntensity = 0;
-    #if _USE_LUT_MAP
-        overlayIntensity = GetLUTMapBloomIntensity(GetRampLineIndex(materialId));
-    #else
-        overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
-    #endif
+#if _USE_LUT_MAP
+    overlayIntensity = GetLUTMapBloomIntensity(GetRampLineIndex(materialId));
+#else
+    overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
+#endif
 
     float3 finalBloomColor = 0;
-    #ifdef _CUSTOMBLOOMCOLORVARENUM_DISABLE
-        finalBloomColor = color.rgb;
-    #elif _CUSTOMBLOOMCOLORVARENUM_TINT
-        finalBloomColor = color.rgb * overlayColor * _BloomColor.rgb;
-    #elif _CUSTOMBLOOMCOLORVARENUM_OVERLAY
-        finalBloomColor = overlayColor;
-    #else
-        finalBloomColor = color.rgb;
-    #endif
+#ifdef _CUSTOMBLOOMCOLORVARENUM_DISABLE
+    finalBloomColor = color.rgb;
+#elif _CUSTOMBLOOMCOLORVARENUM_TINT
+    finalBloomColor = color.rgb * overlayColor * _BloomColor.rgb;
+#elif _CUSTOMBLOOMCOLORVARENUM_OVERLAY
+    finalBloomColor = overlayColor;
+#else
+    finalBloomColor = color.rgb;
+#endif
 
     float finalBloomIntensity = 0;
-    #ifdef _CUSTOMBLOOMVARENUM_DISABLE
-        finalBloomIntensity = _BloomIntensity;
-    #elif _CUSTOMBLOOMVARENUM_MULTIPLY
-        finalBloomIntensity = overlayIntensity * _BloomIntensity;
-    #elif _CUSTOMBLOOMVARENUM_OVERLAY
-        finalBloomIntensity = overlayIntensity;
-    #else
-        finalBloomIntensity = _BloomIntensity;
-    #endif
+#ifdef _CUSTOMBLOOMVARENUM_DISABLE
+    finalBloomIntensity = _BloomIntensity;
+#elif _CUSTOMBLOOMVARENUM_MULTIPLY
+    finalBloomIntensity = overlayIntensity * _BloomIntensity;
+#elif _CUSTOMBLOOMVARENUM_OVERLAY
+    finalBloomIntensity = overlayIntensity;
+#else
+    finalBloomIntensity = _BloomIntensity;
+#endif
 
     bloomAreaData.color = finalBloomColor.rgb;
     bloomAreaData.intensity = finalBloomIntensity;
