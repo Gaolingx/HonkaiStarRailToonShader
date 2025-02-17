@@ -60,6 +60,7 @@ float4 _BaseMap_ST;
 float4 _Maps_ST;
 
 // MainTex
+float4 _Color;
 float4 _FaceColorMapColor;
 float4 _HairColorMapColor;
 float4 _BodyColorMapColor;

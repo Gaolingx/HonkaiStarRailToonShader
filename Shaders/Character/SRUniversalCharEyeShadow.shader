@@ -65,8 +65,8 @@ Shader "HonkaiStarRailToon/Character/EyeShadow"
             #pragma vertex SRUniversalCharVertex
             #pragma fragment frag
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             float4 frag(CharCoreVaryings i) : SV_Target0
             {
@@ -110,8 +110,8 @@ Shader "HonkaiStarRailToon/Character/EyeShadow"
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharGBufferFragment
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
@@ -136,8 +136,8 @@ Shader "HonkaiStarRailToon/Character/EyeShadow"
             #pragma exclude_renderers d3d11_9x
             #pragma target 3.5
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             CharMotionVectorsVaryings vert(CharMotionVectorsAttributes i)
             {

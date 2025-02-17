@@ -2,18 +2,17 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
 {
     Properties
     {
-        _BodyColorMapColor("Color", Color) = (1, 1, 1, 1)
+        _Color("Color", Color) = (1, 1, 1, 1)
 
         [Header(TextureScale Offset)]
         [TextureScaleOffset] _Maps_ST("Maps Scale Offset", Vector) = (1, 1, 0, 0)
-
-        [HideInInspector] _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)", Range(0, 1)) = 0
 
         [Header(Self Shadow Caster)]
         _SelfShadowDepthBias("Depth Bias", Float) = -0.01
         _SelfShadowNormalBias("Normal Bias", Float) = 0
 
         [HideInInspector] _DitherAlpha("Alpha", Range(0, 1)) = 1
+        [HideInInspector] _IndirectLightFlattenNormal("Indirect light flatten normal (Default 0)", Range(0, 1)) = 0
     }
 
     SubShader
@@ -63,15 +62,15 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             #pragma vertex SRUniversalCharVertex
             #pragma fragment frag
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             void frag(CharCoreVaryings i,
                 out float4 colorTarget : SV_Target0)
             {
                 DoDitherAlphaEffect(i.positionCS, _DitherAlpha);
 
-                colorTarget = _BodyColorMapColor;
+                colorTarget = _Color;
 
                 // Mix Fog
                 real fogFactor = InitializeInputDataFog(float4(i.positionWS, 1.0), i.fogFactor);
@@ -107,8 +106,8 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharGBufferFragment
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
@@ -137,8 +136,8 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             #pragma multi_compile_vertex _ _CASTING_SELF_SHADOW
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             CharShadowVaryings FaceMaskShadowVertex(CharShadowAttributes i)
             {
@@ -172,8 +171,8 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             #pragma vertex FaceMaskDepthOnlyVertex
             #pragma fragment FaceMaskDepthOnlyFragment
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             CharDepthOnlyVaryings FaceMaskDepthOnlyVertex(CharDepthOnlyAttributes i)
             {
@@ -209,8 +208,8 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
 
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT // forward-only variant
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             CharDepthNormalsVaryings FaceMaskDepthNormalsVertex(CharDepthNormalsAttributes i)
             {
@@ -245,8 +244,8 @@ Shader "HonkaiStarRailToon/Character/FaceMask"
             #pragma exclude_renderers d3d11_9x
             #pragma target 3.5
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             CharMotionVectorsVaryings vert(CharMotionVectorsAttributes i)
             {

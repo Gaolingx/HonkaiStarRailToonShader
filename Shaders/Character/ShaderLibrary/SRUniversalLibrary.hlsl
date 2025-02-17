@@ -423,7 +423,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
 
     half3 color = rimLightColor;
 
-    const float4 overlayColors[8] = {
+    float4 overlayColors[8] = {
         _RimColor0,
         _RimColor1,
         _RimColor2,
@@ -441,7 +441,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
 #endif
 
-    const float overlayWidths[8] = {
+    float overlayWidths[8] = {
         _RimWidth0,
         _RimWidth1,
         _RimWidth2,
@@ -459,7 +459,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
 #endif
 
-    const float rimDarks[8] = {
+    float rimDarks[8] = {
         _RimDark0,
         _RimDark1,
         _RimDark2,
@@ -477,7 +477,7 @@ RimLightAreaData GetRimLightAreaData(half materialId, half3 rimLightColor)
     overlayDark = rimDarks[GetRampLineIndex(materialId)];
 #endif
 
-    const float rimEdgeSoftnesses[8] = {
+    float rimEdgeSoftnesses[8] = {
         _RimEdgeSoftness0,
         _RimEdgeSoftness1,
         _RimEdgeSoftness2,
@@ -633,7 +633,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
 
     half3 color = rimShadowColor;
 
-    const float4 overlayColors[8] = {
+    float4 overlayColors[8] = {
         _RimShadowColor0,
         _RimShadowColor1,
         _RimShadowColor2,
@@ -651,7 +651,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     overlayColor = overlayColors[GetRampLineIndex(materialId)].rgb;
 #endif
 
-    const float overlayWidths[8] = {
+    float overlayWidths[8] = {
         _RimShadowWidth0,
         _RimShadowWidth1,
         _RimShadowWidth2,
@@ -669,7 +669,7 @@ RimShadowAreaData GetRimShadowAreaData(half materialId, half3 rimShadowColor)
     overlayWidth = overlayWidths[GetRampLineIndex(materialId)];
 #endif
 
-    const float rimShadowFeather[8] = {
+    float rimShadowFeather[8] = {
         _RimShadowFeather0,
         _RimShadowFeather1,
         _RimShadowFeather2,
@@ -764,7 +764,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
 
     half3 color = specularColor;
 
-    const float4 overlayColorArr[8] = {
+    float4 overlayColorArr[8] = {
         _SpecularColor0,
         _SpecularColor1,
         _SpecularColor2,
@@ -782,7 +782,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
 #endif
 
-    const float overlayIntensityArr[8] = {
+    float overlayIntensityArr[8] = {
         _SpecularIntensity0,
         _SpecularIntensity1,
         _SpecularIntensity2,
@@ -800,7 +800,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     overlayIntensity = overlayIntensityArr[GetRampLineIndex(materialId)];
 #endif
 
-    const float overlayShininessArr[8] = {
+    float overlayShininessArr[8] = {
         _SpecularShininess0,
         _SpecularShininess1,
         _SpecularShininess2,
@@ -818,7 +818,7 @@ SpecularAreaData GetSpecularAreaData(half materialId, half3 specularColor)
     overlayShininess = overlayShininessArr[GetRampLineIndex(materialId)];
 #endif
 
-    const float overlayRoughnessArr[8] = {
+    float overlayRoughnessArr[8] = {
         _SpecularRoughness0,
         _SpecularRoughness1,
         _SpecularRoughness2,
@@ -1016,7 +1016,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
 
     half3 color = mainColor;
 
-    const float4 overlayColorArr[8] = {
+    float4 overlayColorArr[8] = {
         _BloomColor0,
         _BloomColor1,
         _BloomColor2,
@@ -1034,7 +1034,7 @@ BloomAreaData GetBloomAreaData(half materialId, half3 mainColor)
     overlayColor = overlayColorArr[GetRampLineIndex(materialId)].rgb;
 #endif
 
-    const float overlayIntensityArr[8] = {
+    float overlayIntensityArr[8] = {
         _mmBloomIntensity0,
         _mmBloomIntensity1,
         _mmBloomIntensity2,

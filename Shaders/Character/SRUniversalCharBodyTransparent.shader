@@ -445,8 +445,8 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
             #pragma multi_compile _ _LIGHT_LAYERS
             #pragma multi_compile _ _FORWARD_PLUS
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
@@ -474,8 +474,8 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
 
             #pragma multi_compile_fog
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawOutline.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawOutline.hlsl"
 
             ENDHLSL
         }
@@ -504,8 +504,8 @@ Shader "HonkaiStarRailToon/Character/Body (Transparent)"
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             #pragma multi_compile_vertex _ _CASTING_SELF_SHADOW
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }

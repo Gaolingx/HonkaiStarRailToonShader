@@ -1,8 +1,8 @@
-Shader "HonkaiStarRailToon/Character/Hair"
+Shader "HonkaiStarRailToon/Character/Body"
 {
     Properties
     {
-        [HideInInspector] [KeywordEnum(None, Face, Hair, Body)] _Area("Material area", Float) = 2
+        [HideInInspector] [KeywordEnum(None, Face, Hair, Body)] _Area("Material area", Float) = 3
         [HideInInspector] _MMDHeadBoneForward("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneUp("", Float) = (0, 0, 0, 0)
         [HideInInspector] _MMDHeadBoneRight("", Float) = (0, 0, 0, 0)
@@ -369,7 +369,7 @@ Shader "HonkaiStarRailToon/Character/Hair"
             "RenderPipeline" = "UniversalPipeline"
             "RenderType" = "Opaque"
             "UniversalMaterialType" = "ComplexLit" // Packages/com.unity.render-pipelines.universal/Runtime/Passes/GBufferPass.cs: Fill GBuffer, but skip lighting pass for ComplexLit
-            "Queue" = "Geometry+20"  // 必须在脸和眼睛之后绘制
+            "Queue" = "Geometry+30"  // 身体默认 +30，放在最后渲染
         }
 
         HLSLINCLUDE
@@ -405,20 +405,21 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
         Pass
         {
-            Name "SRCharHairOpaque(1)"
+            Name "SRCharBodyOpaque"
 
             Tags
             {
-                "LightMode" = "HSRHair"
+                // 在头发的两个 Pass 之后绘制，避免干扰透明刘海对眼睛区域的判断
+                "LightMode" = "HSRForward3"
             }
 
+            // 角色的 Stencil
             Stencil
             {
-                Ref 3
-                ReadMask 2   // 眼睛位
-                WriteMask 1  // 角色
-                Comp Always  // 不管眼睛
-                Pass Replace // 写入角色位
+                Ref 1
+                WriteMask 1
+                Comp Always
+                Pass Replace
                 Fail Keep
             }
 
@@ -438,121 +439,22 @@ Shader "HonkaiStarRailToon/Character/Hair"
             #pragma multi_compile_fog
 
             #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
+            #pragma multi_compile_fragment _ _MAIN_LIGHT_SELF_SHADOWS
             #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile _ _LIGHT_LAYERS
             #pragma multi_compile _ _FORWARD_PLUS
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
 
         Pass
         {
-            Name "SRCharHairOpaque(2)"
-
-            Tags
-            {
-                "LightMode" = "HSRHairPreserveEye"
-            }
-
-            // 没有遮住眼睛的部分
-            Stencil
-            {
-                Ref 3
-                ReadMask 2    // 眼睛位
-                WriteMask 1   // 角色
-                Comp NotEqual // 排除眼睛
-                Pass Replace  // 写入角色位
-                Fail Keep
-            }
-
-            Cull [_CullMode]
-            ZWrite On
-
-            Blend 0 [_SrcBlendModeColor] [_DstBlendModeColor], [_SrcBlendModeAlpha] [_DstBlendModeAlpha]
-
-            ColorMask RGBA 0
-
-            HLSLPROGRAM
-            #pragma target 2.0
-
-            #pragma vertex SRUniversalCharVertex
-            #pragma fragment SRUniversalCharCoreFragment
-
-            #pragma multi_compile_fog
-
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile _ _LIGHT_LAYERS
-            #pragma multi_compile _ _FORWARD_PLUS
-
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "SRCharHairFakeTransparent"
-
-            Tags
-            {
-                "LightMode" = "HSRHairFakeTransparent"
-            }
-
-            // 遮住眼睛的部分
-            Stencil
-            {
-                Ref 3
-                ReadMask 2   // 眼睛位
-                Comp Equal
-                // 不能清除眼睛的 Stencil
-                // 有时候头发存在重叠，如果被盖在下面的头发先画并清除了眼睛的 Stencil，那么上面的头发就画不上了
-                // 上面的头发画不上的话，深度也写不上，后面描边就会出问题
-                Pass Keep
-                Fail Keep
-            }
-
-            // 这个 pass 画的是刘海，Back Face 一般情况下看不见
-            // 把 Back Face 剔除掉，避免 alpha 混合时和 Front Face 叠加导致颜色错误
-            Cull Back // [_Cull]
-            ZWrite On
-
-            Blend 0 SrcAlpha OneMinusSrcAlpha, [_SrcBlendModeAlpha] [_DstBlendModeAlpha]
-
-            ColorMask RGBA 0
-
-            HLSLPROGRAM
-            #pragma target 2.0
-
-            #pragma vertex SRUniversalCharVertex
-            #pragma fragment HairFakeTransparentFragment
-
-            #pragma multi_compile_fog
-
-            #pragma multi_compile _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
-            #pragma multi_compile_fragment _ _ADDITIONAL_LIGHT_SHADOWS
-            #pragma multi_compile_fragment _ _SHADOWS_SOFT
-            #pragma multi_compile _ _LIGHT_LAYERS
-            #pragma multi_compile _ _FORWARD_PLUS
-
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "SRCharHairGBuffer"
+            Name "SRCharBodyOpaqueGBuffer"
 
             Tags
             {
@@ -576,15 +478,15 @@ Shader "HonkaiStarRailToon/Character/Hair"
             #pragma vertex SRUniversalCharVertex
             #pragma fragment SRUniversalCharGBufferFragment
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
 
         Pass
         {
-            Name "SRCharHairOutline"
+            Name "SRCharBodyOpaqueOutline"
 
             Tags
             {
@@ -605,15 +507,15 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
             #pragma multi_compile_fog
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawOutline.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawOutline.hlsl"
 
             ENDHLSL
         }
 
         Pass
         {
-            Name "SRCharHairPerObjectShadow"
+            Name "SRCharBodyOpaquePerObjectShadow"
 
             Tags
             {
@@ -635,15 +537,15 @@ Shader "HonkaiStarRailToon/Character/Hair"
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             #pragma multi_compile_vertex _ _CASTING_SELF_SHADOW
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
 
         Pass
         {
-            Name "SRCharHairDepthOnly"
+            Name "SRCharBodyOpaqueDepthOnly"
 
             Tags
             {
@@ -660,40 +562,15 @@ Shader "HonkaiStarRailToon/Character/Hair"
             #pragma vertex CharacterDepthOnlyVertex
             #pragma fragment CharacterDepthOnlyFragment
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
 
         Pass
         {
-            Name "SRCharHairDepthOnlyHSR"
-
-            Tags
-            {
-                "LightMode" = "HSRHairDepthOnly"
-            }
-
-            Cull [_CullMode]
-            ZWrite On
-            ColorMask R
-
-            HLSLPROGRAM
-            #pragma target 2.0
-
-            #pragma vertex CharacterDepthOnlyVertex
-            #pragma fragment CharacterDepthOnlyFragment
-
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
-
-            ENDHLSL
-        }
-
-        Pass
-        {
-            Name "SRCharHairDepthNormalsOnly"
+            Name "SRCharBodyOpaqueDepthNormalsOnly"
 
             Tags
             {
@@ -711,15 +588,15 @@ Shader "HonkaiStarRailToon/Character/Hair"
 
             #pragma multi_compile_fragment _ _GBUFFER_NORMALS_OCT // forward-only variant
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
 
         Pass
         {
-            Name "SRCharHairMotionVectors"
+            Name "SRCharBodyOpaqueMotionVectors"
 
             Tags
             {
@@ -736,8 +613,8 @@ Shader "HonkaiStarRailToon/Character/Hair"
             #pragma exclude_renderers d3d11_9x
             #pragma target 3.5
 
-            #include "../ShaderLibrary/SRUniversalInput.hlsl"
-            #include "../ShaderLibrary/SRUniversalDrawCorePass.hlsl"
+            #include "./ShaderLibrary/SRUniversalInput.hlsl"
+            #include "./ShaderLibrary/SRUniversalDrawCorePass.hlsl"
 
             ENDHLSL
         }
